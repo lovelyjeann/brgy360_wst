@@ -1,0 +1,3245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Governance &amp; Civic Analytics Console | Brgy360 - Barangay Pallocan West</title>
+  <meta name="description" content="Official Civic Analytics, Predictive Forecasting, and Governance Console for Barangay Pallocan West, Batangas City.">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+
+  <!-- Google Fonts: Poppins -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap" rel="stylesheet">
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="admin.css">
+
+  <!-- Universal Authentication & Route Guard -->
+  <script type="module" src="./auth.js"></script>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="admin-body">
+
+  <!-- MOBILE SIDEBAR BACKDROP -->
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <!-- ADMIN SHELL LAYOUT -->
+  <div class="admin-shell">
+
+    <!-- 1. DARK NAVY SIDEBAR -->
+    <aside class="admin-sidebar" id="adminSidebar">
+      <!-- Sidebar Header / Brand Lockup -->
+      <div class="sidebar-brand">
+        <a href="index.html" class="brand-link" title="Brgy360 Home">
+          <img src="assets/logo.svg" alt="Brgy360 Seal" class="brand-logo">
+          <div class="brand-text">
+            <span class="brand-title">Brgy360</span>
+            <span class="brand-badge">GOV-CONSOLE</span>
+          </div>
+        </a>
+        <button type="button" class="sidebar-close-btn" id="sidebarCloseBtn" aria-label="Close sidebar">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Jurisdiction Subtext -->
+      <div class="sidebar-jurisdiction">
+        <div class="jurisdiction-dot"></div>
+        <div class="jurisdiction-info">
+          <span class="jurisdiction-name">Barangay Pallocan West</span>
+          <span class="jurisdiction-sub">Batangas City • Region IV-A</span>
+        </div>
+      </div>
+
+      <!-- Navigation Menu Groups -->
+      <nav class="sidebar-nav" id="sidebarNav">
+        <!-- SIDEBAR GROUP HEADER: EXACT SPECIFICATION -->
+        <div class="nav-section-label" style="letter-spacing: 0.12em; font-weight: 700; color: #94a3b8; font-size: 10px; margin-bottom: 6px;">BARANGAY OFFICIAL</div>
+        <ul class="nav-list">
+          <li class="nav-item">
+            <button type="button" class="nav-link active" data-view="overview" id="navBtnOverview">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="7" height="9" rx="1"></rect>
+                <rect x="14" y="3" width="7" height="5" rx="1"></rect>
+                <rect x="14" y="12" width="7" height="9" rx="1"></rect>
+                <rect x="3" y="16" width="7" height="5" rx="1"></rect>
+              </svg>
+              <span class="nav-text">Dashboard</span>
+            </button>
+          </li>
+          <li class="nav-item">
+            <button type="button" class="nav-link" data-view="requests" id="navBtnRequests">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+              </svg>
+              <span class="nav-text">Service Requests</span>
+              <span class="nav-counter" id="navCounterRequests">18</span>
+            </button>
+          </li>
+          <li class="nav-item">
+            <button type="button" class="nav-link" data-view="incidents" id="navBtnIncidents">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              <span class="nav-text">Concerns</span>
+              <span class="nav-counter danger" id="navCounterIncidents">3</span>
+            </button>
+          </li>
+          <li class="nav-item">
+            <button type="button" class="nav-link" data-view="proposals" id="navBtnProposals">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+              </svg>
+              <span class="nav-text">Project Proposals</span>
+              <span class="nav-counter" id="navCounterProposals">4</span>
+            </button>
+          </li>
+          <li class="nav-item">
+            <button type="button" class="nav-link" data-view="projects" id="navBtnProjects">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                <polyline points="2 17 12 22 22 17"></polyline>
+                <polyline points="2 12 12 17 22 12"></polyline>
+              </svg>
+              <span class="nav-text">Projects</span>
+              <span class="nav-counter" id="navCounterProjects"></span>
+            </button>
+          </li>
+          <li class="nav-item">
+            <button type="button" class="nav-link" data-view="announcements" id="navBtnAnnouncements">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+              </svg>
+              <span class="nav-text">Announcements</span>
+              <span class="nav-counter" id="navCounterAnnouncements">6</span>
+            </button>
+          </li>
+          <li class="nav-item">
+            <button type="button" class="nav-link" data-view="budget" id="navBtnBudget">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="1" x2="12" y2="23"></line>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+              </svg>
+              <span class="nav-text">Budget</span>
+            </button>
+          </li>
+          <li class="nav-item">
+            <button type="button" class="nav-link" data-view="demographics" id="navBtnDemographics">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+              <span class="nav-text">Resident Verification</span>
+              <span class="nav-badge-pill" id="sidebarPendingVerifBadge" style="background: #fef3c7; color: #d97706; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 999px; margin-left: auto;">4</span>
+            </button>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- Sidebar Footer: Session Card & Portal Switchers -->
+      <div class="sidebar-footer">
+        <div class="admin-profile-card">
+          <div class="profile-avatar">VM</div>
+          <div class="profile-meta">
+            <span class="profile-name" title="Ma. Victoria M. Marasigan">Ma. Victoria M. Marasigan</span>
+            <span class="profile-role">Barangay Secretary (Admin)</span>
+          </div>
+        </div>
+        <div class="sidebar-quick-links" style="display: flex !important; flex-direction: row !important; align-items: center !important; gap: 6px !important; width: 100% !important;">
+          <a href="index.html" class="quick-link-btn" title="Open Public Website" style="flex: 1 1 0 !important; min-width: 0 !important; width: 50% !important; height: 32px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; gap: 4px !important; padding: 0 4px !important; box-sizing: border-box !important; text-decoration: none !important; font-size: 10px !important;">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0 !important;">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            </svg>
+            <span style="white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important;">Public Home</span>
+          </a>
+          <button type="button" class="quick-link-btn logout-quick-btn" id="sidebarAdminLogout" title="Sign Out Session" style="flex: 1 1 0 !important; min-width: 0 !important; width: 50% !important; height: 32px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; gap: 4px !important; padding: 0 4px !important; box-sizing: border-box !important; cursor: pointer !important; font-size: 10px !important; grid-column: auto !important;">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0 !important;">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            <span style="white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important;">Sign Out Session</span>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- 2. MAIN WORKSPACE AREA -->
+    <div class="admin-main-wrapper">
+
+      <!-- TOP NAVIGATION BAR -->
+      <header class="admin-topbar">
+        <div class="topbar-left">
+          <!-- Mobile Drawer Toggle -->
+          <button type="button" class="sidebar-toggle-btn" id="sidebarToggleBtn" aria-label="Toggle navigation drawer">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+
+          <!-- Breadcrumb & Active View Title -->
+          <div class="view-title-block">
+            <span class="view-kicker">Local Governance Analytics Console</span>
+            <h1 class="view-heading" id="currentViewTitle">Executive Overview</h1>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <!-- Real-Time Telemetry & Clock -->
+          <div class="telemetry-pill">
+            <span class="telemetry-pulse"></span>
+            <span class="telemetry-label">Telemetry Live</span>
+            <span class="telemetry-divider">·</span>
+            <span class="telemetry-time" id="liveClockDisplay">Oct 12, 2026 • 2:42 PM</span>
+          </div>
+
+          <!-- Quick Action Dropdown Trigger -->
+          <div class="topbar-dropdown-wrap">
+            <button type="button" class="btn-topbar-action" id="btnQuickActions" aria-expanded="false">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              <span>Quick Action</span>
+            </button>
+            <div class="quick-action-menu" id="quickActionMenu">
+              <button type="button" class="menu-item" id="qaLogIncident">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                  <line x1="12" y1="9" x2="12" y2="13"></line>
+                  <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+                <span>Log New Blotter / Hazard</span>
+              </button>
+              <button type="button" class="menu-item" id="qaExportDossier">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                <span>Export Governance Dossier</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Database-Backed Admin Notifications Popover -->
+          <div class="topbar-dropdown-wrap">
+              <button
+                  type="button"
+                  class="icon-circle-btn"
+                  id="btnNotifCenter"
+                  aria-label="Notifications"
+              >
+                  <svg viewBox="0 0 24 24" width="18" height="18"
+                      fill="none" stroke="currentColor" stroke-width="2"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                      <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                  </svg>
+                  <span class="icon-badge" id="adminNotifBadge" style="display: none;">0</span>
+              </button>
+
+              <div class="notif-popover" id="notifPopover">
+                  <div class="popover-header">
+                      <div>
+                          <h4 class="popover-title">Notifications</h4>
+                          <span class="popover-sub" id="adminNotifSub">
+                              Loading notifications...
+                          </span>
+                      </div>
+
+                      <button
+                          type="button"
+                          class="btn-text-sm"
+                          id="btnDismissAllAlerts"
+                      >
+                          Mark All Read
+                      </button>
+                  </div>
+
+                  <div class="popover-list" id="adminNotifList">
+                      <div class="alert-item info">
+                          <div class="alert-icon">🔔</div>
+                          <div class="alert-body">
+                              <span class="alert-title">Loading notifications</span>
+                              <p class="alert-desc">
+                                  Please wait while notifications are retrieved.
+                              </p>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+
+          <!-- Secretary Profile Tag -->
+          <div class="topbar-user-badge" title="Logged in as Barangay Secretary">
+            <span class="user-role-tag">SECRETARIAT</span>
+            <span class="user-name-tag">Ma. Victoria M. Marasigan</span>
+          </div>
+
+          <!-- Topbar Logout Action -->
+          <button type="button" class="btn-topbar-logout" id="btnAdminLogout" title="Sign Out of Admin Console">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            <span>Log Out</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- MAIN SCROLLABLE VIEW CONTAINER -->
+      <main class="admin-content-area" id="adminContentArea">
+
+        <!-- ==============================================================
+             VIEW 1: BARANGAY DASHBOARD
+             ============================================================== -->
+        <section class="admin-view-panel active" id="viewOverview">
+          
+          <!-- 1. Page Header & Global Controls -->
+          <div class="section-top-toolbar" style="margin-bottom: 22px;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 8px; background: #0b1e36; color: #ffffff;">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="7" height="9" rx="1"></rect>
+                    <rect x="14" y="3" width="7" height="5" rx="1"></rect>
+                    <rect x="14" y="12" width="7" height="9" rx="1"></rect>
+                    <rect x="3" y="16" width="7" height="5" rx="1"></rect>
+                  </svg>
+                </span>
+                <h2 class="section-title" style="margin: 0;">Barangay Dashboard</h2>
+              </div>
+              <p class="section-sub">Overview of barangay operations, financial metrics, resident requests, and project analytics.</p>
+            </div>
+            <div class="toolbar-right">
+              <div class="reports-fiscal-selector">
+                <label for="dashboardFiscalYearSelect" class="reports-select-label">Fiscal Year:</label>
+                <select id="dashboardFiscalYearSelect" class="reports-select-menu">
+                  <option value="2026" selected>2026</option>
+                  <option value="2025">2025</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Primary Metric Overview (Unified 3x3 Space-Optimized Grid) -->
+          <div class="brgy-stats-grid" id="dashboardStatsGrid">
+            
+            <!-- Card 1: Total Residents -->
+            <div class="brgy-stat-card" id="cardResidents">
+              <div class="brgy-stat-header">
+                <span class="brgy-stat-label">Total Residents</span>
+                <div class="brgy-stat-icon-wrap" title="Registered Citizens">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                  </svg>
+                </div>
+              </div>
+              <div class="brgy-stat-value" id="cardValResidents">4,892</div>
+              <div class="brgy-stat-footer">
+                <span class="brgy-stat-sub" id="cardSubResidents">4,120 verified (84.2%)</span>
+              </div>
+            </div>
+
+            <!-- Card 2: Pending Verification -->
+            <div class="brgy-stat-card" id="cardPendingVerif">
+              <div class="brgy-stat-header">
+                <span class="brgy-stat-label">Pending Verification</span>
+                <div class="brgy-stat-icon-wrap" title="Awaiting Validation">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                  </svg>
+                </div>
+              </div>
+              <div class="brgy-stat-value" id="cardValPendingVerif">772</div>
+              <div class="brgy-stat-footer">
+                <span class="brgy-stat-sub" id="cardSubPendingVerif">Awaiting citizen validation</span>
+              </div>
+            </div>
+
+            <!-- Card 3: Total Budget -->
+            <div class="brgy-stat-card" id="cardTotalBudget">
+              <div class="brgy-stat-header">
+                <span class="brgy-stat-label">Total Budget</span>
+                <div class="brgy-stat-icon-wrap" title="Fiscal Appropriations">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="1" x2="12" y2="23"></line>
+                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                  </svg>
+                </div>
+              </div>
+              <div class="brgy-stat-value" id="cardValTotalBudget">₱2,185,000</div>
+              <div class="brgy-stat-footer">
+                <span class="brgy-stat-sub" id="cardSubTotalBudget">₱1,418,000 spent · 65% utilized</span>
+              </div>
+            </div>
+
+            <!-- Card 4: Total Request -->
+            <div class="brgy-stat-card" id="cardTotalRequests">
+              <div class="brgy-stat-header">
+                <span class="brgy-stat-label">Total Request</span>
+                <div class="brgy-stat-icon-wrap" title="Service Requests">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                  </svg>
+                </div>
+              </div>
+              <div class="brgy-stat-value" id="cardValTotalRequests">18</div>
+              <div class="brgy-stat-footer">
+                <span class="brgy-stat-sub" id="cardSubTotalRequests">All document filings</span>
+              </div>
+            </div>
+
+            <!-- Card 5: Completed Request -->
+            <div class="brgy-stat-card" id="cardCompletedRequests">
+              <div class="brgy-stat-header">
+                <span class="brgy-stat-label">Completed Request</span>
+                <div class="brgy-stat-icon-wrap" title="Completed / Ready">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                  </svg>
+                </div>
+              </div>
+              <div class="brgy-stat-value" id="cardValCompletedRequests">6</div>
+              <div class="brgy-stat-footer">
+                <span class="brgy-stat-sub" id="cardSubCompletedRequests">Ready for pickup / released</span>
+              </div>
+            </div>
+
+            <!-- Card 6: Pending Request -->
+            <div class="brgy-stat-card" id="cardPendingRequests">
+              <div class="brgy-stat-header">
+                <span class="brgy-stat-label">Pending Request</span>
+                <div class="brgy-stat-icon-wrap" title="In Processing">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 14 10"></polyline>
+                  </svg>
+                </div>
+              </div>
+              <div class="brgy-stat-value" id="cardValPendingRequests">12</div>
+              <div class="brgy-stat-footer">
+                <span class="brgy-stat-sub" id="cardSubPendingRequests">In review &amp; verification</span>
+              </div>
+            </div>
+
+            <!-- Card 7: Reported Concerns -->
+            <div class="brgy-stat-card card-accent-concern" id="cardReportedConcerns">
+              <div class="brgy-stat-header">
+                <span class="brgy-stat-label">Reported Concerns</span>
+                <div class="brgy-stat-icon-wrap" title="Citizen Blotters">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                    <line x1="12" y1="9" x2="12" y2="13"></line>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                  </svg>
+                </div>
+              </div>
+              <div class="brgy-stat-value" id="cardValReportedConcerns">14</div>
+              <div class="brgy-stat-footer">
+                <span id="cardSubReportedConcerns">
+                  <span class="brgy-open-badge">
+                    <span class="badge-dot-alert"></span>
+                    <strong>5 open concerns</strong>
+                  </span>
+                </span>
+              </div>
+            </div>
+
+            <!-- Card 8: Ongoing Project -->
+            <div class="brgy-stat-card" id="cardOngoingProjects">
+              <div class="brgy-stat-header">
+                <span class="brgy-stat-label">Ongoing Project</span>
+                <div class="brgy-stat-icon-wrap" title="Active Works">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                    <polyline points="2 17 12 22 22 17"></polyline>
+                    <polyline points="2 12 12 17 22 12"></polyline>
+                  </svg>
+                </div>
+              </div>
+              <div class="brgy-stat-value" id="cardValOngoingProjects">2</div>
+              <div class="brgy-stat-footer">
+                <span class="brgy-stat-sub" id="cardSubOngoingProjects">Active civic &amp; infra works</span>
+              </div>
+            </div>
+
+            <!-- Card 9: Completed Project -->
+            <div class="brgy-stat-card" id="cardCompletedProjects">
+              <div class="brgy-stat-header">
+                <span class="brgy-stat-label">Completed Project</span>
+                <div class="brgy-stat-icon-wrap" title="Completed Projects">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+                  </svg>
+                </div>
+              </div>
+              <div class="brgy-stat-value" id="cardValCompletedProjects">2</div>
+              <div class="brgy-stat-footer">
+                <span class="brgy-stat-sub" id="cardSubCompletedProjects">Delivered infrastructure</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- 3. Consolidated Analytics & Reports Section (Below Stat Cards) -->
+          <div id="dashboardAnalyticsSection">
+            
+            <!-- Chart Section 1 (2-Column Row) -->
+            <div class="charts-two-col-grid" style="margin-bottom: 24px;">
+              <!-- Left Card: Budget vs Actual by Category -->
+              <div class="admin-card reports-chart-card">
+                <div class="card-header">
+                  <div>
+                    <span class="card-kicker">FISCAL APPROPRIATIONS</span>
+                    <h3 class="card-title">Budget vs Actual by Category</h3>
+                    <p class="card-subtitle">Approved budget allocation against actual disbursed expenditures (in ₱ thousands)</p>
+                  </div>
+                </div>
+                <div class="chart-canvas-wrap" style="height: 310px;">
+                  <canvas id="repBudgetCatChart"></canvas>
+                </div>
+              </div>
+
+              <!-- Right Card: Quarterly Budget Utilization -->
+              <div class="admin-card reports-chart-card">
+                <div class="card-header">
+                  <div>
+                    <span class="card-kicker">DISBURSEMENT VELOCITY</span>
+                    <h3 class="card-title">Quarterly Budget Utilization</h3>
+                    <p class="card-subtitle">Quarter-by-quarter comparison of planned ceiling vs. actual release trajectories</p>
+                  </div>
+                </div>
+                <div class="chart-canvas-wrap" style="height: 310px;">
+                  <canvas id="repQuarterlyChart"></canvas>
+                </div>
+              </div>
+            </div>
+
+            <!-- Chart Section 2 (2-Column Row) -->
+            <div class="charts-two-col-grid" style="margin-bottom: 24px;">
+              <!-- Left Card: Project Status Distribution -->
+              <div class="admin-card reports-chart-card">
+                <div class="card-header">
+                  <div>
+                    <span class="card-kicker">INFRASTRUCTURE &amp; CIVIC WORKS</span>
+                    <h3 class="card-title">Project Status Distribution</h3>
+                    <p class="card-subtitle">Current health and operational milestone status of registered community projects</p>
+                  </div>
+                </div>
+                <div class="chart-canvas-wrap doughnut-wrap" style="height: 290px;">
+                  <canvas id="repProjectStatusChart"></canvas>
+                </div>
+                <div class="reports-donut-legend" id="repProjectLegend">
+                  <span class="legend-chip"><span class="legend-dot" style="background:#2563eb;"></span> Ongoing: <strong>2</strong></span>
+                  <span class="legend-chip"><span class="legend-dot" style="background:#10b981;"></span> Completed: <strong>2</strong></span>
+                  <span class="legend-chip"><span class="legend-dot" style="background:#e11d48;"></span> Delayed: <strong>1</strong></span>
+                  <span class="legend-chip"><span class="legend-dot" style="background:#94a3b8;"></span> Planning: <strong>1</strong></span>
+                </div>
+              </div>
+
+              <!-- Right Card: Service Requests by Type -->
+              <div class="admin-card reports-chart-card">
+                <div class="card-header">
+                  <div>
+                    <span class="card-kicker">RESIDENT DOCUMENT TRANSACTIONS</span>
+                    <h3 class="card-title">Service Requests by Type</h3>
+                    <p class="card-subtitle">Breakdown of certificates, permits, and assistance applications submitted</p>
+                  </div>
+                </div>
+                <div class="chart-canvas-wrap doughnut-wrap" style="height: 290px;">
+                  <canvas id="repRequestTypeChart"></canvas>
+                </div>
+                <div class="reports-donut-legend" id="repRequestLegend">
+                  <span class="legend-chip"><span class="legend-dot" style="background:#0b1e36;"></span> Clearance: <strong>6</strong></span>
+                  <span class="legend-chip"><span class="legend-dot" style="background:#2563eb;"></span> Indigency: <strong>5</strong></span>
+                  <span class="legend-chip"><span class="legend-dot" style="background:#0284c7;"></span> Residency: <strong>3</strong></span>
+                  <span class="legend-chip"><span class="legend-dot" style="background:#d97706;"></span> Business: <strong>2</strong></span>
+                  <span class="legend-chip"><span class="legend-dot" style="background:#10b981;"></span> Jobseeker: <strong>2</strong></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Chart Section 3 (Full Width / Span) -->
+            <div class="admin-card reports-chart-card" style="margin-bottom: 24px;">
+              <div class="card-header">
+                <div>
+                  <span class="card-kicker">CITIZEN FEEDBACK &amp; BLOTTERS</span>
+                  <h3 class="card-title">Concerns by Category</h3>
+                  <p class="card-subtitle">Total logged resident grievances and municipal incidents categorized by domain</p>
+                </div>
+              </div>
+              <div class="chart-canvas-wrap" style="height: 260px;">
+                <canvas id="repConcernsChart"></canvas>
+              </div>
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <!-- ==============================================================
+             VIEW 3: SERVICE REQUESTS DESK (MANAGEMENT & STATUS WORKFLOW)
+             ============================================================== -->
+        <section class="admin-view-panel" id="viewRequests">
+          
+          <div class="section-top-toolbar">
+            <div class="toolbar-left">
+              <div>
+                <span class="view-kicker">OPERATIONAL DESK MANAGEMENT</span>
+                <h2 class="section-title">Document Service Requests Desk</h2>
+                <p class="section-sub">Process, approve, generate, and issue official municipal clearances and certifications</p>
+              </div>
+            </div>
+            <div class="toolbar-right">
+              <button type="button" class="btn-dash-primary" id="btnExportRequests">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                <span>Export Processing Log (CSV)</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Desk Filter & Search Bar -->
+          <div class="admin-card table-control-card">
+            <div class="table-filters-row">
+              <!-- Search Input -->
+              <div class="table-search-box">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" id="requestsSearchInput" class="table-search-input" placeholder="Search by Ref #, Resident Name, Document Type, or Sitio...">
+              </div>
+
+              <!-- Filter Buttons / Status Tabs -->
+              <div class="filter-pills-row" id="requestsStatusFilterGroup">
+                <button type="button" class="filter-pill active" data-status="all">All (<span id="cntReqAll">18</span>)</button>
+                <button type="button" class="filter-pill" data-status="In Review">In Review (<span id="cntReqReview">12</span>)</button>
+                <button type="button" class="filter-pill" data-status="Ready for Pickup">Ready for Pickup (<span id="cntReqReady">6</span>)</button>
+                <button type="button" class="filter-pill" data-status="Completed">Completed (<span id="cntReqDone">0</span>)</button>
+                <button type="button" class="filter-pill" data-status="Rejected">Rejected (<span id="cntReqRejected">0</span>)</button>
+              </div>
+
+              <!-- Document Category Dropdown -->
+              <div class="dropdown-filter-wrap">
+                <select id="reqDocTypeSelect" class="table-filter-select">
+                  <option value="all">All Document Categories</option>
+                  <option value="Barangay Clearance">Barangay Clearance</option>
+                  <option value="Certificate of Residency">Certificate of Residency</option>
+                  <option value="Certificate of Indigency">Certificate of Indigency</option>
+                  <option value="Barangay Business Permit">Barangay Business Permit</option>
+                  <option value="First-Time Jobseeker">First-Time Jobseeker</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Active Requests Data Table -->
+            <div class="table-responsive">
+              <table class="admin-data-table" id="requestsTable">
+                <thead>
+                  <tr>
+                    <th>Request ID</th>
+                    <th>Resident Name</th>
+                    <th>Certificate Type</th>
+                    <th>Status</th>
+                    <th>Date Requested</th>
+                    <th class="text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="requestsTableBody">
+                  <!-- Dynamically Rendered by admin.js -->
+                </tbody>
+              </table>
+            </div>
+
+            <div class="table-footer-pagination">
+              <span class="pagination-info" id="requestsPaginationInfo">Showing 18 active requests</span>
+              <div class="pagination-buttons">
+                <button type="button" class="btn-page disabled">&laquo; Previous</button>
+                <button type="button" class="btn-page active">1</button>
+                <button type="button" class="btn-page disabled">Next &raquo;</button>
+              </div>
+            </div>
+          </div>
+
+        </section>
+
+
+        <!-- ==============================================================
+             VIEW 4: CITIZEN BLOTTER & INCIDENT DESK
+             ============================================================== -->
+        <section class="admin-view-panel" id="viewIncidents">
+          
+          <div class="section-top-toolbar">
+            <div class="toolbar-left">
+              <div>
+                <span class="view-kicker">RESIDENT CONCERNS &amp; COMMUNITY REPORTS</span>
+                <h2 class="section-title">Submitted Resident Concerns</h2>
+                <p class="section-sub">View all concerns submitted by residents, inspect full user and issue details, and update status between Pending, In Progress, and Resolved.</p>
+              </div>
+            </div>
+            <div class="toolbar-right">
+              <button type="button" class="btn-dash-primary" id="btnOpenNewIncidentModal">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <span>Log Walk-in Concern</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Summary Metric Badges -->
+          <div class="incident-metrics-strip">
+            <div class="inc-metric-pill">
+              <span class="inc-lbl">Total Concerns:</span>
+              <strong class="inc-val" id="incTotalCount">7 Submitted</strong>
+            </div>
+            <div class="inc-metric-pill danger-bg">
+              <span class="inc-lbl">Pending:</span>
+              <strong class="inc-val red" id="incActiveCount">2 Pending</strong>
+            </div>
+            <div class="inc-metric-pill">
+              <span class="inc-lbl">In Progress:</span>
+              <strong class="inc-val" id="incInspectCount">2 In Progress</strong>
+            </div>
+            <div class="inc-metric-pill success-bg">
+              <span class="inc-lbl">Resolved:</span>
+              <strong class="inc-val green" id="incResolvedCount">3 Resolved</strong>
+            </div>
+          </div>
+
+          <!-- Concerns Data Table Card -->
+          <div class="admin-card table-control-card">
+            <div class="table-filters-row">
+              <!-- Search Input -->
+              <div class="table-search-box">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" id="incidentsSearchInput" class="table-search-input" placeholder="Search by Ticket #, Resident Name, Title, Category, or Location...">
+              </div>
+
+              <!-- Status Pills -->
+              <div class="filter-pills-row" id="incidentsStatusFilterGroup">
+                <button type="button" class="filter-pill active" data-status="all">All (<span id="pillCountIncAll">0</span>)</button>
+                <button type="button" class="filter-pill" data-status="Pending">Pending (<span id="pillCountIncPending">0</span>)</button>
+                <button type="button" class="filter-pill" data-status="In Progress">In Progress (<span id="pillCountIncProgress">0</span>)</button>
+                <button type="button" class="filter-pill" data-status="Resolved">Resolved (<span id="pillCountIncResolved">0</span>)</button>
+              </div>
+
+              <!-- Category & Urgency Selects -->
+              <div class="dropdown-filter-wrap" style="gap: 8px; flex-wrap: wrap;">
+                <select id="incidentCategorySelect" class="table-filter-select">
+                  <option value="all">All Categories</option>
+                  <option value="Infrastructure">Infrastructure</option>
+                  <option value="Sanitation">Sanitation</option>
+                  <option value="Public Safety">Public Safety</option>
+                  <option value="Noise Disturbance">Noise Disturbance</option>
+                  <option value="Public Utility">Public Utility</option>
+                  <option value="Other">Other</option>
+                </select>
+
+                <select id="incidentUrgencySelect" class="table-filter-select">
+                  <option value="all">All Urgency Levels</option>
+                  <option value="Standard">Standard</option>
+                  <option value="Urgent">Urgent</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Concerns Table -->
+            <div class="table-responsive">
+              <table class="admin-data-table" id="incidentsTable">
+                <thead>
+                  <tr>
+                    <th>Ticket #</th>
+                    <th>Resident Info</th>
+                    <th>Concern Title &amp; Description</th>
+                    <th>Category</th>
+                    <th>Urgency</th>
+                    <th>Date Submitted</th>
+                    <th>Status</th>
+                    <th class="text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="incidentsTableBody">
+                  <!-- Dynamically rendered via admin.js -->
+                </tbody>
+              </table>
+            </div>
+
+            <div class="table-footer-pagination">
+              <span class="pagination-info" id="incidentsPaginationInfo">Showing 0 concern records</span>
+            </div>
+          </div>
+
+        </section>
+
+
+        <!-- ==============================================================
+             VIEW 5: FISCAL & BUDGET UTILIZATION
+             ============================================================== -->
+        <section class="admin-view-panel" id="viewBudget">
+          
+          <div class="section-top-toolbar">
+            <div>
+              <span class="view-kicker">PUBLIC TREASURY &amp; DILG FULL DISCLOSURE</span>
+              <h2 class="section-title">Budget Allocation &amp; Expense Records</h2>
+              <p class="section-sub">Manage annual appropriations, category allocations, and quarterly spending—automatically synchronized with the Public Transparency Dashboard.</p>
+            </div>
+            <div class="toolbar-right budget-header-actions">
+              <div class="budget-header-row budget-header-row-primary">
+                <button type="button" class="btn-budget-primary" id="btnOpenAddBudgetModal">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  <span>Add Record</span>
+                </button>
+              </div>
+              <div class="budget-header-row budget-header-row-secondary">
+                <button type="button" class="btn-budget-export" id="btnOpenBudgetSummaryModal" data-budget-edit="overview">
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                  </svg>
+                  <span>Edit Budget Summary</span>
+                </button>
+                <button type="button" class="btn-budget-export" id="btnExportBudgetReport">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                  </svg>
+                  <span>Export CSV / Report</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Metric Summary Cards Top Bar (4 Horizontal Metric Stat Cards with Edit Controls) -->
+          <div class="proposal-metrics-bar" id="budgetMetricsBar">
+            <!-- 1. TOTAL ANNUAL BUDGET -->
+            <div class="proposal-metric-card" id="bgtMetricCardTotal">
+              <div class="metric-card-top">
+                <span class="metric-card-label">TOTAL ANNUAL BUDGET</span>
+                <div class="metric-card-actions-group">
+                  <span class="metric-badge badge-blue" id="bgtMetricYearBadge">
+                    <span class="status-dot dot-blue"></span> FY 2026
+                  </span>
+                  <button type="button" class="btn-card-edit-inline" data-budget-edit="summary-total" title="Edit Total Annual Budget" aria-label="Edit Total Annual Budget">
+                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    <span>Edit</span>
+                  </button>
+                </div>
+              </div>
+              <div class="metric-card-body">
+                <span class="metric-card-count metric-count-navy" id="bgtMetricTotal">₱2,185,000</span>
+                <span class="metric-card-sub" id="bgtMetricTotalSub">Approved appropriations ceiling</span>
+              </div>
+            </div>
+
+            <!-- 2. TOTAL SPENDING -->
+            <div class="proposal-metric-card" id="bgtMetricCardSpent">
+              <div class="metric-card-top">
+                <span class="metric-card-label">TOTAL SPENDING</span>
+                <div class="metric-card-actions-group">
+                  <span class="metric-badge badge-blue" id="bgtMetricSpentBadge">
+                    <span class="status-dot dot-blue"></span> Disbursed
+                  </span>
+                  <button type="button" class="btn-card-edit-inline" data-budget-edit="summary-spent" title="Edit Total Spending" aria-label="Edit Total Spending">
+                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    <span>Edit</span>
+                  </button>
+                </div>
+              </div>
+              <div class="metric-card-body">
+                <span class="metric-card-count metric-count-sky" id="bgtMetricSpent">₱1,418,000</span>
+                <span class="metric-card-sub" id="bgtMetricSpentSub">Total vouchers &amp; contracts paid</span>
+              </div>
+            </div>
+
+            <!-- 3. REMAINING BUDGET -->
+            <div class="proposal-metric-card" id="bgtMetricCardRemaining">
+              <div class="metric-card-top">
+                <span class="metric-card-label">REMAINING BUDGET</span>
+                <div class="metric-card-actions-group">
+                  <span class="metric-badge badge-green" id="bgtMetricRemainingBadge">
+                    <span class="status-dot dot-green"></span> Available
+                  </span>
+                  <button type="button" class="btn-card-edit-inline" data-budget-edit="summary-remaining" title="Edit Remaining Budget" aria-label="Edit Remaining Budget">
+                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    <span>Edit</span>
+                  </button>
+                </div>
+              </div>
+              <div class="metric-card-body">
+                <span class="metric-card-count metric-count-emerald" id="bgtMetricRemaining">₱767,000</span>
+                <span class="metric-card-sub" id="bgtMetricRemainingSub">Remaining unencumbered funds</span>
+              </div>
+            </div>
+
+            <!-- 4. UTILIZATION RATE -->
+            <div class="proposal-metric-card" id="bgtMetricCardUtil">
+              <div class="metric-card-top">
+                <span class="metric-card-label">UTILIZATION RATE</span>
+                <div class="metric-card-actions-group">
+                  <span class="metric-badge badge-amber" id="bgtMetricUtilBadge">
+                    <span class="status-dot dot-amber"></span> 64.9% Rate
+                  </span>
+                  <button type="button" class="btn-card-edit-inline" data-budget-edit="summary-util" title="Edit Utilization Rate" aria-label="Edit Utilization Rate">
+                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    <span>Edit</span>
+                  </button>
+                </div>
+              </div>
+              <div class="metric-card-body">
+                <span class="metric-card-count metric-count-slate" id="bgtMetricUtil">64.9%</span>
+                <span class="metric-card-sub" id="bgtMetricUtilSub">Fund disbursement velocity</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Overall Budget Utilization Progress Bar Card (Synced with Public Home Page) -->
+          <div class="admin-card admin-budget-util-card" id="adminBudgetUtilizationCard">
+            <div class="admin-util-header">
+              <div>
+                <span class="card-kicker">PUBLIC TRANSPARENCY PROGRESS BAR</span>
+                <h3 class="card-title">Budget Utilization</h3>
+              </div>
+              <div class="metric-card-actions-group">
+                <span class="admin-util-badge" id="adminUtilBadge">64.9% spent</span>
+                <button type="button" class="btn-card-edit-inline" data-budget-edit="summary-utilization" title="Edit Budget Utilization">
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  <span>Edit</span>
+                </button>
+              </div>
+            </div>
+            <div class="admin-util-track" role="progressbar" id="adminUtilProgressBar" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100">
+              <div class="admin-util-spent" id="adminUtilSpentBar" style="width: 64.9%;"></div>
+              <div class="admin-util-remaining" id="adminUtilRemainingBar" style="width: 35.1%;"></div>
+            </div>
+            <div class="admin-util-footer">
+              <span class="admin-util-subtext" id="adminUtilSubtextLabel">
+                <strong>₱1,418,000</strong> of <strong>₱2,185,000</strong> used · <strong>₱767,000</strong> remaining
+              </span>
+              <div class="admin-util-legend">
+                <span class="admin-util-legend-item"><span class="admin-util-dot spent"></span> Spent Funds</span>
+                <span class="admin-util-legend-item"><span class="admin-util-dot remaining"></span> Remaining Balance</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sectoral / Category Breakdown Summary Cards (with Edit buttons) -->
+          <div class="budget-sectors-grid" id="budgetSectorsGrid">
+            <div class="budget-sector-card warning-accent" id="secCardInfra" data-sector="Infrastructure" title="Click card to filter by Infrastructure">
+              <div class="sec-top">
+                <span class="sec-name">Infrastructure Sector</span>
+                <div class="sec-top-actions">
+                  <span class="sec-burn-tag" id="secBurnInfra">62.3% Spent</span>
+                  <button type="button" class="btn-card-edit-inline" data-sector-edit="Infrastructure" title="Edit Infrastructure Allocation &amp; Spending" aria-label="Edit Infrastructure Budget">
+                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    <span>Edit</span>
+                  </button>
+                </div>
+              </div>
+              <div class="sec-amounts">
+                <span class="sec-spent" id="secSpentInfra">₱785,000</span>
+                <span class="sec-total" id="secTotalInfra">/ ₱1,260,000 Cap</span>
+              </div>
+              <div class="sec-bar">
+                <div class="sec-fill normal" id="secFillInfra" style="width: 62.3%;"></div>
+              </div>
+              <span class="sec-note">Road rehabilitation, streetlights, drainage &amp; flood mitigation.</span>
+            </div>
+
+            <div class="budget-sector-card" id="secCardHealth" data-sector="Health" title="Click card to filter by Health">
+              <div class="sec-top">
+                <span class="sec-name">Health &amp; Sanitation</span>
+                <div class="sec-top-actions">
+                  <span class="sec-burn-tag" id="secBurnHealth">71.4% Spent</span>
+                  <button type="button" class="btn-card-edit-inline" data-sector-edit="Health" title="Edit Health Allocation &amp; Spending" aria-label="Edit Health Budget">
+                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    <span>Edit</span>
+                  </button>
+                </div>
+              </div>
+              <div class="sec-amounts">
+                <span class="sec-spent" id="secSpentHealth">₱300,000</span>
+                <span class="sec-total" id="secTotalHealth">/ ₱420,000 Cap</span>
+              </div>
+              <div class="sec-bar">
+                <div class="sec-fill normal" id="secFillHealth" style="width: 71.4%;"></div>
+              </div>
+              <span class="sec-note">Barangay health station, vaccine procurement &amp; sanitation.</span>
+            </div>
+
+            <div class="budget-sector-card surplus-accent" id="secCardSocial" data-sector="Social Services" title="Click card to filter by Social Services">
+              <div class="sec-top">
+                <span class="sec-name">Social Services &amp; SK</span>
+                <div class="sec-top-actions">
+                  <span class="sec-burn-tag success" id="secBurnSocial">59.6% Spent</span>
+                  <button type="button" class="btn-card-edit-inline" data-sector-edit="Social Services" title="Edit Social Services Allocation &amp; Spending" aria-label="Edit Social Services Budget">
+                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    <span>Edit</span>
+                  </button>
+                </div>
+              </div>
+              <div class="sec-amounts">
+                <span class="sec-spent" id="secSpentSocial">₱146,000</span>
+                <span class="sec-total" id="secTotalSocial">/ ₱245,000 Cap</span>
+              </div>
+              <div class="sec-bar">
+                <div class="sec-fill normal" id="secFillSocial" style="width: 59.6%;"></div>
+              </div>
+              <span class="sec-note">Senior and youth social assistance with reserve surplus identified.</span>
+            </div>
+
+            <div class="budget-sector-card" id="secCardAdmin" data-sector="Administration" title="Click card to filter by Administration">
+              <div class="sec-top">
+                <span class="sec-name">Administration &amp; Hall Ops</span>
+                <div class="sec-top-actions">
+                  <span class="sec-burn-tag" id="secBurnAdmin">71.9% Spent</span>
+                  <button type="button" class="btn-card-edit-inline" data-sector-edit="Administration" title="Edit Administration Allocation &amp; Spending" aria-label="Edit Administration Budget">
+                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    <span>Edit</span>
+                  </button>
+                </div>
+              </div>
+              <div class="sec-amounts">
+                <span class="sec-spent" id="secSpentAdmin">₱187,000</span>
+                <span class="sec-total" id="secTotalAdmin">/ ₱260,000 Cap</span>
+              </div>
+              <div class="sec-bar">
+                <div class="sec-fill normal" id="secFillAdmin" style="width: 71.9%;"></div>
+              </div>
+              <span class="sec-note">Secretariat, ICT digital portal maintenance, and utility allowances.</span>
+            </div>
+
+            <div class="budget-sector-card" id="secCardEmergency" data-sector="Emergency Preparedness" title="Click card to filter by Emergency Preparedness">
+              <div class="sec-top">
+                <span class="sec-name">Emergency Preparedness</span>
+                <div class="sec-top-actions">
+                  <span class="sec-burn-tag" id="secBurnEmergency">62.2% Spent</span>
+                  <button type="button" class="btn-card-edit-inline" data-sector-edit="Emergency Preparedness" title="Edit Emergency Preparedness Allocation &amp; Spending" aria-label="Edit Emergency Preparedness Budget">
+                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    <span>Edit</span>
+                  </button>
+                </div>
+              </div>
+              <div class="sec-amounts">
+                <span class="sec-spent" id="secSpentEmergency">₱112,000</span>
+                <span class="sec-total" id="secTotalEmergency">/ ₱180,000 Cap</span>
+              </div>
+              <div class="sec-bar">
+                <div class="sec-fill normal" id="secFillEmergency" style="width: 62.2%;"></div>
+              </div>
+              <span class="sec-note">BDRRMC calamity reserve, rescue equipment &amp; disaster relief supplies.</span>
+            </div>
+
+            <div class="budget-sector-card" id="secCardEduSports" data-sector="Education, Sports &amp; Recreation" title="Click card to filter by Education, Sports &amp; Recreation">
+              <div class="sec-top">
+                <span class="sec-name">Education, Sports &amp; Recreation</span>
+                <div class="sec-top-actions">
+                  <span class="sec-burn-tag" id="secBurnEduSports">71.5% Spent</span>
+                  <button type="button" class="btn-card-edit-inline" data-sector-edit="Education, Sports &amp; Recreation" title="Edit Education, Sports &amp; Recreation Allocation &amp; Spending" aria-label="Edit Education, Sports &amp; Recreation Budget">
+                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    <span>Edit</span>
+                  </button>
+                </div>
+              </div>
+              <div class="sec-amounts">
+                <span class="sec-spent" id="secSpentEduSports">₱118,000</span>
+                <span class="sec-total" id="secTotalEduSports">/ ₱165,000 Cap</span>
+              </div>
+              <div class="sec-bar">
+                <div class="sec-fill normal" id="secFillEduSports" style="width: 71.5%;"></div>
+              </div>
+              <span class="sec-note">Day care learning kits, scholarship grants, sports leagues &amp; recreation.</span>
+            </div>
+
+            <div class="budget-sector-card" id="secCardAgri" data-sector="Agriculture &amp; Livelihood" title="Click card to filter by Agriculture &amp; Livelihood">
+              <div class="sec-top">
+                <span class="sec-name">Agriculture &amp; Livelihood</span>
+                <div class="sec-top-actions">
+                  <span class="sec-burn-tag" id="secBurnAgri">62.9% Spent</span>
+                  <button type="button" class="btn-card-edit-inline" data-sector-edit="Agriculture &amp; Livelihood" title="Edit Agriculture &amp; Livelihood Allocation &amp; Spending" aria-label="Edit Agriculture &amp; Livelihood Budget">
+                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    <span>Edit</span>
+                  </button>
+                </div>
+              </div>
+              <div class="sec-amounts">
+                <span class="sec-spent" id="secSpentAgri">₱88,000</span>
+                <span class="sec-total" id="secTotalAgri">/ ₱140,000 Cap</span>
+              </div>
+              <div class="sec-bar">
+                <div class="sec-fill normal" id="secFillAgri" style="width: 62.9%;"></div>
+              </div>
+              <span class="sec-note">Community urban gardening, skills training &amp; micro-livelihood support.</span>
+            </div>
+
+            <div class="budget-sector-card" id="secCardEnv" data-sector="Environment &amp; Waste Management" title="Click card to filter by Environment &amp; Waste Management">
+              <div class="sec-top">
+                <span class="sec-name">Environment &amp; Waste Management</span>
+                <div class="sec-top-actions">
+                  <span class="sec-burn-tag" id="secBurnEnv">65.6% Spent</span>
+                  <button type="button" class="btn-card-edit-inline" data-sector-edit="Environment &amp; Waste Management" title="Edit Environment &amp; Waste Management Allocation &amp; Spending" aria-label="Edit Environment &amp; Waste Management Budget">
+                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    <span>Edit</span>
+                  </button>
+                </div>
+              </div>
+              <div class="sec-amounts">
+                <span class="sec-spent" id="secSpentEnv">₱105,000</span>
+                <span class="sec-total" id="secTotalEnv">/ ₱160,000 Cap</span>
+              </div>
+              <div class="sec-bar">
+                <div class="sec-fill normal" id="secFillEnv" style="width: 65.6%;"></div>
+              </div>
+              <span class="sec-note">Solid waste segregation, MRF operations, tree planting &amp; clean-up drives.</span>
+            </div>
+          </div>
+
+          <!-- Public-Synced Bar Graph & Pie Chart Preview + Direct Edit Controls -->
+          <div class="charts-two-col-grid" id="adminBudgetPublicChartsGrid">
+            <div class="admin-card">
+              <div class="card-header card-header-split-actions">
+                <div>
+                  <span class="card-kicker">PUBLIC BAR GRAPH · QUARTERLY COMPARISON</span>
+                  <h3 class="card-title">Budget vs. Actual per Quarter</h3>
+                  <p class="card-subtitle" id="adminQuarterBarSubtitle">Quarterly allocation and actual spending synced with the Public Home Page</p>
+                </div>
+                <button type="button" class="btn-card-edit-inline" data-budget-edit="quarters" title="Edit Quarterly Budget &amp; Bar Graph Data">
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  <span>Edit Bar Graph Data</span>
+                </button>
+              </div>
+              <div class="chart-canvas-wrap admin-budget-chart-wrap">
+                <canvas id="adminBudgetQuarterBarChart"></canvas>
+              </div>
+            </div>
+
+            <div class="admin-card">
+              <div class="card-header card-header-split-actions">
+                <div>
+                  <span class="card-kicker">PUBLIC PIE CHART · SECTOR DISTRIBUTION</span>
+                  <h3 class="card-title" id="adminCategoryPieTitle">Spending by Category</h3>
+                  <p class="card-subtitle" id="adminCategoryPieSubtitle">Category distribution synced with the Public Home Page</p>
+                </div>
+                <div class="admin-chart-header-controls">
+                  <div class="admin-pie-mode-toggle" id="adminPieChartModeToggle" role="group" aria-label="Admin pie chart metric mode">
+                    <button type="button" class="admin-pie-mode-btn active" data-admin-pie-mode="actual">Actual</button>
+                    <button type="button" class="admin-pie-mode-btn" data-admin-pie-mode="budget">Allocated</button>
+                  </div>
+                  <button type="button" class="btn-card-edit-inline" data-budget-edit="categories" title="Edit Category Allocations &amp; Pie Chart Data">
+                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    <span>Edit Pie Chart Data</span>
+                  </button>
+                </div>
+              </div>
+              <div class="chart-canvas-wrap admin-budget-chart-wrap">
+                <canvas id="adminBudgetCategoryPieChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Budget Trajectory & Voucher History Grid -->
+          <div class="charts-two-col-grid">
+            <div class="admin-card">
+              <div class="card-header">
+                <div>
+                  <span class="card-kicker">EXPENDITURE TRAJECTORY</span>
+                  <h3 class="card-title">Monthly Disbursement Burn Rate vs. Ceiling</h3>
+                  <p class="card-subtitle" id="adminBurnChartSubtitle">Monthly expenditure trajectory derived from active fiscal allocations</p>
+                </div>
+              </div>
+              <div class="chart-canvas-wrap admin-budget-chart-wrap">
+                <canvas id="budgetBurnChart"></canvas>
+              </div>
+            </div>
+
+            <div class="admin-card">
+              <div class="card-header">
+                <div>
+                  <span class="card-kicker">LEDGER DISBURSEMENTS</span>
+                  <h3 class="card-title">Active Disbursed Line Items</h3>
+                  <p class="card-subtitle">Latest treasury expenditures recorded under Sanggunian appropriations</p>
+                </div>
+              </div>
+              <div class="table-responsive admin-vouchers-scroll">
+                <table class="admin-data-table compact">
+                  <thead>
+                    <tr>
+                      <th>Record ID</th>
+                      <th>Sector</th>
+                      <th>Particulars</th>
+                      <th>Spent</th>
+                    </tr>
+                  </thead>
+                  <tbody id="adminRecentVouchersTbody">
+                    <tr>
+                      <td><code>#BGT-2026-001</code></td>
+                      <td>Infrastructure</td>
+                      <td>Drainage Desiltation &amp; Street Repair Sitio Ibaba</td>
+                      <td><strong>₱310,000</strong></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Main Financial Data Table Container Card (Quarterly Budget List) -->
+          <div class="admin-card budget-table-card" id="adminQuarterlyBudgetListCard">
+            <div class="card-header admin-ledger-card-header">
+              <div>
+                <span class="card-kicker">ITEMIZED APPROPRIATIONS &amp; EXPENSES</span>
+                <h3 class="card-title">Quarterly Budget Allocation &amp; Expense Ledger</h3>
+                <p class="card-subtitle">Comprehensive itemized line items across fiscal quarters, approved budgets, disbursed expenses, status, and utilization rates.</p>
+              </div>
+            </div>
+            
+            <!-- Search & Filter Bar (Above Table) -->
+            <div class="budget-filter-toolbar">
+              <!-- Left side: Search input field with search icon -->
+              <div class="budget-search-box">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" id="adminBudgetSearchInput" class="table-search-input" placeholder="Search by category, description, remarks, or year...">
+              </div>
+
+              <!-- Right side: Dropdown filters -->
+              <div class="budget-filter-dropdowns">
+                <div class="budget-select-wrapper">
+                  <label for="adminBudgetYearFilter" class="budget-filter-label">Year:</label>
+                  <select id="adminBudgetYearFilter" class="budget-filter-select">
+                    <option value="all">All Years</option>
+                    <option value="2026" selected>2026</option>
+                    <option value="2025">2025</option>
+                  </select>
+                </div>
+                <div class="budget-select-wrapper">
+                  <label for="adminBudgetQuarterFilter" class="budget-filter-label">Quarter:</label>
+                  <select id="adminBudgetQuarterFilter" class="budget-filter-select">
+                    <option value="all">All Quarters</option>
+                    <option value="Q1">Q1</option>
+                    <option value="Q2">Q2</option>
+                    <option value="Q3">Q3</option>
+                    <option value="Q4">Q4</option>
+                  </select>
+                </div>
+                <div class="budget-select-wrapper">
+                  <label for="adminBudgetCategoryFilter" class="budget-filter-label">Category:</label>
+                  <select id="adminBudgetCategoryFilter" class="budget-filter-select">
+                    <option value="all">All Categories</option>
+                    <option value="Infrastructure">Infrastructure</option>
+                    <option value="Health">Health</option>
+                    <option value="Social Services">Social Services</option>
+                    <option value="Administration">Administration</option>
+                    <option value="Emergency Preparedness">Emergency Preparedness</option>
+                    <option value="Education, Sports &amp; Recreation">Education, Sports &amp; Recreation</option>
+                    <option value="Agriculture &amp; Livelihood">Agriculture &amp; Livelihood</option>
+                    <option value="Environment &amp; Waste Management">Environment &amp; Waste Management</option>
+                  </select>
+                </div>
+                <button type="button" id="adminBudgetResetBtn" class="budget-reset-btn" title="Reset all filters">Reset</button>
+              </div>
+            </div>
+
+            <!-- Financial Data Table System -->
+            <div class="table-responsive budget-table-responsive">
+              <table class="admin-data-table budget-table-modern" id="adminBudgetTable">
+                <thead>
+                  <tr>
+                    <th style="width: 72px; text-align: left;">Year</th>
+                    <th style="width: 82px; text-align: left;">Quarter</th>
+                    <th style="width: 165px; text-align: left;">Category</th>
+                    <th style="text-align: left;">Description &amp; Remarks</th>
+                    <th style="width: 120px; text-align: right;">Allocated</th>
+                    <th style="width: 120px; text-align: right;">Spending</th>
+                    <th style="width: 85px; text-align: right;">Util.</th>
+                    <th style="width: 100px; text-align: center;">Status</th>
+                    <th style="width: 95px; text-align: center;">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="adminBudgetTbody">
+                  <!-- Injected dynamically via JS -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Table Footer Status & Count -->
+            <div class="budget-table-bottom-bar">
+              <div class="budget-item-counter" id="adminBudgetCounterText">
+                Showing 14 allocation records
+              </div>
+              <div class="budget-legend">
+                <span class="legend-chip"><span class="legend-dot green"></span> ≥80% High Util.</span>
+                <span class="legend-chip"><span class="legend-dot amber"></span> 50–79% Moderate</span>
+                <span class="legend-chip"><span class="legend-dot gray"></span> 0% Low / Unspent</span>
+              </div>
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <!-- ==============================================================
+             VIEW 6: RESIDENT VERIFICATION & CITIZEN REGISTRY
+             ============================================================== -->
+        <section class="admin-view-panel" id="viewDemographics">
+          
+          <!-- 1. Header & Quick Actions Toolbar -->
+          <div class="section-top-toolbar res-verif-header-toolbar">
+            <div class="res-verif-header-info">
+              <span class="view-kicker">CITIZEN REGISTRY &amp; PRE-REGISTRATION WORKFLOW</span>
+              <h2 class="section-title">Resident Verification</h2>
+              <p class="section-sub">Review and verify resident accounts before grant of full platform access.</p>
+            </div>
+            <div class="toolbar-right res-verif-toolbar-actions">
+              <button type="button" class="btn-res-action primary" id="btnOpenPreRegisterModal">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                <span>Pre-Register Resident</span>
+              </button>
+              <button type="button" class="btn-res-action secondary" id="btnExportResidentRegistry">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                <span>Export Registry</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 2. Verification Overview KPI Counter Cards -->
+          <div class="res-kpi-grid">
+            <div class="res-kpi-card" id="resKpiCardTotal">
+              <div class="res-kpi-header">
+                <span class="res-kpi-kicker">TOTAL APPLICATIONS</span>
+                <span class="res-kpi-badge badge-neutral" id="kpiBadgeTotal">All Inflow</span>
+              </div>
+              <div class="res-kpi-value" id="kpiValTotalApps">8</div>
+              <div class="res-kpi-sub" id="kpiSubTotalApps">Citizen pre-registration queue</div>
+            </div>
+
+            <div class="res-kpi-card pending-card" id="resKpiCardPending">
+              <div class="res-kpi-header">
+                <span class="res-kpi-kicker">PENDING VERIFICATION</span>
+                <span class="res-kpi-badge badge-amber"><span class="badge-dot-amber"></span> Review Needed</span>
+              </div>
+              <div class="res-kpi-value text-amber" id="kpiValPendingApps">4</div>
+              <div class="res-kpi-sub" id="kpiSubPendingApps">Awaiting document validation</div>
+            </div>
+
+            <div class="res-kpi-card verified-card" id="resKpiCardVerified">
+              <div class="res-kpi-header">
+                <span class="res-kpi-kicker">VERIFIED RESIDENTS</span>
+                <span class="res-kpi-badge badge-green"><span class="badge-dot-green"></span> Approved</span>
+              </div>
+              <div class="res-kpi-value text-green" id="kpiValVerifiedApps">3</div>
+              <div class="res-kpi-sub" id="kpiSubVerifiedApps">Full platform access active</div>
+            </div>
+
+            <div class="res-kpi-card rejected-card" id="resKpiCardRejected">
+              <div class="res-kpi-header">
+                <span class="res-kpi-kicker">REJECTED APPLICATIONS</span>
+                <span class="res-kpi-badge badge-red"><span class="badge-dot-red"></span> Rectification</span>
+              </div>
+              <div class="res-kpi-value text-red" id="kpiValRejectedApps">1</div>
+              <div class="res-kpi-sub" id="kpiSubRejectedApps">Declined due to criteria</div>
+            </div>
+          </div>
+
+          <!-- 3. Primary Card: Resident Verification Data Table -->
+          <div class="admin-card table-control-card res-verif-main-card">
+            
+            <!-- Header & Quick Filters Toolbar -->
+            <div class="table-filters-row res-filter-toolbar">
+              <!-- Left: Search Box (by Name/Sitio) -->
+              <div class="table-search-box res-table-search-box">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="res-search-icon" aria-hidden="true">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" id="resSearchInput" class="table-search-input" placeholder="Search by name..." aria-label="Search applications by name or sitio">
+                <button type="button" id="btnClearResSearch" class="res-search-clear" style="display: none;" aria-label="Clear search text">&times;</button>
+              </div>
+
+              <!-- Right: Status Filter Pills (Square Buttons Consistent with Other Pages) -->
+              <div class="filter-pills-row res-status-filter-pills" id="resStatusFilterGroup" role="tablist" aria-label="Verification status filter">
+                <button type="button" class="filter-pill res-filter-pill active" data-res-status="all" id="resPillAll" role="tab" aria-selected="true">
+                  All (<span id="resCountAll">8</span>)
+                </button>
+                <button type="button" class="filter-pill res-filter-pill" data-res-status="pending" id="resPillPending" role="tab" aria-selected="false">
+                  Pending (<span id="resCountPending">4</span>)
+                </button>
+                <button type="button" class="filter-pill res-filter-pill" data-res-status="verified" id="resPillVerified" role="tab" aria-selected="false">
+                  Verified (<span id="resCountVerified">3</span>)
+                </button>
+                <button type="button" class="filter-pill res-filter-pill" data-res-status="rejected" id="resPillRejected" role="tab" aria-selected="false">
+                  Rejected (<span id="resCountRejected">1</span>)
+                </button>
+              </div>
+
+              <!-- Sitio Dropdown Filter (Right side alongside pills) -->
+              <div class="dropdown-filter-wrap res-select-wrap">
+                <select id="resSitioFilter" class="table-filter-select" aria-label="Filter by Sitio or Purok">
+                  <option value="all">All Sitios &amp; Puroks</option>
+                  <option value="Sitio Ibaba">Sitio Ibaba</option>
+                  <option value="Sitio Santolan">Sitio Santolan</option>
+                  <option value="Sitio Ilaya">Sitio Ilaya</option>
+                  <option value="Sitio Gitna">Sitio Gitna</option>
+                  <option value="Tierra Verde">Tierra Verde</option>
+                  <option value="Potenciana Village">Potenciana Village</option>
+                  <option value="G.C Berberabe">G.C Berberabe</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Resident Verification Data Table -->
+            <div class="res-table-container">
+              <table class="res-data-table" id="resVerificationTable">
+                <thead>
+                  <tr>
+                    <th scope="col" style="width: 22%;">Name</th>
+                    <th scope="col" style="width: 24%;">Address</th>
+                    <th scope="col" style="width: 12%;">Sitio</th>
+                    <th scope="col" style="width: 13%;">Mobile</th>
+                    <th scope="col" style="width: 10%;">Registered</th>
+                    <th scope="col" style="width: 10%;">Status</th>
+                    <th scope="col" style="width: 9%; text-align: center;">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="resVerificationTableBody">
+                  <!-- Dynamically rendered via Vanilla JavaScript -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Empty State Container -->
+            <div id="resTableEmptyState" class="res-empty-state" style="display: none;">
+              <div class="res-empty-icon">🔍</div>
+              <h4 class="res-empty-title">No matching resident applications found</h4>
+              <p class="res-empty-desc">Try clearing your search input, switching status filter pills, or selecting a different Sitio.</p>
+              <button type="button" class="btn-res-action secondary" id="btnResetResFilters">Reset Filter Criteria</button>
+            </div>
+
+            <!-- Table Footer Pagination / Count Indicator -->
+            <div class="table-footer-pagination" style="padding: 12px 18px 4px 18px;">
+              <span class="pagination-info" id="resTotalCountIndicator">Showing <strong>8</strong> of <strong>8</strong> applications</span>
+            </div>
+
+          </div>
+
+            <!-- 4. Geographic Breakdown -->
+            <div class="admin-card" id="demographicGeoBreakdownCard">
+                <div class="card-header">
+                    <div>
+                        <span class="card-kicker">GEOGRAPHIC BREAKDOWN</span>
+                        <h3 class="card-title">Population by Sitio / Purok Sub-Division</h3>
+                        <p class="card-subtitle">
+                            Official count recorded in the Barangay Civil Registry
+                        </p>
+                    </div>
+
+                    <div class="card-header-badge">
+                        <span class="badge-neutral" id="totalRegistryBadge">
+                            Total Registry: Loading...
+                        </span>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="admin-data-table">
+                        <thead>
+                            <tr>
+                                <th>Sitio / Purok</th>
+                                <th>Registered Residents</th>
+                                <th>Verified Residents</th>
+                                <th>Pending Verification</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="geographicBreakdownTableBody">
+                            <tr>
+                                <td colspan="4">Loading geographic breakdown...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            </section>
+
+        <!-- ==============================================================
+             VIEW 7: CITIZEN PROJECT PROPOSALS DESK
+             ============================================================== -->
+        <section class="admin-view-panel" id="viewProposals">
+          <!-- Page Header & Action Bar -->
+          <div class="section-top-toolbar">
+            <div>
+              <span class="view-kicker">COMMUNITY PARTICIPATION &amp; CIVIC INITIATIVES</span>
+              <h2 class="section-title">Community Project Proposals</h2>
+              <p class="section-sub">Review project suggestions submitted by residents and record the council's decision.</p>
+            </div>
+          </div>
+
+          <!-- Metric Summary Cards Top Bar (4 Horizontal Cards) -->
+          <div class="proposal-metrics-bar" id="proposalMetricsBar">
+            <!-- 1. PENDING -->
+            <div class="proposal-metric-card">
+              <div class="metric-card-top">
+                <span class="metric-card-label">PENDING</span>
+                <span class="metric-badge badge-amber" id="metricBadgePending">
+                  <span class="status-dot dot-amber"></span> Pending
+                </span>
+              </div>
+              <div class="metric-card-body">
+                <span class="metric-card-count" id="metricCountPending">4</span>
+                <span class="metric-card-sub">Awaiting initial intake</span>
+              </div>
+            </div>
+
+            <!-- 2. UNDER REVIEW -->
+            <div class="proposal-metric-card">
+              <div class="metric-card-top">
+                <span class="metric-card-label">UNDER REVIEW</span>
+                <span class="metric-badge badge-blue" id="metricBadgeReview">
+                  <span class="status-dot dot-blue"></span> Under Review
+                </span>
+              </div>
+              <div class="metric-card-body">
+                <span class="metric-card-count" id="metricCountReview">2</span>
+                <span class="metric-card-sub">Committee evaluation</span>
+              </div>
+            </div>
+
+            <!-- 3. APPROVED -->
+            <div class="proposal-metric-card">
+              <div class="metric-card-top">
+                <span class="metric-card-label">APPROVED</span>
+                <span class="metric-badge badge-green" id="metricBadgeApproved">
+                  <span class="status-dot dot-green"></span> Approved
+                </span>
+              </div>
+              <div class="metric-card-body">
+                <span class="metric-card-count" id="metricCountApproved">5</span>
+                <span class="metric-card-sub">Elevated to AIP Feasibility</span>
+              </div>
+            </div>
+
+            <!-- 4. REJECTED -->
+            <div class="proposal-metric-card">
+              <div class="metric-card-top">
+                <span class="metric-card-label">REJECTED</span>
+                <span class="metric-badge badge-rose" id="metricBadgeRejected">
+                  <span class="status-dot dot-rose"></span> Rejected
+                </span>
+              </div>
+              <div class="metric-card-body">
+                <span class="metric-card-count" id="metricCountRejected">1</span>
+                <span class="metric-card-sub">Declined / Out of scope</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Filters & Search Bar -->
+          <div class="proposals-filter-toolbar">
+            <div class="proposals-search-box">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input type="text" id="proposalsSearchInput" class="table-search-input" placeholder="Search by title, proponent, or location...">
+            </div>
+            <div class="proposals-filter-pills" id="proposalsFilterGroup">
+              <button type="button" class="filter-pill active" data-status="all">All (<span id="pillCountAll">12</span>)</button>
+              <button type="button" class="filter-pill" data-status="Pending">Pending (<span id="pillCountPending">4</span>)</button>
+              <button type="button" class="filter-pill" data-status="Under Review">Under Review (<span id="pillCountReview">2</span>)</button>
+              <button type="button" class="filter-pill" data-status="Approved">Approved (<span id="pillCountApproved">5</span>)</button>
+              <button type="button" class="filter-pill" data-status="Rejected">Rejected (<span id="pillCountRejected">1</span>)</button>
+            </div>
+          </div>
+
+          <!-- Card-Based Content Grid (2 Columns on Desktop) -->
+          <div class="proposals-grid" id="proposalsGrid">
+            <!-- Dynamically populated proposal cards -->
+          </div>
+
+          <!-- Empty State Fallback -->
+          <div class="proposals-empty-state" id="proposalsEmptyState" style="display: none;">
+            <div class="empty-state-icon-circle">
+              <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 18h6"></path>
+                <path d="M10 22h4"></path>
+                <path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"></path>
+              </svg>
+            </div>
+            <h3 class="empty-state-heading">No project proposals found</h3>
+            <p class="empty-state-subtitle">Resident proposals will appear here once submitted.</p>
+          </div>
+        </section>
+
+        <!-- ==============================================================
+             VIEW 8: INFRASTRUCTURE & BARANGAY PROJECTS
+             ============================================================== -->
+        <section class="admin-view-panel" id="viewProjects">
+          <div class="section-top-toolbar">
+            <div>
+              <span class="view-kicker">INFRASTRUCTURE &amp; MUNICIPAL INVESTMENT</span>
+              <h2 class="section-title">Barangay Capital Projects Portfolio</h2>
+              <p class="section-sub">Comprehensive tracking of all 6 infrastructure, technology, and public works projects in Barangay Pallocan West</p>
+            </div>
+            <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px;">
+              <div class="projects-budget-summary-pill" id="projectBudgetSummaryPill">
+                <span class="budget-pill-label">Total Allocated Budget</span>
+                <span class="budget-pill-value" id="projectTotalBudgetValue">₱1,815,000.00</span>
+              </div>
+              <button type="button" class="btn-dash-primary" id="btnNewProjectModal">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                <span>Add New Project</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Project Metric Summary Cards Top Bar (4 Horizontal Cards) -->
+          <div class="proposal-metrics-bar" id="projectMetricsBar">
+            <!-- 1. ONGOING -->
+            <div class="proposal-metric-card" data-status="ongoing" style="cursor: pointer;" title="Filter by Ongoing projects">
+              <div class="metric-card-top">
+                <span class="metric-card-label">ONGOING</span>
+                <span class="metric-badge badge-blue" id="projBadgeOngoing">
+                  <span class="status-dot dot-blue"></span> Ongoing
+                </span>
+              </div>
+              <div class="metric-card-body">
+                <span class="metric-card-count" id="projMetricCountOngoing">2</span>
+                <span class="metric-card-sub" id="projMetricSubOngoing">₱695,000.00 · Active in execution</span>
+              </div>
+            </div>
+
+            <!-- 2. COMPLETED -->
+            <div class="proposal-metric-card" data-status="completed" style="cursor: pointer;" title="Filter by Completed projects">
+              <div class="metric-card-top">
+                <span class="metric-card-label">COMPLETED</span>
+                <span class="metric-badge badge-green" id="projBadgeCompleted">
+                  <span class="status-dot dot-green"></span> Completed
+                </span>
+              </div>
+              <div class="metric-card-body">
+                <span class="metric-card-count" id="projMetricCountCompleted">2</span>
+                <span class="metric-card-sub" id="projMetricSubCompleted">₱770,000.00 · Turned over & in service</span>
+              </div>
+            </div>
+
+            <!-- 3. PLANNING -->
+            <div class="proposal-metric-card" data-status="planning" style="cursor: pointer;" title="Filter by Planning projects">
+              <div class="metric-card-top">
+                <span class="metric-card-label">PLANNING</span>
+                <span class="metric-badge badge-amber" id="projBadgePlanning">
+                  <span class="status-dot dot-amber"></span> Planning
+                </span>
+              </div>
+              <div class="metric-card-body">
+                <span class="metric-card-count" id="projMetricCountPlanning">1</span>
+                <span class="metric-card-sub" id="projMetricSubPlanning">₱180,000.00 · Pre-procurement</span>
+              </div>
+            </div>
+
+            <!-- 4. DELAYED -->
+            <div class="proposal-metric-card" data-status="delayed" style="cursor: pointer;" title="Filter by Delayed projects">
+              <div class="metric-card-top">
+                <span class="metric-card-label">DELAYED</span>
+                <span class="metric-badge badge-red" id="projBadgeDelayed">
+                  <span class="status-dot dot-red"></span> Delayed
+                </span>
+              </div>
+              <div class="metric-card-body">
+                <span class="metric-card-count" id="projMetricCountDelayed">1</span>
+                <span class="metric-card-sub" id="projMetricSubDelayed">₱170,000.00 · Pending clearance</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Projects Table Card -->
+          <div class="admin-card table-control-card">
+            <div class="table-filters-row">
+              <div class="table-search-box">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" id="projectsSearchInput" class="table-search-input" placeholder="Search projects by name, location, or contractor...">
+              </div>
+              <div class="filter-pills-row" id="projectsStatusFilterGroup">
+                <button type="button" class="filter-pill active" data-status="all">All (<span id="projPillAll">6</span>)</button>
+                <button type="button" class="filter-pill" data-status="ongoing">Ongoing (<span id="projPillOngoing">2</span>)</button>
+                <button type="button" class="filter-pill" data-status="completed">Completed (<span id="projPillCompleted">2</span>)</button>
+                <button type="button" class="filter-pill" data-status="planning">Planning (<span id="projPillPlanning">1</span>)</button>
+                <button type="button" class="filter-pill" data-status="delayed">Delayed (<span id="projPillDelayed">1</span>)</button>
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="admin-data-table" id="projectsTable">
+                <thead>
+                  <tr>
+                    <th>Code</th>
+                    <th>Project Name</th>
+                    <th>Location / Purok</th>
+                    <th>Timeline</th>
+                    <th>Budget</th>
+                    <th>Progress</th>
+                    <th>Status</th>
+                    <th class="text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="projectsTableBody">
+                  <!-- Rendered dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==============================================================
+             VIEW 9: PUBLIC ANNOUNCEMENTS BROADCAST MANAGER
+             ============================================================== -->
+        <section class="admin-view-panel" id="viewAnnouncements">
+          <div class="section-top-toolbar">
+            <div>
+              <span class="view-kicker">CIVIC COMMUNICATIONS &amp; EARLY WARNINGS</span>
+              <h2 class="section-title">Barangay Announcements &amp; Advisories</h2>
+              <p class="section-sub">Publish official notices, health alerts, civic meetings, and weather warnings to the public resident portal</p>
+            </div>
+            <div class="toolbar-right">
+              <button type="button" class="btn-dash-primary" id="btnOpenNewAnnouncementModal">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                <span>Broadcast New Announcement</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Announcement Metric Summary Cards Top Bar (4 Horizontal Cards) -->
+          <div class="proposal-metrics-bar" id="announcementMetricsBar">
+            <!-- 1. TOTAL NOTICES -->
+            <div class="proposal-metric-card" data-category="all" style="cursor: pointer;" title="Show All Notices">
+              <div class="metric-card-top">
+                <span class="metric-card-label">TOTAL NOTICES</span>
+                <span class="metric-badge badge-blue" id="metricBadgeAnnTotal">
+                  <span class="status-dot dot-blue"></span> Total
+                </span>
+              </div>
+              <div class="metric-card-body">
+                <span class="metric-card-count" id="annMetricTotalCount">3</span>
+                <span class="metric-card-sub">Published public records</span>
+              </div>
+            </div>
+
+            <!-- 2. CRITICAL / EMERGENCY -->
+            <div class="proposal-metric-card" data-category="Critical" style="cursor: pointer;" title="Filter by Critical Priority / Emergency Advisories">
+              <div class="metric-card-top">
+                <span class="metric-card-label">CRITICAL / EMERGENCY</span>
+                <span class="metric-badge badge-rose" id="metricBadgeAnnCritical">
+                  <span class="status-dot dot-rose"></span> Critical Alert
+                </span>
+              </div>
+              <div class="metric-card-body">
+                <span class="metric-card-count" id="annMetricCriticalCount">1</span>
+                <span class="metric-card-sub">High-urgency citizen alert</span>
+              </div>
+            </div>
+
+            <!-- 3. ACTIVE NOTICES -->
+            <div class="proposal-metric-card" data-category="active" style="cursor: pointer;" title="Filter by Active Broadcasts">
+              <div class="metric-card-top">
+                <span class="metric-card-label">ACTIVE BROADCASTS</span>
+                <span class="metric-badge badge-green" id="metricBadgeAnnActive">
+                  <span class="status-dot dot-green"></span> Live Feeds
+                </span>
+              </div>
+              <div class="metric-card-body">
+                <span class="metric-card-count" id="annMetricActiveCount">2</span>
+                <span class="metric-card-sub">Live on resident portal</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="admin-card table-control-card">
+            <div class="table-filters-row">
+              <div class="table-search-box">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" id="announcementsSearchInput" class="table-search-input" placeholder="Search notices by title, category, or audience...">
+              </div>
+              <div class="filter-pills-row" id="announcementsFilterGroup">
+                <button type="button" class="filter-pill active" data-category="all">All Notices</button>
+                <button type="button" class="filter-pill" data-category="active">Active</button>
+                <button type="button" class="filter-pill" data-category="unpublished">Unpublished</button>
+                <button type="button" class="filter-pill filter-pill-critical" data-category="Critical">🚨 Critical Priority</button>
+                <button type="button" class="filter-pill" data-category="Emergency">Emergency</button>
+                <button type="button" class="filter-pill" data-category="Health">Health</button>
+                <button type="button" class="filter-pill" data-category="Infrastructure">Infrastructure</button>
+                <button type="button" class="filter-pill" data-category="Event">Event</button>
+                <button type="button" class="filter-pill" data-category="Social Services">Social Services</button>
+                <button type="button" class="filter-pill" data-category="General">General</button>
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="admin-data-table" id="announcementsTable">
+                <thead>
+                  <tr>
+                    <th>Ref ID</th>
+                    <th>Announcement Headline</th>
+                    <th>Priority</th>
+                    <th>Category</th>
+                    <th>Target Audience</th>
+                    <th>Date Published</th>
+                    <th>Status</th>
+                    <th class="text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="announcementsTableBody">
+                  <!-- Rendered dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+      </main>
+
+    </div>
+  </div>
+
+
+  <!-- ==============================================================
+       MODALS & OVERLAYS ARCHITECTURE
+       ============================================================== -->
+
+  <!-- MODAL 1: REQUEST DETAIL & APPROVAL MODAL -->
+  <div class="admin-modal-overlay" id="requestDetailModal">
+    <div class="admin-modal-box">
+      <div class="modal-header">
+        <div>
+          <span class="modal-kicker">DOCUMENT APPLICATION INFORMATION</span>
+          <h3 class="modal-title" id="modalReqDocType">Barangay Clearance</h3>
+          <span class="modal-sub" id="modalReqRef">REF-2026-08492</span>
+        </div>
+        <button type="button" class="modal-close-btn" id="btnCloseReqModal">&times;</button>
+      </div>
+      <div class="modal-body" id="modalReqBody">
+        <!-- Rendered dynamically via admin.js -->
+      </div>
+      <div class="modal-footer" id="modalReqFooter">
+        <button type="button" class="btn-modal-outline" id="btnRejectInModal">Reject Application</button>
+        <button type="button" class="btn-modal-primary" id="btnReadyInModal">Mark Ready for Pickup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: VIEW & UPDATE SUBMITTED RESIDENT CONCERN MODAL -->
+  <div class="admin-modal-overlay" id="concernViewModal" role="dialog" aria-modal="true" aria-labelledby="modalIncTitle">
+    <div class="admin-modal-box" style="max-width: 640px;">
+      <div class="modal-header">
+        <div>
+          <span class="modal-kicker">SUBMITTED RESIDENT CONCERN</span>
+          <h3 class="modal-title" id="modalIncTitle">Submitted Concern Details</h3>
+          <span class="modal-sub" id="modalIncId">Ticket #TCK-4021</span>
+        </div>
+        <button type="button" class="modal-close-btn" id="btnCloseIncModal" aria-label="Close dialog">&times;</button>
+      </div>
+      <div class="modal-body" id="modalIncViewBody">
+        <!-- Rendered dynamically via admin.js -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-modal-outline" id="btnCloseIncFooter">Close</button>
+        <button type="button" class="btn-modal-primary" id="btnSaveConcernModalStatus">Update Concern Status</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2B: RESOLVE CONCERN CASE (ACTION & RESPONSE RECORDER) -->
+  <div class="admin-modal-overlay" id="resolveCaseModal" role="dialog" aria-modal="true" aria-labelledby="resolveModalTitle">
+    <div class="admin-modal-box resolve-modal-box">
+      <div class="modal-header">
+        <div>
+          <span class="modal-kicker">BLOTTER &amp; CONCERN RESOLUTION DESK</span>
+          <h3 class="modal-title" id="resolveModalTitle">Resolve Case in Concern</h3>
+          <span class="modal-sub">Log the official response, operational actions taken, and resolving personnel</span>
+        </div>
+        <button type="button" class="modal-close-btn" id="btnCloseResolveModal" aria-label="Close dialog">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Target Concern Case Summary Card -->
+        <div class="resolve-case-card">
+          <div class="resolve-case-card-header">
+            <div class="resolve-case-meta">
+              <span class="resolve-ticket-badge" id="resCaseTicketId">TCK-4018</span>
+              <span class="badge-neutral" id="resCaseCategory">Infrastructure</span>
+              <span class="badge-status red" id="resCaseSeverity">Urgent</span>
+            </div>
+            <span class="resolve-case-date" id="resCaseDateLogged">Logged: 2026-10-15</span>
+          </div>
+
+          <div class="resolve-case-summary-body">
+            <h4 class="resolve-case-heading" id="resCaseSummary">Heavy siltation &amp; plastic clog choking Sitio Ibaba culvert outflow</h4>
+            <div class="resolve-case-details-grid">
+              <div>
+                <span class="detail-label">Location / Purok:</span>
+                <strong id="resCaseLocation">Sitio Ibaba</strong>
+              </div>
+              <div>
+                <span class="detail-label">Reported By:</span>
+                <strong id="resCaseReporter">Sitio Leader M. De Chavez</strong>
+              </div>
+            </div>
+            <div class="resolve-case-prev-notes" id="resCasePrevNotesBox">
+              <span class="detail-label">Initial Incident Notes:</span>
+              <p id="resCasePrevNotes">Culvert capacity depleted by ~72%. Overflow risk acute during rainfall exceeding 45mm.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Resolution Form -->
+        <form id="resolveCaseForm" class="modal-form" onsubmit="return false;">
+          <!-- Quick Presets -->
+          <div class="form-group">
+            <div class="preset-label-row">
+              <label class="form-label">Quick Action Presets (Click to autofill response):</label>
+            </div>
+            <div class="resolve-quick-chips" id="resolveQuickChips">
+              <button type="button" class="quick-chip-btn" data-text="Barangay Public Works mobilized with backhoe & desilting crew. Culvert cleared, 35 sacks of plastic waste removed, and normal waterflow restored.">🚜 Desilted &amp; Cleared Culvert</button>
+              <button type="button" class="quick-chip-btn" data-text="BPSO Tanod patrol dispatched immediately on site. Hazard secured with safety barriers and danger signage. Public access safely regulated.">🛡️ BPSO Patrol Dispatched &amp; Secured</button>
+              <button type="button" class="quick-chip-btn" data-text="Electrician team deployed. Damaged/dangling cables secured and replaced with new 100W Solar LED lighting unit under AIP Program.">💡 Repaired &amp; Replaced Lighting</button>
+              <button type="button" class="quick-chip-btn" data-text="Parties summoned to Barangay Hall. Amicable settlement signed and recorded under Lupon Tagapamayapa dispute resolution.">⚖️ Settled via Lupon Tagapamayapa</button>
+              <button type="button" class="quick-chip-btn" data-text="Official Barangay Sanitary Warning Notice served to property owner. Re-inspection verified complete voluntary compliance and cleanup.">📋 Warning Notice Served &amp; Complied</button>
+              <button type="button" class="quick-chip-btn" data-text="Emergency coordination conducted with Batangas City LGU / Utility agency. Inter-agency quick response team dispatched on site.">🏛️ Coordinated with City LGU / Agency</button>
+            </div>
+          </div>
+
+          <!-- Action / Response Made (Only text field required) -->
+          <div class="form-group" style="margin-top: 6px;">
+            <label class="form-label" for="resolveActionInput">
+              Response or Action Made to Resolve the Case <span class="text-danger">*</span>
+            </label>
+            <textarea id="resolveActionInput" class="form-textarea" rows="5" placeholder="Detail the concrete steps, teams deployed, repairs completed, or administrative actions made to fully resolve this concern..." required></textarea>
+            <span class="form-hint">Specify the response or action conducted to resolve this case. This will be recorded in official records and viewable in View Action.</span>
+          </div>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-modal-outline" id="btnCancelResolveCase">Cancel (Keep Active)</button>
+        <button type="button" class="btn-modal-primary success-btn" id="btnSubmitResolveCase">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          <span>Confirm &amp; Mark as Resolved</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- MODAL 4: NEW CONCERN QUICK LOGGING MODAL -->
+  <div class="admin-modal-overlay" id="newIncidentModal">
+    <div class="admin-modal-box">
+      <div class="modal-header">
+        <div>
+          <span class="modal-kicker">CONCERN DESK · WALK-IN INTAKE</span>
+          <h3 class="modal-title">Log Walk-in Resident Concern</h3>
+          <span class="modal-sub">Official Barangay Pallocan West Concern Registry</span>
+        </div>
+        <button type="button" class="modal-close-btn" id="btnCloseNewIncModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="newIncidentForm" class="modal-form">
+          <div class="form-group">
+            <label class="form-label">Concern Title <span class="text-danger">*</span></label>
+            <input type="text" id="newIncTitle" class="form-input" placeholder="e.g. Damaged drainage cover near chapel" required>
+            <span class="field-error-text text-danger" id="newIncTitleError"></span>
+          </div>
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label">Category <span class="text-danger">*</span></label>
+              <select id="newIncCategory" class="form-select" required>
+                <option value="Infrastructure">Infrastructure</option>
+                <option value="Sanitation">Sanitation</option>
+                <option value="Public Safety">Public Safety</option>
+                <option value="Noise Disturbance">Noise Disturbance</option>
+                <option value="Public Utility">Public Utility</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Location / Sitio <span class="text-danger">*</span></label>
+              <select id="newIncLocation" class="form-select" required>
+                <option value="Sitio Ibaba">Sitio Ibaba</option>
+                <option value="Sitio Santolan">Sitio Santolan</option>
+                <option value="Sitio Ilaya">Sitio Ilaya</option>
+                <option value="Sitio Gitna">Sitio Gitna</option>
+                <option value="Tierra Verde">Tierra Verde</option>
+                <option value="Potenciana Village">Potenciana Village</option>
+                <option value="G.C Berberabe">G.C Berberabe</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+            <div class="form-group">
+              <label class="form-label" for="newIncReporter">Resident Full Name <span class="text-danger">*</span></label>
+              <input type="text" id="newIncReporter" class="form-input" placeholder="e.g. Maria Santos" pattern="[a-zA-Z\s]+" required>
+              <span class="field-error-text text-danger" id="newIncReporterError"></span>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="newIncContact">Contact Number <span class="text-danger">*</span></label>
+              <input type="tel" id="newIncContact" class="form-input" placeholder="09183456789" inputmode="numeric" pattern="[0-9]*" maxlength="11" required>
+              <span class="field-error-text text-danger" id="newIncContactError"></span>
+            </div>
+          </div>
+          <!-- Urgency Level Toggle Card (Standard vs Urgent) -->
+          <div class="form-group">
+            <label class="form-label" style="display: flex; align-items: center; justify-content: space-between;">
+              <span>Urgency Level</span>
+              <span style="font-size: 11px; color: #64748b; font-weight: 600;">Click to switch between Standard &amp; Urgent</span>
+            </label>
+            <button type="button" class="btn-critical-toggle-card" id="btnToggleConcernUrgency">
+              <div class="critical-toggle-icon">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.3">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                  <line x1="12" y1="9" x2="12" y2="13"/>
+                  <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+              </div>
+              <div class="critical-toggle-content">
+                <div class="critical-toggle-title" id="newIncUrgencyTitle">Standard Concern Level</div>
+                <div class="critical-toggle-subtitle" id="newIncUrgencySub">Click to mark as Urgent if this concern poses an immediate safety or infrastructure hazard</div>
+              </div>
+              <div class="critical-toggle-badge" id="newIncUrgencyBadge">
+                <span class="dot-gray"></span>
+                <span class="badge-text">Standard</span>
+              </div>
+            </button>
+            <input type="hidden" id="newIncUrgency" value="Standard">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Detailed Description <span class="text-danger">*</span></label>
+            <textarea id="newIncDesc" class="form-textarea" rows="3" placeholder="Provide detailed description of the resident's concern..." required></textarea>
+            <span class="field-error-text text-danger" id="newIncDescError"></span>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-modal-outline" id="btnCancelNewInc">Cancel</button>
+        <button type="button" class="btn-modal-primary" id="btnSubmitNewIncident">Record Concern</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 5: CREATE & EDIT ANNOUNCEMENT BROADCAST MODAL -->
+  <div class="admin-modal-overlay" id="newAnnouncementModal">
+    <div class="admin-modal-box" style="max-width: 660px;">
+      <div class="modal-header">
+        <div>
+          <span class="modal-kicker" id="annModalKicker">COMMUNICATIONS · BROADCAST ADVISORY</span>
+          <h3 class="modal-title" id="annModalTitle">Create Official Announcement</h3>
+          <span class="modal-sub" id="annModalSub">Broadcast to Public Portal &amp; Resident Feeds</span>
+        </div>
+        <button type="button" class="modal-close-btn" id="btnCloseNewAnnModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="newAnnouncementForm" class="modal-form" onsubmit="return false;">
+          <input type="hidden" id="annEditId" value="">
+          <div class="form-group">
+            <label class="form-label" for="annTitle">Headline / Title <span class="text-danger">*</span></label>
+            <input type="text" id="annTitle" class="form-input" placeholder="e.g. Dengue Prevention Cleanup Drive in Sitio Ibaba" required>
+            <span class="field-error-text text-danger" id="annTitleError"></span>
+          </div>
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label" for="annCategory">Category</label>
+              <select id="annCategory" class="form-select" required>
+                <option value="Emergency">Emergency</option>
+                <option value="Health">Health</option>
+                <option value="Infrastructure">Infrastructure</option>
+                <option value="Event">Event</option>
+                <option value="Social Services">Social Services</option>
+                <option value="General">General</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="annAudience">Target Audience / Sitio</label>
+              <select id="annAudience" class="form-select" required>
+                <option value="All Residents">All Barangay Pallocan West Residents</option>
+                <option value="Sitio Ibaba">Sitio Ibaba</option>
+                <option value="Sitio Santolan">Sitio Santolan</option>
+                <option value="Sitio Ilaya">Sitio Ilaya</option>
+                <option value="Sitio Gitna">Sitio Gitna</option>
+                <option value="Tierra Verde">Tierra Verde</option>
+                <option value="Potenciana Village">Potenciana Village</option>
+                <option value="G.C Berberabe">G.C Berberabe</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label" for="annDepartment">Issuing Office / Department</label>
+              <input type="text" id="annDepartment" class="form-input" placeholder="e.g. Office of the Punong Barangay">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="annDate">Date Published</label>
+              <input type="date" id="annDate" class="form-input" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="annStatus">Publication Status</label>
+            <select id="annStatus" class="form-select">
+              <option value="Active">Active (Broadcast Live on Public Home Page)</option>
+              <option value="Unpublished">Unpublished / Draft (Hidden from Public View)</option>
+            </select>
+          </div>
+          <!-- Critical Priority / Emergency Advisory Toggle Button -->
+          <div class="form-group">
+            <label class="form-label" style="display: flex; align-items: center; justify-content: space-between;">
+              <span>Advisory Urgency &amp; Classification</span>
+              <span style="font-size: 11px; color: #64748b; font-weight: 600;">Click button to toggle priority</span>
+            </label>
+            <button type="button" class="btn-critical-toggle-card" id="btnToggleCriticalPriority">
+              <div class="critical-toggle-icon">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.3">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                  <line x1="12" y1="9" x2="12" y2="13"/>
+                  <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+              </div>
+              <div class="critical-toggle-content">
+                <div class="critical-toggle-title">Label as Critical Priority / Emergency Advisory</div>
+                <div class="critical-toggle-subtitle">Flag this announcement with emergency red alert banner and prioritize on resident feeds</div>
+              </div>
+              <div class="critical-toggle-badge" id="criticalToggleBadge">
+                <span class="dot-gray"></span>
+                <span class="badge-text">Standard</span>
+              </div>
+            </button>
+            <input type="hidden" id="annIsCritical" value="false">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="annSummary">Public Feed Summary / Excerpt <span style="font-weight: 500; color: #64748b; font-size: 11.5px;">(Optional — auto-generated from content if left blank)</span></label>
+            <textarea id="annSummary" class="form-textarea" rows="2" placeholder="Concise overview shown on the public home page card..."></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="annContent">Announcement Content / Directive Details <span class="text-danger">*</span></label>
+            <textarea id="annContent" class="form-textarea" rows="5" placeholder="Enter complete announcement message..." required></textarea>
+            <span class="field-error-text text-danger" id="annContentError"></span>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-modal-outline" id="btnCancelNewAnn">Cancel</button>
+        <button type="button" class="btn-modal-primary" id="btnSubmitNewAnn">Broadcast Announcement</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 6: NEW CAPITAL PROJECT MODAL -->
+  <div class="admin-modal-overlay" id="newProjectModal">
+    <div class="admin-modal-box">
+      <div class="modal-header">
+        <div>
+          <span class="modal-kicker">INFRASTRUCTURE · AIP ALLOCATION</span>
+          <h3 class="modal-title">Record Capital Project</h3>
+          <span class="modal-sub">Barangay Annual Investment Plan (AIP) 2026</span>
+        </div>
+        <button type="button" class="modal-close-btn" id="btnCloseNewProjModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="newProjectForm" class="modal-form">
+          <div class="form-group">
+            <label class="form-label" for="projTitle">Project Title <span class="text-danger">*</span></label>
+            <input type="text" id="projTitle" class="form-input" placeholder="e.g. Solar LED Streetlights Phase 3" required>
+            <span class="field-error-text text-danger" id="projTitleError"></span>
+          </div>
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label" for="projLocation">Location / Purok</label>
+              <select id="projLocation" class="form-select" required>
+                <option value="Sitio Ibaba">Sitio Ibaba</option>
+                <option value="Sitio Santolan">Sitio Santolan</option>
+                <option value="Sitio Ilaya">Sitio Ilaya</option>
+                <option value="Sitio Gitna">Sitio Gitna</option>
+                <option value="Tierra Verde">Tierra Verde</option>
+                <option value="Potenciana Village">Potenciana Village</option>
+                <option value="G.C Berberabe">G.C Berberabe</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="projBudget">Allocated Budget (₱) <span class="text-danger">*</span></label>
+              <input type="text" id="projBudget" class="form-input" placeholder="e.g. 250000" inputmode="numeric" required>
+              <span class="field-error-text text-danger" id="projBudgetError"></span>
+            </div>
+          </div>
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label" for="projStatus">Initial Status</label>
+              <select id="projStatus" class="form-select">
+                <option value="planning" selected>Planning</option>
+                <option value="ongoing">Ongoing</option>
+                <option value="completed">Completed</option>
+                <option value="delayed">Delayed</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="projProgress">Progress Percentage</label>
+              <input type="number" id="projProgress" class="form-input" value="15" min="0" max="100">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="projScope">
+              Project Scope <span class="text-danger">*</span>
+            </label>
+            <textarea
+              id="projScope"
+              class="form-textarea"
+              rows="3"
+              placeholder="Describe the work, activities, and expected project output..."
+              required
+            ></textarea>
+            <span class="field-error-text text-danger" id="projScopeError"></span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="projBeneficiaries">
+              Target Beneficiaries <span class="text-danger">*</span>
+            </label>
+            <textarea
+              id="projBeneficiaries"
+              class="form-textarea"
+              rows="3"
+              placeholder="Describe the residents, households, or groups who will benefit..."
+              required
+            ></textarea>
+            <span class="field-error-text text-danger" id="projBeneficiariesError"></span>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-modal-outline" id="btnCancelNewProj">Cancel</button>
+        <button type="button" class="btn-modal-primary" id="btnSubmitNewProj">Save Project Record</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 7: PROPOSAL REVIEW & ELEVATION MODAL -->
+  <div class="admin-modal-overlay" id="proposalReviewModal">
+    <div class="admin-modal-box">
+      <div class="modal-header">
+        <div>
+          <span class="modal-kicker">CITIZEN INITIATIVE · AIP ELEVATION</span>
+          <h3 class="modal-title" id="modalPropTitle">Review Proposal</h3>
+          <span class="modal-sub" id="modalPropId">PROP-2026-001</span>
+        </div>
+        <button type="button" class="modal-close-btn" id="btnClosePropModal">&times;</button>
+      </div>
+      <div class="modal-body" id="modalPropBody">
+        <!-- Rendered dynamically -->
+      </div>
+      <div class="modal-footer" id="modalPropFooter">
+        <button type="button" class="btn-modal-outline" id="btnRejectPropInModal" style="color: #be123c; border-color: #fecdd3;">Reject Proposal</button>
+        <button type="button" class="btn-modal-outline" id="btnUnderReviewPropInModal" style="color: #0369a1; border-color: #bae6fd;">Mark Under Review</button>
+        <button type="button" class="btn-modal-primary" id="btnApprovePropInModal" style="background-color: #16a34a; border-color: #16a34a;">Approve Proposal</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 7B: SUBMIT NEW COMMUNITY PROPOSAL -->
+  <div class="admin-modal-overlay" id="submitProposalModal" role="dialog" aria-modal="true" aria-labelledby="submitPropModalTitle">
+    <div class="admin-modal-box">
+      <div class="modal-header">
+        <div>
+          <span class="modal-kicker">COMMUNITY INITIATIVES · CITIZEN SUGGESTION DESK</span>
+          <h3 class="modal-title" id="submitPropModalTitle">Submit Community Project Proposal</h3>
+          <span class="modal-sub">Record citizen project suggestions for barangay council review and evaluation</span>
+        </div>
+        <button type="button" class="modal-close-btn" id="btnCloseSubmitPropModal" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="submitProposalForm" class="modal-form" onsubmit="return false;">
+          <div class="form-group">
+            <label class="form-label" for="newPropTitle">Proposal Title <span class="text-danger">*</span></label>
+            <input type="text" id="newPropTitle" class="form-input" placeholder="e.g. Solar Streetlight Installation - Sitio Gitna" required>
+            <span class="field-error-text text-danger" id="newPropTitleError"></span>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="form-label" for="newPropCategory">Category <span class="text-danger">*</span></label>
+              <select id="newPropCategory" class="form-select" required>
+                <option value="Infrastructure">Infrastructure</option>
+                <option value="Health">Health</option>
+                <option value="Environment">Environment</option>
+                <option value="Public Safety">Public Safety</option>
+                <option value="Sports &amp; Youth">Sports &amp; Youth</option>
+                <option value="Education &amp; Tech">Education &amp; Tech</option>
+                <option value="Social Services">Social Services</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="newPropYear">Fiscal Year</label>
+              <input type="text" id="newPropYear" class="form-input" value="2026">
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="form-label" for="newPropLocation">Location / Purok <span class="text-danger">*</span></label>
+              <select id="newPropLocation" class="form-select" required>
+                <option value="Sitio Ibaba">Sitio Ibaba</option>
+                <option value="Sitio Santolan">Sitio Santolan</option>
+                <option value="Sitio Ilaya">Sitio Ilaya</option>
+                <option value="Sitio Gitna">Sitio Gitna</option>
+                <option value="Tierra Verde">Tierra Verde</option>
+                <option value="Potenciana Village">Potenciana Village</option>
+                <option value="G.C Berberabe">G.C Berberabe</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="newPropProponent">Proponent / Resident <span class="text-danger">*</span></label>
+              <input type="text" id="newPropProponent" class="form-input" placeholder="e.g. Juan Dela Cruz" pattern="[a-zA-Z\s]+" required>
+              <span class="field-error-text text-danger" id="newPropProponentError"></span>
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="form-label" for="newPropBudget">Estimated Budget <span class="text-danger">*</span></label>
+              <input type="text" id="newPropBudget" class="form-input" placeholder="e.g. 150000" inputmode="numeric" required>
+              <span class="field-error-text text-danger" id="newPropBudgetError"></span>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="newPropStatus">Initial Status</label>
+              <select id="newPropStatus" class="form-select">
+                <option value="Pending" selected>Pending</option>
+                <option value="Under Review">Under Review</option>
+                <option value="Approved">Approved</option>
+                <option value="Rejected">Rejected</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="newPropDescription">Description / Scope <span class="text-danger">*</span></label>
+            <textarea id="newPropDescription" class="form-textarea" rows="3" placeholder="2-3 line summary of project purpose, location specifics, and benefits to residents..." required></textarea>
+            <span class="field-error-text text-danger" id="newPropDescriptionError"></span>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-modal-outline" id="btnCancelSubmitProp">Cancel</button>
+        <button type="button" class="btn-modal-primary" id="btnSaveSubmitProp" style="background-color: #0b1e36;">+ Submit Proposal</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD / EDIT INDIVIDUAL BUDGET RECORD -->
+  <div class="admin-modal-overlay" id="adminBudgetModal" role="dialog" aria-modal="true" aria-labelledby="budgetModalTitle">
+    <div class="admin-modal-box modal-box-budget-record">
+      <div class="modal-header">
+        <div>
+          <span class="modal-kicker">PUBLIC TREASURY · FISCAL MANAGEMENT</span>
+          <h3 class="modal-title" id="budgetModalTitle">Add Budget Record</h3>
+          <span class="modal-sub">Barangay Annual Investment Plan (AIP) &amp; Sectoral Allocation</span>
+        </div>
+        <button type="button" class="modal-close-btn" id="btnCloseBudgetModal" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="adminBudgetForm" class="modal-form">
+          <input type="hidden" id="budgetRecordId" value="">
+          
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label" for="budgetInputYear">Fiscal Year <span class="text-danger">*</span></label>
+              <input type="number" id="budgetInputYear" class="form-input" value="2026" min="2020" max="2035" required>
+              <span class="field-error-text text-danger" id="budgetInputYearError"></span>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="budgetInputQuarter">Quarter <span class="text-danger">*</span></label>
+              <select id="budgetInputQuarter" class="form-select" required>
+                <option value="Q1">Q1 (1st Quarter: Jan - Mar)</option>
+                <option value="Q2">Q2 (2nd Quarter: Apr - Jun)</option>
+                <option value="Q3">Q3 (3rd Quarter: Jul - Sep)</option>
+                <option value="Q4">Q4 (4th Quarter: Oct - Dec)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label" for="budgetInputCategory">Budget Category <span class="text-danger">*</span></label>
+              <select id="budgetInputCategory" class="form-select" required>
+                <option value="Infrastructure">Infrastructure</option>
+                <option value="Health">Health</option>
+                <option value="Social Services">Social Services</option>
+                <option value="Administration">Administration</option>
+                <option value="Emergency Preparedness">Emergency Preparedness</option>
+                <option value="Education, Sports &amp; Recreation">Education, Sports &amp; Recreation</option>
+                <option value="Agriculture &amp; Livelihood">Agriculture &amp; Livelihood</option>
+                <option value="Environment &amp; Waste Management">Environment &amp; Waste Management</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="budgetInputStatus">Record Status</label>
+              <select id="budgetInputStatus" class="form-select">
+                <option value="Active">Active (Published)</option>
+                <option value="Ongoing">Ongoing</option>
+                <option value="Completed">Completed</option>
+                <option value="Planned">Planned</option>
+                <option value="Inactive">Inactive (Hidden from Public)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label" for="budgetInputAmount">Allocated Budget (₱) <span class="text-danger">*</span></label>
+              <input type="number" id="budgetInputAmount" class="form-input" placeholder="e.g. 250000" min="0" step="any" required>
+              <span class="field-error-text text-danger" id="budgetInputAmountError"></span>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="budgetInputActual">Actual Spending (₱)</label>
+              <input type="number" id="budgetInputActual" class="form-input" placeholder="0" min="0" step="any" value="0">
+              <span class="field-error-text text-danger" id="budgetInputActualError"></span>
+            </div>
+          </div>
+
+          <div class="record-calc-preview-strip" id="budgetRecordCalcPreview">
+            <div class="record-calc-item">
+              <span class="record-calc-label">Remaining Budget:</span>
+              <strong id="budgetModalCalcRemaining">₱0</strong>
+            </div>
+            <div class="record-calc-item">
+              <span class="record-calc-label">Utilization Rate:</span>
+              <strong id="budgetModalCalcUtil">0%</strong>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="budgetInputDesc">Budget Description / Line Item Purpose <span class="text-danger">*</span></label>
+            <textarea id="budgetInputDesc" class="form-textarea" rows="2" placeholder="e.g. Drainage Desiltation &amp; Street Repair Sitio Ibaba" required></textarea>
+            <span class="field-error-text text-danger" id="budgetInputDescError"></span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="budgetInputRemarks">Remarks / Audit Notes</label>
+            <input type="text" id="budgetInputRemarks" class="form-input" placeholder="Optional resolution reference, disbursement note, or remarks">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-modal-outline" id="btnCancelBudgetModal">Cancel</button>
+        <button type="button" class="btn-modal-primary btn-navy-solid" id="btnSaveBudgetRecord">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: COMPREHENSIVE BUDGET SUMMARY, CATEGORY & QUARTERLY GRAPH EDITOR -->
+  <div class="admin-modal-overlay" id="adminBudgetSummaryModal" role="dialog" aria-modal="true" aria-labelledby="budgetSummaryModalTitle">
+    <div class="admin-modal-box modal-box-budget-summary">
+      <div class="modal-header">
+        <div>
+          <span class="modal-kicker">PUBLIC TRANSPARENCY SOURCE OF TRUTH · TREASURY CONSOLE</span>
+          <h3 class="modal-title" id="budgetSummaryModalTitle">Edit Budget Summary &amp; Allocations</h3>
+          <span class="modal-sub" id="budgetSummaryModalSub">Updates automatically synchronize summary cards, utilization bar, bar graph, and pie chart on the Public Home Page.</span>
+        </div>
+        <button type="button" class="modal-close-btn" id="btnCloseBudgetSummaryModal" aria-label="Close modal">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Top Year Selector & Mode Tabs -->
+        <div class="budget-summary-top-controls">
+          <div class="budget-summary-year-group">
+            <label for="sumEditYear" class="form-label">Fiscal Year</label>
+            <select id="sumEditYear" class="form-select sum-year-select">
+              <option value="2026" selected>FY 2026</option>
+              <option value="2025">FY 2025</option>
+            </select>
+          </div>
+
+          <div class="budget-summary-modal-tabs" role="tablist" aria-label="Budget editor sections">
+            <button type="button" class="sum-tab-btn active" data-sum-tab="overview" role="tab" aria-selected="true">
+              Summary &amp; Utilization
+            </button>
+            <button type="button" class="sum-tab-btn" data-sum-tab="categories" role="tab" aria-selected="false">
+              Categories &amp; Pie Chart
+            </button>
+            <button type="button" class="sum-tab-btn" data-sum-tab="quarters" role="tab" aria-selected="false">
+              Quarters &amp; Bar Graph
+            </button>
+          </div>
+        </div>
+
+        <!-- TAB PANE 1: OVERALL SUMMARY CARDS & BUDGET UTILIZATION -->
+        <div class="sum-tab-pane active" id="sumTabPaneOverview" role="tabpanel">
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label" for="sumInputTotalBudget">Total Annual Budget (₱)</label>
+              <input type="number" id="sumInputTotalBudget" class="form-input" min="0" step="any" placeholder="0">
+              <span class="sum-field-hint">Sum of applicable fiscal year allocations</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="sumInputTotalSpending">Total Spending (₱)</label>
+              <input type="number" id="sumInputTotalSpending" class="form-input" min="0" step="any" placeholder="0">
+              <span class="sum-field-hint">Sum of actual disbursed expenditures</span>
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label" for="sumInputRemainingBudget">Remaining Budget (₱)</label>
+              <input type="number" id="sumInputRemainingBudget" class="form-input" step="any" placeholder="0">
+              <span class="sum-field-hint">Formula: Total Annual Budget − Total Spending</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="sumInputUtilRate">Utilization Rate (%)</label>
+              <input type="number" id="sumInputUtilRate" class="form-input" min="0" max="100" step="0.1" placeholder="0">
+              <span class="sum-field-hint">Formula: (Total Spending ÷ Total Annual Budget) × 100</span>
+            </div>
+          </div>
+
+          <!-- Live Budget Utilization Bar Preview -->
+          <div class="summary-calc-preview-card">
+            <div class="summary-calc-preview-top">
+              <span class="summary-calc-preview-title">Budget Utilization Preview (Public Home Page Sync)</span>
+              <span class="admin-util-badge" id="sumPreviewBadge">64.9% spent</span>
+            </div>
+            <div class="admin-util-track">
+              <div class="admin-util-spent" id="sumPreviewSpentBar" style="width: 64.9%;"></div>
+              <div class="admin-util-remaining" id="sumPreviewRemBar" style="width: 35.1%;"></div>
+            </div>
+            <div class="summary-calc-preview-foot" id="sumPreviewText">
+              <strong>₱1,418,000</strong> of <strong>₱2,185,000</strong> used · <strong>₱767,000</strong> remaining
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label" for="sumInputBatchStatus">Record Status (Optional Batch Update)</label>
+              <select id="sumInputBatchStatus" class="form-select">
+                <option value="">Keep Individual Record Statuses</option>
+                <option value="Active">Set All Year Records to Active</option>
+                <option value="Ongoing">Set All Year Records to Ongoing</option>
+                <option value="Completed">Set All Year Records to Completed</option>
+                <option value="Planned">Set All Year Records to Planned</option>
+                <option value="Inactive">Set All Year Records to Inactive (Hide from Public)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="sumInputRemarks">Budget Description / Adjustment Remarks</label>
+              <input type="text" id="sumInputRemarks" class="form-input" placeholder="e.g. Q3 supplemental AIP adjustment approved by Sanggunian">
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB PANE 2: INDIVIDUAL BUDGET ALLOCATIONS & SPENDING PER CATEGORY (PIE CHART DATA) -->
+        <div class="sum-tab-pane" id="sumTabPaneCategories" role="tabpanel">
+          <p class="sum-pane-intro">Update allocated budgets, actual spending, status, or remarks per category. Changes automatically recalculate summary totals and refresh the Public Category Pie Chart.</p>
+          <div class="table-responsive">
+            <table class="budget-bulk-edit-table">
+              <thead>
+                <tr>
+                  <th style="min-width: 220px;">Budget Category</th>
+                  <th style="width: 145px;">Allocated Budget (₱)</th>
+                  <th style="width: 145px;">Actual Spending (₱)</th>
+                  <th style="width: 115px; text-align: right;">Remaining</th>
+                  <th style="width: 85px; text-align: right;">Util. Rate</th>
+                  <th style="width: 150px;">Status</th>
+                  <th style="min-width: 180px;">Remarks</th>
+                </tr>
+              </thead>
+              <tbody id="sumCategoriesEditTbody">
+                <!-- Populated dynamically via JS -->
+              </tbody>
+              <tfoot id="sumCategoriesEditTfoot">
+                <!-- Totals populated dynamically via JS -->
+              </tfoot>
+            </table>
+          </div>
+        </div>
+
+        <!-- TAB PANE 3: QUARTERLY BUDGET RECORDS & EXPENDITURES (BAR GRAPH DATA) -->
+        <div class="sum-tab-pane" id="sumTabPaneQuarters" role="tabpanel">
+          <p class="sum-pane-intro">Update quarterly budget allocations and actual expenditures (Q1–Q4). Changes automatically recalculate annual totals and refresh the Public Quarterly Bar Graph.</p>
+          <div class="table-responsive">
+            <table class="budget-bulk-edit-table">
+              <thead>
+                <tr>
+                  <th style="min-width: 155px;">Fiscal Quarter</th>
+                  <th style="width: 150px;">Allocated Budget (₱)</th>
+                  <th style="width: 150px;">Actual Spending (₱)</th>
+                  <th style="width: 120px; text-align: right;">Remaining</th>
+                  <th style="width: 90px; text-align: right;">Util. Rate</th>
+                  <th style="width: 150px;">Status</th>
+                  <th style="min-width: 185px;">Remarks</th>
+                </tr>
+              </thead>
+              <tbody id="sumQuartersEditTbody">
+                <!-- Populated dynamically via JS -->
+              </tbody>
+              <tfoot id="sumQuartersEditTfoot">
+                <!-- Totals populated dynamically via JS -->
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-modal-outline" id="btnCancelBudgetSummaryModal">Cancel</button>
+        <button type="button" class="btn-modal-primary btn-navy-solid" id="btnSaveBudgetSummaryModal">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 8: OFFICIAL CERTIFICATE PRINT PREVIEW MODAL -->
+  <div class="print-modal-overlay" id="printModal" role="dialog" aria-modal="true" aria-labelledby="printModalTitle" hidden>
+    <div class="print-modal-container">
+      <div class="print-modal-header no-print">
+        <div class="print-modal-title-group">
+          <span class="print-modal-kicker">BARANGAY PALLOCAN KANLURAN · OFFICIAL ISSUANCE</span>
+          <h3 class="print-modal-title" id="printModalTitle">Certificate Print Preview</h3>
+        </div>
+        <div class="print-modal-actions">
+          <button type="button" class="btn-print-trigger" id="btnPrintDocument">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 6 2 18 2 18 9"></polyline>
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+              <rect x="6" y="14" width="12" height="8"></rect>
+            </svg>
+            <span>Print Document</span>
+          </button>
+          <button type="button" class="btn-modal-close" id="btnClosePrintModal" aria-label="Close modal">&times;</button>
+        </div>
+      </div>
+
+      <div class="print-modal-body">
+        <!-- Standard 8.5in x 11in Printable Document Layout -->
+        <div class="printable-document" id="printableArea" style="display: flex !important; flex-direction: column !important; justify-content: space-between !important; width: 8.5in !important; min-height: 11in !important; height: 11in !important; padding: 1in !important; background: #ffffff !important; box-sizing: border-box !important; margin: 0 auto !important; font-family: 'Times New Roman', Times, serif !important; color: #000000 !important; position: relative !important;">
+          <!-- Document Header -->
+          <header class="doc-header" style="display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; width: 100% !important; margin: 0 0 14px 0 !important; text-align: center !important;">
+            <div class="doc-header-seal-left" style="flex-shrink: 0; width: 80px; display: flex; justify-content: center;">
+              <svg viewBox="0 0 100 100" width="80" height="80">
+                <circle cx="50" cy="50" r="46" fill="#ffffff" stroke="#0a2540" stroke-width="3"/>
+                <circle cx="50" cy="50" r="40" fill="none" stroke="#0d47a1" stroke-width="1.2" stroke-dasharray="3,2"/>
+                <polygon points="50,15 54,28 67,28 57,36 61,48 50,40 39,48 43,36 33,28 46,28" fill="#FFD93D" stroke="#0a2540" stroke-width="0.8"/>
+                <path d="M22,68 Q50,56 78,68 Q50,82 22,68 Z" fill="#0d47a1"/>
+                <text x="50" y="88" font-size="7" font-weight="bold" text-anchor="middle" fill="#0a2540" font-family="'Times New Roman', serif">BATANGAS CITY</text>
+              </svg>
+            </div>
+
+            <div class="doc-header-text" style="flex: 1;">
+              <p class="header-line">REPUBLIC OF THE PHILIPPINES</p>
+              <p class="header-line">CITY OF BATANGAS</p>
+              <h1 class="header-barangay">BARANGAY PALLOCAN KANLURAN</h1>
+              <p class="header-office">OFFICE OF THE PUNONG BARANGAY</p>
+            </div>
+
+            <div class="doc-header-seal-right" style="flex-shrink: 0; width: 80px; display: flex; justify-content: center;">
+              <svg viewBox="0 0 100 100" width="80" height="80">
+                <circle cx="50" cy="50" r="46" fill="#ffffff" stroke="#0a2540" stroke-width="3"/>
+                <circle cx="50" cy="50" r="40" fill="none" stroke="#0a2540" stroke-width="1.2"/>
+                <path d="M30,35 L70,35 L62,75 L50,82 L38,75 Z" fill="#e8f0fe" stroke="#0a2540" stroke-width="1.5"/>
+                <path d="M50,22 L50,78 M32,50 L68,50" stroke="#FFD93D" stroke-width="2"/>
+                <text x="50" y="90" font-size="6.5" font-weight="bold" text-anchor="middle" fill="#0a2540" font-family="'Times New Roman', serif">PALLOCAN KANLURAN</text>
+              </svg>
+            </div>
+          </header>
+
+          <div class="doc-divider" style="display: block !important; width: 100% !important; height: 3px !important; background: #0a2540 !important; margin: 14px 0 22px 0 !important;"></div>
+
+          <!-- Document Title & Control Meta -->
+          <div class="doc-title-section" style="display: block !important; width: 100% !important; text-align: center !important; margin: 0 0 24px 0 !important;">
+            <h2 class="doc-title" id="certDocumentTitle">BARANGAY CLEARANCE</h2>
+            <div class="doc-meta-row" style="display: flex !important; justify-content: space-between !important; width: 100% !important; margin-top: 14px !important;">
+              <span>Control No.: <strong id="certControlNo">PK-2026-08492</strong></span>
+              <span>Date: <strong id="certDateFiled">October 14, 2026</strong></span>
+            </div>
+          </div>
+
+          <!-- Dynamic Template Content Container -->
+          <div class="doc-body-section" id="certBodyContainer" style="display: block !important; width: 100% !important; flex: 1 1 auto !important; font-family: 'Times New Roman', Times, serif !important; font-size: 12pt !important; line-height: 1.85 !important; color: #000000 !important; margin: 0 0 24px 0 !important;">
+            <!-- Dynamically populated depending on document type -->
+          </div>
+
+          <!-- Document Footer -->
+          <footer class="doc-footer" style="display: block !important; width: 100% !important; margin-top: auto !important; flex-shrink: 0 !important;">
+            <span id="certIssuedDate" style="display:none;"></span>
+
+            <div class="doc-signature-block" style="text-align: right !important; margin-right: 20px !important; margin-bottom: 28px !important;">
+              <div class="signature-line" style="font-weight: 600 !important; letter-spacing: -1px !important;">____________________________</div>
+              <div class="signatory-title" style="font-weight: 700 !important; font-size: 12pt !important; margin-top: 6px !important; margin-right: 24px !important;">Punong Barangay</div>
+            </div>
+
+            <div class="doc-security-note" style="border-top: 1px solid #94a3b8 !important; padding-top: 8px !important; font-size: 8.5pt !important; text-align: center !important; letter-spacing: 0.05em !important; text-transform: uppercase !important;">
+              <span>Official Barangay Seal Required &bull; Invalid Without Official Embossed Seal</span>
+            </div>
+          </footer>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==============================================================
+       MODALS: RESIDENT VERIFICATION & PRE-REGISTRATION WORKFLOW
+       ============================================================== -->
+
+  <!-- 1. DETAILED REVIEW MODAL (TRIGGERS ON "VIEW") -->
+  <div class="admin-modal-overlay" id="resReviewModal" role="dialog" aria-modal="true" aria-labelledby="resReviewModalTitle">
+    <div class="admin-modal-box res-modal-box-wide">
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <div>
+          <span class="modal-kicker">CITIZEN REGISTRY · PRE-REGISTRATION REVIEW</span>
+          <h3 class="modal-title" id="resReviewModalTitle">Resident Verification Review</h3>
+          <span class="modal-sub" id="resReviewModalSub">Application ID: <strong id="resReviewAppId">VER-2026-001</strong> · Submitted on <span id="resReviewAppDate">Oct 16, 2026</span></span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <span class="res-status-pill status-pending" id="resReviewStatusBadge">
+            <span class="status-pill-dot"></span> Pending Verification
+          </span>
+          <button type="button" class="modal-close-btn" id="btnCloseResReviewModal" aria-label="Close review modal">&times;</button>
+        </div>
+      </div>
+
+      <!-- Modal Body (2-Column Responsive Layout) -->
+      <div class="res-review-grid">
+        
+        <!-- Left Column: Applicant Demographic, Contact & Residency Details -->
+        <div class="res-applicant-col">
+          
+          <!-- Top Applicant Summary Card -->
+          <div class="res-applicant-summary-card">
+            <div class="res-applicant-avatar-lg" id="resReviewAvatar">CV</div>
+            <div class="res-applicant-summary-meta">
+              <h4 class="res-applicant-name-lg" id="resReviewFullName">Clarisse Anne Villanueva</h4>
+              <div class="res-applicant-subchannel-pill" id="resReviewSubchannel">Online Resident Portal · Self-Registration</div>
+            </div>
+          </div>
+
+          <!-- Section 1: Demographics & Civil Information -->
+          <div class="res-section-card">
+            <div class="res-section-card-title">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <span>Demographic &amp; Civil Record</span>
+            </div>
+            <div class="res-info-grid">
+              <div class="res-info-cell full-width">
+                <span class="res-info-lbl">Full Legal Name</span>
+                <span class="res-info-val" id="resReviewDetailName">Clarisse Anne Villanueva</span>
+              </div>
+              <div class="res-info-cell">
+                <span class="res-info-lbl">Date of Birth &amp; Age</span>
+                <span class="res-info-val" id="resReviewDetailDob">April 18, 1995 (31 yrs old)</span>
+              </div>
+              <div class="res-info-cell">
+                <span class="res-info-lbl">Gender</span>
+                <span class="res-info-val" id="resReviewDetailGender">Female</span>
+              </div>
+              <div class="res-info-cell">
+                <span class="res-info-lbl">Civil Status</span>
+                <span class="res-info-val" id="resReviewDetailCivil">Single</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 2: Contact Information -->
+          <div class="res-section-card">
+            <div class="res-section-card-title">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              <span>Contact Information</span>
+            </div>
+            <div class="res-info-grid">
+              <div class="res-info-cell">
+                <span class="res-info-lbl">Mobile Number</span>
+                <span class="res-info-val font-mono" id="resReviewDetailMobile">0917 554 8219</span>
+              </div>
+              <div class="res-info-cell">
+                <span class="res-info-lbl">Email Address</span>
+                <span class="res-info-val val-link" id="resReviewDetailEmail">clarisse.villanueva@gmail.com</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 3: Jurisdictional Residency Address -->
+          <div class="res-section-card">
+            <div class="res-section-card-title">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              <span>Jurisdictional Residency Address</span>
+            </div>
+            <div class="res-info-grid">
+              <div class="res-info-cell full-width">
+                <span class="res-info-lbl">Assigned Sitio / Purok</span>
+                <span class="res-info-val">
+                  <span class="res-sitio-tag" id="resReviewDetailSitio">Sitio Ibaba</span>
+                </span>
+              </div>
+              <div class="res-info-cell full-width">
+                <span class="res-info-lbl">Complete Street Address</span>
+                <span class="res-info-val" id="resReviewDetailAddress">082 Sitio Ibaba Road, Barangay Pallocan West, Batangas City</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Prior Rejection History Banner (Only if status is Rejected) -->
+          <div class="res-rejection-history-banner" id="resReviewRejectionBanner" style="display: none;">
+            <div class="res-rejection-history-title">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <span>Application Rejected: <strong id="resReviewRejectionReasonText">Invalid ID</strong></span>
+            </div>
+            <div class="res-rejection-history-desc" id="resReviewRejectionNotesText">Notes: ID photo was expired and blurry. Resident notified for resubmission.</div>
+          </div>
+        </div>
+
+        <!-- Right Column: Uploaded Documents Viewer -->
+        <div class="res-documents-panel">
+          
+          <!-- Document 1: Government Issued ID -->
+          <div class="res-doc-card-container">
+            <div class="res-doc-card-header">
+              <span class="res-doc-card-title">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><line x1="15" y1="8" x2="17" y2="8"/><line x1="15" y1="12" x2="17" y2="12"/><line x1="7" y1="16" x2="17" y2="16"/></svg>
+                1. Government Identification
+              </span>
+              <span class="res-doc-card-type-tag" id="resReviewIdTypeTag">Philippine National ID (PhilID)</span>
+            </div>
+
+            <div class="res-doc-card-preview" id="resReviewIdPreviewBox">
+              <!-- Rendered realistic ID card preview -->
+              <div class="res-id-graphic">
+                <div class="res-id-graphic-header">
+                  <div>
+                    <div class="res-id-rep-title">Republika ng Pilipinas</div>
+                    <div class="res-id-doc-title" id="resGraphicIdTitle">PAMBANSANG PAGKAKAKILANLAN</div>
+                  </div>
+                  <div class="res-id-flag">🇵🇭</div>
+                </div>
+                <div class="res-id-graphic-body">
+                  <div class="res-id-photo-box" id="resGraphicPhotoBox">
+                    <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <span>PHOTO ID</span>
+                  </div>
+                  <div class="res-id-fields-grid">
+                    <div class="res-id-field">
+                      <span class="res-id-lbl">Apelyido / Last Name</span>
+                      <strong class="res-id-val" id="resGraphicLastName">VILLANUEVA</strong>
+                    </div>
+                    <div class="res-id-field">
+                      <span class="res-id-lbl">Mga Pangalan / Given Names</span>
+                      <strong class="res-id-val" id="resGraphicGivenName">CLARISSE ANNE</strong>
+                    </div>
+                    <div class="res-id-field-inline">
+                      <div>
+                        <span class="res-id-lbl">Kapanganakan / DOB</span>
+                        <span class="res-id-val" id="resGraphicDob">1995/04/18</span>
+                      </div>
+                      <div>
+                        <span class="res-id-lbl">Kasarian / Sex</span>
+                        <span class="res-id-val" id="resGraphicSex">FEMALE</span>
+                      </div>
+                    </div>
+                    <div class="res-id-field">
+                      <span class="res-id-lbl">Tirahan / Address</span>
+                      <span class="res-id-val" id="resGraphicAddress">SITIO IBABA, PALLOCAN WEST, BATANGAS CITY</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="res-id-barcode-row">
+                  <span id="resGraphicCardNo">PhilSys Card No: 4829-9182-3918-0912</span>
+                  <span class="res-id-barcode-bars">||||||| | ||||| || |||| |||</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="res-doc-card-footer">
+              <button type="button" class="btn-doc-inspect" id="btnZoomInspectId">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+                <span>Zoom &amp; Inspect ID</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Document 2: Proof of Residency Document -->
+          <div class="res-doc-card-container">
+            <div class="res-doc-card-header">
+              <span class="res-doc-card-title">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                2. Proof of Residency
+              </span>
+              <span class="res-doc-card-type-tag" id="resReviewProofTypeTag">PrimeWater Utility Bill</span>
+            </div>
+
+            <div class="res-doc-card-preview" id="resReviewProofPreviewBox">
+              <div class="res-proof-graphic">
+                <div class="res-proof-header">
+                  <span class="res-proof-logo-text" id="resGraphicProofIssuer">PrimeWater Batangas City</span>
+                  <span class="res-proof-badge">Recent Billing (Oct 2026)</span>
+                </div>
+                <div class="res-proof-info-grid">
+                  <div class="res-proof-row">
+                    <span class="res-proof-lbl">Account Number</span>
+                    <strong class="res-proof-val font-mono" id="resGraphicProofAccount">PW-BAT-90281-26</strong>
+                  </div>
+                  <div class="res-proof-row">
+                    <span class="res-proof-lbl">Account Holder</span>
+                    <strong class="res-proof-val" id="resGraphicProofName">CLARISSE ANNE VILLANUEVA</strong>
+                  </div>
+                  <div class="res-proof-row">
+                    <span class="res-proof-lbl">Service Address</span>
+                    <span class="res-proof-val" id="resGraphicProofAddress">082 Sitio Ibaba, Brgy. Pallocan West, Batangas City</span>
+                  </div>
+                  <div class="res-proof-row">
+                    <span class="res-proof-lbl">Billing Period</span>
+                    <span class="res-proof-val" id="resGraphicProofPeriod">Sep 15, 2026 – Oct 14, 2026</span>
+                  </div>
+                </div>
+                <div class="res-proof-address-match">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  <span>Address &amp; Sitio match barangay demographic records</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="res-doc-card-footer">
+              <button type="button" class="btn-doc-inspect" id="btnZoomInspectProof">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+                <span>Zoom &amp; Inspect Proof</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Modal Footer: Approval Workflow Controls -->
+      <div class="res-modal-footer-controls">
+        <div class="res-modal-audit-note">
+          <span class="status-pill-dot" style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #d97706; margin-right: 6px;"></span>
+          <span>Application Status: <strong id="resReviewAuditStatus">Pending Review</strong></span>
+        </div>
+        <div class="res-modal-actions-right">
+          <button type="button" class="btn-res-close" id="btnFooterCloseReview">Close</button>
+          <button type="button" class="btn-res-reject" id="btnTriggerRejectModal">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            <span>Reject Application</span>
+          </button>
+          <button type="button" class="btn-res-approve" id="btnApproveResident">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            <span>Approve Account</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. REJECTION MODAL (REQUIRING REASON SELECTION) -->
+  <div class="admin-modal-overlay" id="resRejectModal" role="dialog" aria-modal="true" aria-labelledby="resRejectModalTitle">
+    <div class="admin-modal-box" style="max-width: 540px;">
+      <div class="modal-header">
+        <div>
+          <span class="modal-kicker" style="color: #dc2626;">ADMINISTRATIVE ACTION · VERIFICATION DECLINE</span>
+          <h3 class="modal-title" id="resRejectModalTitle">Reject Resident Application</h3>
+          <span class="modal-sub">Select verified cause for rejection. The applicant will be notified with instructions for resubmission.</span>
+        </div>
+        <button type="button" class="modal-close-btn" id="btnCloseResRejectModal" aria-label="Close rejection modal">&times;</button>
+      </div>
+
+      <div class="modal-body" style="padding: 18px 24px;">
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; margin-bottom: 14px;">
+          <div style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase;">Applicant</div>
+          <div style="font-size: 13.5px; font-weight: 700; color: #0f172a;" id="resRejectApplicantSummary">Clarisse Anne Villanueva (VER-2026-001)</div>
+        </div>
+
+        <!-- Required Reason Selection -->
+        <label style="font-size: 12px; font-weight: 700; color: #334155; text-transform: uppercase; letter-spacing: 0.04em;">
+          Select Rejection Reason <span style="color: #dc2626;">*</span>
+        </label>
+
+        <div class="res-reason-selector" id="resReasonSelector">
+          <!-- 1. Invalid ID -->
+          <label class="res-reason-card selected" for="reasonInvalidId">
+            <input type="radio" name="resRejectReason" id="reasonInvalidId" value="Invalid ID" checked>
+            <div class="res-reason-content">
+              <span class="res-reason-title">Invalid ID</span>
+              <span class="res-reason-desc">Expired, illegible, unrecognized document type, or altered government identification.</span>
+            </div>
+          </label>
+
+          <!-- 2. Address Mismatch -->
+          <label class="res-reason-card" for="reasonAddressMismatch">
+            <input type="radio" name="resRejectReason" id="reasonAddressMismatch" value="Address Mismatch">
+            <div class="res-reason-content">
+              <span class="res-reason-title">Address Mismatch</span>
+              <span class="res-reason-desc">Document address does not match stated residence in Barangay Pallocan West.</span>
+            </div>
+          </label>
+
+          <!-- 3. Duplicate Account -->
+          <label class="res-reason-card" for="reasonDuplicateAccount">
+            <input type="radio" name="resRejectReason" id="reasonDuplicateAccount" value="Duplicate Account">
+            <div class="res-reason-content">
+              <span class="res-reason-title">Duplicate Account</span>
+              <span class="res-reason-desc">An active verified citizen profile already exists with identical name or national ID.</span>
+            </div>
+          </label>
+
+          <!-- 4. Incomplete Documents -->
+          <label class="res-reason-card" for="reasonIncompleteDocs">
+            <input type="radio" name="resRejectReason" id="reasonIncompleteDocs" value="Incomplete Documents">
+            <div class="res-reason-content">
+              <span class="res-reason-title">Incomplete Documents</span>
+              <span class="res-reason-desc">Missing back side of identification or proof of residency is older than 3 months.</span>
+            </div>
+          </label>
+        </div>
+
+        <!-- Optional Administrative Remarks -->
+        <div class="res-reject-notes-box">
+          <label class="res-reject-notes-label" for="resRejectNotesInput">Administrative Remarks / Instructions for Resident (Optional)</label>
+          <textarea id="resRejectNotesInput" class="res-reject-notes-input" rows="3" placeholder="Provide specific guidance (e.g. Please upload a clear photo of your PhilID and electric bill dated within the last 3 months)..."></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="padding: 14px 24px; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 10px;">
+        <button type="button" class="btn-res-close" id="btnCancelResReject">Cancel</button>
+        <button type="button" class="btn-res-reject" id="btnConfirmResReject" style="background: #dc2626; color: #ffffff; border-color: #dc2626;">
+          Confirm Rejection &amp; Notify Resident
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. DOCUMENT FULLSCREEN LIGHTBOX MODAL -->
+  <div class="res-lightbox-overlay" id="resDocLightboxModal" role="dialog" aria-modal="true" aria-labelledby="resLightboxTitle">
+    <div class="res-lightbox-box">
+      <div class="res-lightbox-header">
+        <span class="res-lightbox-title" id="resLightboxTitle">Document Inspection Viewer</span>
+        <div class="res-lightbox-controls">
+          <button type="button" class="btn-lightbox-tool" id="btnLightboxZoomIn" title="Zoom In (+)">Zoom In +</button>
+          <button type="button" class="btn-lightbox-tool" id="btnLightboxZoomOut" title="Zoom Out (-)">Zoom Out -</button>
+          <button type="button" class="btn-lightbox-tool" id="btnLightboxReset" title="Reset Zoom">Reset 100%</button>
+          <button type="button" class="btn-lightbox-tool" id="btnLightboxRotate" title="Rotate 90deg">Rotate ↻</button>
+          <button type="button" class="btn-lightbox-tool" id="btnCloseLightbox" style="background: rgba(239, 68, 68, 0.4); border-color: rgba(239, 68, 68, 0.6);">✕ Close</button>
+        </div>
+      </div>
+      <div class="res-lightbox-body">
+        <div class="res-lightbox-viewport" id="resLightboxViewport">
+          <!-- Dynamically cloned document node -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. PRE-REGISTRATION INTAKE MODAL (WALK-IN / ADMINISTRATIVE PRE-REGISTRATION) -->
+  <div class="admin-modal-overlay" id="resPreRegisterModal" role="dialog" aria-modal="true" aria-labelledby="preRegisterModalTitle">
+    <div class="admin-modal-box" style="max-width: 640px;">
+      <div class="modal-header">
+        <div>
+          <span class="modal-kicker">CITIZEN ONBOARDING · PRE-REGISTRATION WORKFLOW</span>
+          <h3 class="modal-title" id="preRegisterModalTitle">New Resident Pre-Registration Application</h3>
+          <span class="modal-sub">Enroll resident profile and upload proof of residency for administrative verification.</span>
+        </div>
+        <button type="button" class="modal-close-btn" id="btnClosePreRegisterModal" aria-label="Close modal">&times;</button>
+      </div>
+
+      <div class="modal-body" style="padding: 18px 24px; max-height: 75vh; overflow-y: auto;">
+        <form id="preRegisterForm" novalidate>
+          <div class="form-group" style="margin-bottom: 12px;">
+            <label class="form-label" for="preRegFullName">Full Legal Name <span class="text-danger">*</span></label>
+            <input type="text" id="preRegFullName" class="form-input" placeholder="e.g. Maria Teresa Santos Ramos" pattern="[a-zA-Z\s]+" required>
+            <span class="field-error-text text-danger" id="preRegFullNameError"></span>
+          </div>
+
+          <div class="form-grid-4" style="margin-bottom: 12px; display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label" for="preRegDob">Date of Birth <span class="text-danger">*</span></label>
+              <input type="date" id="preRegDob" class="form-input" value="1998-07-22" required>
+              <span class="field-error-text text-danger" id="preRegDobError"></span>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="preRegAge">Age <span class="text-danger">*</span></label>
+              <input type="text" id="preRegAge" class="form-input" value="28" placeholder="e.g. 28" inputmode="numeric" pattern="[0-9]*" maxlength="3" required>
+              <span class="field-error-text text-danger" id="preRegAgeError"></span>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="preRegGender">Gender <span class="text-danger">*</span></label>
+              <select id="preRegGender" class="form-select" required>
+                <option value="Male">Male</option>
+                <option value="Female" selected>Female</option>
+                <option value="Other / Non-Binary">Other / Non-Binary</option>
+              </select>
+              <span class="field-error-text text-danger" id="preRegGenderError"></span>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="preRegCivilStatus">Civil Status <span class="text-danger">*</span></label>
+              <select id="preRegCivilStatus" class="form-select" required>
+                <option value="Single" selected>Single</option>
+                <option value="Married">Married</option>
+                <option value="Widowed">Widowed</option>
+                <option value="Separated">Separated</option>
+              </select>
+              <span class="field-error-text text-danger" id="preRegCivilStatusError"></span>
+            </div>
+          </div>
+
+          <div class="form-grid-2" style="margin-bottom: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label" for="preRegMobile">Mobile Number <span class="text-danger">*</span></label>
+              <input type="tel" id="preRegMobile" class="form-input" placeholder="09171234567" inputmode="numeric" pattern="[0-9]*" maxlength="11" required>
+              <span class="field-error-text text-danger" id="preRegMobileError"></span>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="preRegEmail">Email Address <span class="text-danger">*</span></label>
+              <input type="email" id="preRegEmail" class="form-input" placeholder="resident@example.com" required>
+              <span class="field-error-text text-danger" id="preRegEmailError"></span>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 12px;">
+            <label class="form-label" for="preRegAddress">Street Address / House No. <span class="text-danger">*</span></label>
+            <input type="text" id="preRegAddress" class="form-input" placeholder="e.g. 054 Sampaguita St., Barangay Pallocan West" required>
+            <span class="field-error-text text-danger" id="preRegAddressError"></span>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 14px;">
+            <label class="form-label" for="preRegSitio">Sitio / Purok Zone <span class="text-danger">*</span></label>
+            <select id="preRegSitio" class="form-select" required>
+              <option value="Sitio Ibaba">Sitio Ibaba</option>
+              <option value="Sitio Santolan">Sitio Santolan</option>
+              <option value="Sitio Ilaya">Sitio Ilaya</option>
+              <option value="Sitio Gitna">Sitio Gitna</option>
+              <option value="Tierra Verde">Tierra Verde</option>
+              <option value="Potenciana Village">Potenciana Village</option>
+              <option value="G.C Berberabe">G.C Berberabe</option>
+            </select>
+            <span class="field-error-text text-danger" id="preRegSitioError"></span>
+          </div>
+
+          <!-- Document Upload Inputs Simulation -->
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; margin-bottom: 14px;">
+            <div style="font-size: 11.5px; font-weight: 700; color: #0f172a; text-transform: uppercase; margin-bottom: 10px;">Verification Documents</div>
+            
+            <div class="form-grid-2" style="margin-bottom: 10px;">
+              <div class="form-group">
+                <label class="form-label" for="preRegIdType">Primary ID Type <span class="text-danger">*</span></label>
+                <select id="preRegIdType" class="form-select" required>
+                  <option value="Philippine National ID (PhilID)">Philippine National ID (PhilID)</option>
+                  <option value="Driver's License">Driver's License (LTO)</option>
+                  <option value="COMELEC Voter's ID">COMELEC Voter's ID / Cert</option>
+                  <option value="UMID / SSS ID">UMID / SSS ID</option>
+                  <option value="Postal ID">Postal ID</option>
+                  <option value="Senior Citizen ID">Senior Citizen ID</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="preRegIdNumber">ID Card Number <span class="text-danger">*</span></label>
+                <input type="text" id="preRegIdNumber" class="form-input" placeholder="e.g. 4829-9182-3918-0912" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="preRegProofType">Proof of Residency Document <span class="text-danger">*</span></label>
+              <select id="preRegProofType" class="form-select" required>
+                <option value="PrimeWater Utility Bill">PrimeWater Utility Bill (Last 3 mos)</option>
+                <option value="Meralco Electric Bill">Meralco Electric Bill</option>
+                <option value="Barangay Certification of Residence">Barangay Certification of Residence</option>
+                <option value="Lease Agreement Contract">Notarized Lease Agreement</option>
+                <option value="PLDT / Telecom Billing Statement">PLDT / Telecom Billing Statement</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="font-size: 11.5px; color: #64748b; line-height: 1.4;">
+            ℹ️ Submitting will record this applicant in the <strong>Pending Verification</strong> queue. The admin team can review uploaded identification and trigger approval.
+          </div>
+        </form>
+      </div>
+
+      <div class="modal-footer" style="padding: 14px 24px; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 10px;">
+        <button type="button" class="btn-res-close" id="btnCancelPreRegister">Cancel</button>
+        <button type="submit" class="btn-res-approve" id="btnSubmitPreRegister">
+          <span>Enroll Pre-Registration</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. AUTOMATED CREDENTIALS & ACTIVATION NOTICE MODAL -->
+  <div class="admin-modal-overlay" id="resActivationNoticeModal" role="dialog" aria-modal="true" aria-labelledby="resActivationTitle">
+    <div class="res-activation-notice-box">
+      <div class="res-activation-icon">✓</div>
+      <h3 class="res-activation-title" id="resActivationTitle">Account Verified &amp; Activated!</h3>
+      <p class="res-activation-sub" id="resActivationSub">
+        Resident account has been approved. Automated access credentials and platform activation instructions have been dispatched.
+      </p>
+
+      <div class="res-activation-link-card">
+        <div class="res-activation-link-title">Automated Activation URL Dispatched</div>
+        <div class="res-activation-link-val">
+          <span id="resActivationUrlText">https://pallocanwest.brgy360.gov.ph/activate?token=ACT-84920</span>
+          <button type="button" class="btn-copy-link" id="btnCopyActivationLink">Copy</button>
+        </div>
+      </div>
+
+      <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 10px 14px; text-align: left; margin-bottom: 20px; font-size: 12px; color: #166534;">
+        ✓ Notification sent to <strong id="resActivationNoticeEmail">applicant@example.com</strong><br>
+        ✓ Access tier upgraded to: <strong>Level 2 - Fully Verified Resident</strong><br>
+        ✓ Resident may now file online clearance requests and blotter inquiries.
+      </div>
+
+      <button type="button" class="btn-res-action primary" id="btnCloseActivationNotice" style="width: 100%; justify-content: center; padding: 10px 16px;">
+        Done &amp; Return to Verification Queue
+      </button>
+    </div>
+  </div>
+
+  <!-- 4. TOAST NOTIFICATION CONTAINER -->
+  <div class="admin-toast-container" id="adminToastContainer"></div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script type="module" src="./admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Set Up Your Brgy360 Account</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #f1f5f9;
+            padding: 20px;
+        }
+
+        .setup-container {
+            width: 100%;
+            max-width: 430px;
+            background: white;
+            padding: 35px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        h2 {
+            color: #1e293b;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .description {
+            color: #64748b;
+            text-align: center;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: bold;
+            color: #334155;
+            margin-bottom: 8px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: 100%;
+            padding: 13px;
+            border: 1px solid #cbd5e1;
+            border-radius: 7px;
+            font-size: 15px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+
+        .password-wrapper {
+            position: relative;
+        }
+
+        .password-wrapper input {
+            padding-right: 65px;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: none;
+            background: none;
+            color: #2563eb;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .requirements {
+            color: #64748b;
+            font-size: 12px;
+            margin-top: 7px;
+        }
+
+        button.submit-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 7px;
+            background: #2563eb;
+            color: white;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button.submit-btn:hover {
+            background: #1d4ed8;
+        }
+
+        button.submit-btn:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        .message {
+            display: none;
+            padding: 12px;
+            border-radius: 7px;
+            font-size: 13px;
+            line-height: 1.5;
+            margin-bottom: 18px;
+        }
+
+        .error {
+            display: block;
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .success {
+            display: block;
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .footer {
+            margin-top: 22px;
+            text-align: center;
+            font-size: 12px;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="setup-container">
+        <h2>Set Up Your Account</h2>
+
+        <p class="description">
+            Welcome to Brgy360! Create your password to complete
+            your resident account setup.
+        </p>
+
+        <div id="message" class="message"></div>
+
+        <form id="setupForm">
+
+            <div class="input-group">
+                <label for="password">New Password</label>
+
+                <div class="password-wrapper">
+                    <input
+                        type="password"
+                        id="password"
+                        placeholder="Enter your password"
+                        minlength="8"
+                        required
+                    >
+
+                    <button
+                        type="button"
+                        class="toggle-password"
+                        onclick="togglePassword('password', this)"
+                    >
+                        Show
+                    </button>
+                </div>
+
+                <p class="requirements">
+                    Minimum of 8 characters.
+                </p>
+            </div>
+
+            <div class="input-group">
+                <label for="confirmPassword">Confirm Password</label>
+
+                <div class="password-wrapper">
+                    <input
+                        type="password"
+                        id="confirmPassword"
+                        placeholder="Confirm your password"
+                        minlength="8"
+                        required
+                    >
+
+                    <button
+                        type="button"
+                        class="toggle-password"
+                        onclick="togglePassword('confirmPassword', this)"
+                    >
+                        Show
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">
+                Create My Account
+            </button>
+
+        </form>
+
+        <div class="footer">
+            Brgy360 Resident Portal
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = "http://localhost:5000/api";
+
+        const setupForm = document.getElementById("setupForm");
+        const messageBox = document.getElementById("message");
+        const submitBtn = document.getElementById("submitBtn");
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const setupToken = urlParams.get("token");
+
+        function showMessage(message, type) {
+            messageBox.textContent = message;
+            messageBox.className = "message " + type;
+        }
+
+        function togglePassword(inputId, button) {
+            const input = document.getElementById(inputId);
+
+            if (input.type === "password") {
+                input.type = "text";
+                button.textContent = "Hide";
+            } else {
+                input.type = "password";
+                button.textContent = "Show";
+            }
+        }
+
+        if (!setupToken) {
+            setupForm.style.display = "none";
+
+            showMessage(
+                "Invalid account setup link. Please contact your barangay administrator.",
+                "error"
+            );
+        }
+
+        setupForm.addEventListener("submit", async function(event) {
+            event.preventDefault();
+
+            if (!setupToken) {
+                return;
+            }
+
+            const password = document.getElementById("password").value;
+            const confirmPassword = document.getElementById("confirmPassword").value;
+
+            if (password.length < 8) {
+                showMessage(
+                    "Your password must contain at least 8 characters.",
+                    "error"
+                );
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showMessage(
+                    "Your passwords do not match.",
+                    "error"
+                );
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Creating Account...";
+
+            try {
+                const response = await fetch(
+                    `${API_BASE}/auth/setup-password`,
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            token: setupToken,
+                            password: password,
+                            confirmPassword: confirmPassword
+                        })
+                    }
+                );
+
+                const data = await response.json();
+
+                if (!response.ok || !data.success) {
+                    throw new Error(
+                        data.message || "Unable to set up your account."
+                    );
+                }
+
+                setupForm.style.display = "none";
+
+                showMessage(
+                    "Your password has been created successfully! You can now log in to Brgy360.",
+                    "success"
+                );
+
+            } catch (error) {
+                showMessage(error.message, "error");
+
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Create My Account";
+            }
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Service Request Management · Barangay Pallocan Kanluran</title>
+  <style>
+    /* ==============================================================
+       1. GLOBAL RESET & DESIGN TOKENS
+       Palettes: Navy Blue (#0f172a / #0a2540), Charcoal (#334155),
+       White (#ffffff), Neutral Borders (#e2e8f0)
+       ============================================================== */
+    :root {
+      --primary-navy: #0f172a;
+      --brand-navy: #0a2540;
+      --accent-blue: #0d47a1;
+      --accent-hover: #1565c0;
+      --text-charcoal: #334155;
+      --text-muted: #64748b;
+      --bg-canvas: #f8fafc;
+      --surface-white: #ffffff;
+      --border-color: #e2e8f0;
+      --border-darker: #cbd5e1;
+      --status-green-bg: #dcfce7;
+      --status-green-txt: #15803d;
+      --status-amber-bg: #fef3c7;
+      --status-amber-txt: #b45309;
+      --status-blue-bg: #e0f2fe;
+      --status-blue-txt: #0369a1;
+      --status-red-bg: #fee2e2;
+      --status-red-txt: #dc2626;
+      --font-sans: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-serif: 'Times New Roman', Times, 'Georgia', serif;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg-canvas);
+      color: var(--text-charcoal);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      padding: 32px 24px;
+    }
+
+    .module-container {
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+
+    /* ==============================================================
+       2. MODULE HEADER & NAV
+       ============================================================== */
+    .module-header {
+      background: var(--surface-white);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 24px 30px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .kicker-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent-blue);
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .module-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--primary-navy);
+      letter-spacing: -0.02em;
+    }
+
+    .module-subtitle {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .header-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #f1f5f9;
+      border: 1px solid var(--border-color);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--primary-navy);
+    }
+
+    /* ==============================================================
+       3. DATA TABLE CARD & CONTROLS
+       ============================================================== */
+    .table-card {
+      background: var(--surface-white);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+    }
+
+    .table-toolbar {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      background: #fafbfd;
+    }
+
+    .filter-pills {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .filter-pill {
+      border: 1px solid var(--border-color);
+      background: var(--surface-white);
+      color: var(--text-charcoal);
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 6px 14px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .filter-pill:hover {
+      border-color: var(--accent-blue);
+      color: var(--accent-blue);
+    }
+
+    .filter-pill.active {
+      background: var(--brand-navy);
+      border-color: var(--brand-navy);
+      color: #ffffff;
+      font-weight: 600;
+    }
+
+    .search-box {
+      position: relative;
+      min-width: 280px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 8px 14px 8px 36px;
+      font-family: inherit;
+      font-size: 13px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background: var(--surface-white);
+      color: var(--text-charcoal);
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+
+    .search-input:focus {
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 0 3px rgba(13, 71, 161, 0.1);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    /* Table Styles */
+    .table-responsive {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    .admin-data-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13px;
+    }
+
+    .admin-data-table th {
+      background: #f8fafc;
+      color: var(--primary-navy);
+      font-weight: 600;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border-color);
+      white-space: nowrap;
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.05em;
+    }
+
+    .admin-data-table th.text-right,
+    .admin-data-table td.text-right {
+      text-align: right;
+    }
+
+    .admin-data-table td {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-charcoal);
+      vertical-align: middle;
+    }
+
+    .admin-data-table tbody tr:hover {
+      background-color: #f8fafc;
+    }
+
+    .applicant-name {
+      font-weight: 600;
+      color: var(--primary-navy);
+      display: block;
+    }
+
+    .applicant-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 1px;
+    }
+
+    /* Status Badges */
+    .status-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 14px;
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .status-badge.green {
+      background-color: var(--status-green-bg);
+      color: var(--status-green-txt);
+    }
+
+    .status-badge.amber {
+      background-color: var(--status-amber-bg);
+      color: var(--status-amber-txt);
+    }
+
+    .status-badge.blue {
+      background-color: var(--status-blue-bg);
+      color: var(--status-blue-txt);
+    }
+
+    .status-badge.red {
+      background-color: var(--status-red-bg);
+      color: var(--status-red-txt);
+    }
+
+    /* Action Buttons (Icon-Only, No Text) */
+    .btn-action-print {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      background-color: var(--primary-navy);
+      color: #ffffff;
+      border: 1px solid var(--primary-navy);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .btn-action-print:hover {
+      background-color: var(--accent-blue);
+      border-color: var(--accent-blue);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(13, 71, 161, 0.25);
+    }
+
+    .btn-action-print svg {
+      width: 15px;
+      height: 15px;
+    }
+
+    .table-footer {
+      padding: 14px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      background: #fafbfd;
+      border-top: 1px solid var(--border-color);
+    }
+
+    /* ==============================================================
+       4. MODAL OVERLAY & PRINT PREVIEW CONTAINER
+       ============================================================== */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(4px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      padding: 24px;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.25s ease, visibility 0.25s ease;
+    }
+
+    .modal-overlay.active,
+    .modal-overlay:not([hidden]) {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    body.modal-open {
+      overflow: hidden;
+    }
+
+    .modal-dialog {
+      background: #f1f5f9;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 960px;
+      max-height: 94vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+      overflow: hidden;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 24px;
+      background: var(--primary-navy);
+      color: #ffffff;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .modal-kicker {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #94a3b8;
+      display: block;
+    }
+
+    .modal-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-top: 2px;
+      color: #ffffff;
+    }
+
+    .modal-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-modal-print {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--accent-blue);
+      color: #ffffff;
+      border: 1px solid #1565c0;
+      padding: 8px 18px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-modal-print:hover {
+      background: #1565c0;
+      box-shadow: 0 4px 12px rgba(13, 71, 161, 0.35);
+    }
+
+    .btn-modal-close {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-size: 24px;
+      line-height: 1;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 4px;
+      transition: color 0.15s ease;
+    }
+
+    .btn-modal-close:hover {
+      color: #ffffff;
+    }
+
+    .modal-body {
+      padding: 30px 20px;
+      overflow-y: auto;
+      display: flex;
+      justify-content: center;
+      background: #cbd5e1;
+    }
+
+    /* ==============================================================
+       5. PRINTABLE DOCUMENT STYLING (8.5in x 11in LETTER)
+       Formal Serif / Times New Roman Typography & 1in Margins
+       ============================================================== */
+    #printableArea {
+      width: 8.5in;
+      min-height: 11in;
+      padding: 1in;
+      background: #ffffff;
+      box-sizing: border-box;
+      font-family: var(--font-serif);
+      color: #000000;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    .doc-header-block {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .doc-header-line {
+      font-size: 11pt;
+      margin: 0;
+      letter-spacing: 0.05em;
+      font-weight: 500;
+      color: #000000;
+    }
+
+    .doc-header-barangay {
+      font-size: 15pt;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      margin: 4px 0 2px 0;
+      color: #000000;
+    }
+
+    .doc-header-office {
+      font-size: 11pt;
+      font-weight: 600;
+      margin-top: 2px;
+      color: #000000;
+    }
+
+    .doc-header-line-rule {
+      height: 2px;
+      background: #000000;
+      border-bottom: 1px solid #000000;
+      margin: 16px 0 28px 0;
+    }
+
+    .doc-title-block {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .doc-main-title {
+      font-size: 18pt;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-decoration: underline;
+      text-underline-offset: 4px;
+      margin: 0;
+    }
+
+    .doc-content-area {
+      flex: 1;
+      font-size: 12pt;
+      line-height: 1.85;
+      color: #000000;
+    }
+
+    .salutation {
+      font-weight: 700;
+      margin-bottom: 20px;
+      letter-spacing: 0.05em;
+    }
+
+    .cert-body-p {
+      text-indent: 0.5in;
+      text-align: justify;
+      text-justify: inter-word;
+      margin-bottom: 20px;
+    }
+
+    .doc-field-text {
+      color: #000000;
+    }
+
+    .doc-field-text.font-bold {
+      font-weight: 700;
+    }
+
+    .business-specs-box {
+      margin: 16px 0 20px 0.5in;
+      font-size: 12pt;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .business-spec-item {
+      display: flex;
+      gap: 12px;
+    }
+
+    .spec-name {
+      width: 180px;
+      font-weight: 600;
+    }
+
+    /* Document Footer (Strictly one line gap above issued) */
+    .doc-footer-block {
+      margin-top: 1.2em; /* strictly one line gap */
+    }
+
+    .doc-issued-text {
+      text-indent: 0.5in;
+      text-align: justify;
+      font-size: 12pt;
+      line-height: 1.6;
+      margin-top: 1em; /* strictly one line gap */
+      margin-bottom: 2em;
+    }
+
+    .doc-signature-area {
+      text-align: right;
+      margin-right: 20px;
+    }
+
+    .doc-signature-line {
+      font-weight: 600;
+      letter-spacing: -1px;
+    }
+
+    .doc-signatory-title {
+      font-weight: 700;
+      font-size: 12pt;
+      margin-top: 6px;
+      margin-right: 24px;
+    }
+
+    /* ==============================================================
+       6. PRINT STYLESHEET (@media print)
+       Hides all admin UI, navigation, buttons, and tables.
+       Shows ONLY #printableArea formatted to letter size.
+       ============================================================== */
+    @media print {
+      @page {
+        size: 8.5in 11in;
+        margin: 0;
+      }
+
+      html, body {
+        width: 8.5in !important;
+        height: 11in !important;
+        max-height: 11in !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #ffffff !important;
+        overflow: hidden !important;
+      }
+
+      body > *:not(#printModal) {
+        display: none !important;
+      }
+
+      .app-shell,
+      .top-navbar,
+      .main-content,
+      .modal-header,
+      .btn-modal-print,
+      .btn-modal-close,
+      .no-print {
+        display: none !important;
+        visibility: hidden !important;
+      }
+
+      #printModal {
+        position: static !important;
+        display: block !important;
+        width: 8.5in !important;
+        height: 11in !important;
+        max-height: 11in !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #ffffff !important;
+        box-shadow: none !important;
+        overflow: hidden !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        page-break-after: avoid !important;
+        break-after: avoid !important;
+      }
+
+      .modal-dialog {
+        position: static !important;
+        display: block !important;
+        width: 8.5in !important;
+        height: 11in !important;
+        max-height: 11in !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        border: none !important;
+        overflow: hidden !important;
+      }
+
+      .modal-body {
+        position: static !important;
+        display: block !important;
+        width: 8.5in !important;
+        height: 11in !important;
+        max-height: 11in !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        background: #ffffff !important;
+        overflow: hidden !important;
+      }
+
+      #printableArea {
+        position: static !important;
+        width: 8.5in !important;
+        height: 11in !important;
+        max-height: 11in !important;
+        padding: 0.85in 1in 0.75in 1in !important;
+        margin: 0 !important;
+        background: #ffffff !important;
+        box-shadow: none !important;
+        border: none !important;
+        box-sizing: border-box !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+        overflow: hidden !important;
+        page-break-inside: avoid !important;
+        page-break-after: avoid !important;
+        break-inside: avoid !important;
+        break-after: avoid !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="module-container">
+
+    <!-- Module Header -->
+    <header class="module-header no-print">
+      <div>
+        <span class="kicker-label">ADMINISTRATION DESK · DOCUMENT ISSUANCE</span>
+        <h1 class="module-title">Service Request Management</h1>
+        <p class="module-subtitle">Barangay Pallocan Kanluran, Batangas City, Batangas Province</p>
+      </div>
+      <div class="header-badge">
+        <span>🏛️ Official Seal &amp; Registry</span>
+      </div>
+    </header>
+
+    <!-- Admin Data Table Container -->
+    <main class="table-card no-print">
+      <div class="table-toolbar">
+        <!-- Filter Status Pills -->
+        <div class="filter-pills" id="statusFilterGroup">
+          <button type="button" class="filter-pill active" data-filter="all">All (<span id="countAll">5</span>)</button>
+          <button type="button" class="filter-pill" data-filter="Ready for Pickup">Ready for Pickup (<span id="countReady">2</span>)</button>
+          <button type="button" class="filter-pill" data-filter="In Review">In Review (<span id="countReview">3</span>)</button>
+        </div>
+
+        <!-- Search Input -->
+        <div class="search-box">
+          <svg class="search-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" id="searchInput" class="search-input" placeholder="Search by name, ID, or certificate...">
+        </div>
+      </div>
+
+      <!-- Responsive Data Table -->
+      <div class="table-responsive">
+        <table class="admin-data-table" id="serviceRequestsTable">
+          <thead>
+            <tr>
+              <th>Request ID</th>
+              <th>Resident Name</th>
+              <th>Certificate Type</th>
+              <th>Status</th>
+              <th>Date Requested</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <!-- Dynamically Rendered by JavaScript -->
+          </tbody>
+        </table>
+      </div>
+
+      <div class="table-footer">
+        <span id="paginationLabel">Showing 5 active requests</span>
+        <a href="admin.html" style="color: var(--accent-blue); text-decoration: none; font-weight: 600;">&larr; Return to Admin Executive Dashboard</a>
+      </div>
+    </main>
+
+  </div>
+
+
+  <!-- ==============================================================
+       HIDDEN MODAL OVERLAY & PRINTABLE CERTIFICATE AREA
+       ============================================================== -->
+  <div class="modal-overlay" id="printModal" role="dialog" aria-modal="true" aria-labelledby="printModalTitle" hidden>
+    <div class="modal-dialog">
+      <!-- Modal Navigation Toolbar -->
+      <div class="modal-header no-print">
+        <div>
+          <span class="modal-kicker">BARANGAY PALLOCAN KANLURAN</span>
+          <h2 class="modal-title" id="printModalTitle">Certificate Print Preview</h2>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-modal-print" id="btnPrintModalAction">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 6 2 18 2 18 9"></polyline>
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+              <rect x="6" y="14" width="12" height="8"></rect>
+            </svg>
+            <span>Print Document</span>
+          </button>
+          <button type="button" class="btn-modal-close" id="btnCloseModalBtn" aria-label="Close Preview">&times;</button>
+        </div>
+      </div>
+
+      <!-- Modal Body Containing 8.5in x 11in Printable Area -->
+      <div class="modal-body">
+        <div id="printableArea">
+
+          <!-- Dynamic Header for all documents -->
+          <div class="doc-header-block">
+            <p class="doc-header-line">REPUBLIC OF THE PHILIPPINES</p>
+            <p class="doc-header-line">CITY OF BATANGAS</p>
+            <h1 class="doc-header-barangay">BARANGAY PALLOCAN KANLURAN</h1>
+            <p class="doc-header-office">OFFICE OF THE PUNONG BARANGAY</p>
+          </div>
+
+          <div class="doc-header-line-rule"></div>
+
+          <!-- Document Title -->
+          <div class="doc-title-block">
+            <h2 class="doc-main-title" id="certTitle">BARANGAY CLEARANCE</h2>
+          </div>
+
+          <!-- Dynamic Body Content -->
+          <div class="doc-content-area" id="certBody">
+            <!-- Dynamically injected template -->
+          </div>
+
+          <!-- Footer for all documents -->
+          <div class="doc-footer-block">
+          
+
+            <div class="doc-signature-area">
+              <div class="doc-signature-line">____________________________</div>
+              <div class="doc-signatory-title">Punong Barangay</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ==============================================================
+       ES6+ VANILLA JAVASCRIPT LOGIC
+       ============================================================== -->
+  <script>
+    (function () {
+      'use strict';
+
+      // 1. Initial Service Requests Dataset (Representative of all 5 document types)
+      const serviceRequestsData = [
+        {
+          id: 'REQ-2026-08492',
+          fullName: 'Juan M. Dela Cruz',
+          age: '34',
+          address: '042 Sitio Ibaba Main Road',
+          purokSitio: 'Sitio Ibaba',
+          documentType: 'Barangay Clearance',
+          purpose: 'Local Employment Application with Pilipinas Shell Batangas',
+          date: 'October 11, 2026',
+          status: 'Ready for Pickup',
+          residencySince: 'March 2012',
+          businessName: 'Dela Cruz Enterprises',
+          businessAddress: '042 Sitio Ibaba Main Road, Barangay Pallocan Kanluran',
+          natureOfBusiness: 'Retail of Consumer Goods',
+          businessType: 'Sole Proprietorship',
+          numberOfEmployees: '2'
+        },
+        {
+          id: 'REQ-2026-08490',
+          fullName: 'Rogelio B. Mendoza',
+          age: '45',
+          address: '088 Crossing Ilaya',
+          purokSitio: 'Sitio Ilaya',
+          documentType: 'Certificate of Residency',
+          purpose: 'Pag-IBIG Housing Loan Prerequisite & Title Verification',
+          date: 'October 11, 2026',
+          status: 'In Review',
+          residencySince: 'June 2008',
+          businessName: 'Mendoza Vulcanizing Services',
+          businessAddress: '088 Crossing Ilaya, Barangay Pallocan Kanluran',
+          natureOfBusiness: 'Automotive Tire Care',
+          businessType: 'Sole Proprietorship',
+          numberOfEmployees: '3'
+        },
+        {
+          id: 'REQ-2026-08491',
+          fullName: 'Maria Santos Alcantara',
+          age: '28',
+          address: 'Block 3 Lot 8, Villa Celina',
+          purokSitio: 'Sitio Santolan',
+          documentType: 'Certificate of Indigency',
+          purpose: 'CHED Tertiary Education Subsidy & Tuition Waiver',
+          date: 'October 11, 2026',
+          status: 'In Review',
+          residencySince: 'August 2015',
+          businessName: 'Alcantara Handicrafts',
+          businessAddress: 'Block 3 Lot 8, Sitio Santolan, Barangay Pallocan Kanluran',
+          natureOfBusiness: 'Home Crafts & Sewing',
+          businessType: 'Sole Proprietorship',
+          numberOfEmployees: '1'
+        },
+        {
+          id: 'REQ-2026-08488',
+          fullName: 'Jayson Mark Reyes',
+          age: '21',
+          address: '023 Alley 4, Sitio Gitna',
+          purokSitio: 'Sitio Gitna',
+          documentType: 'Certification for First-Time Job Seeker',
+          purpose: 'BPO Customer Support Trainee (RA 11261 Assistance Act)',
+          date: 'October 10, 2026',
+          status: 'In Review',
+          residencySince: 'May 2005',
+          businessName: 'N/A',
+          businessAddress: '023 Alley 4, Sitio Gitna, Barangay Pallocan Kanluran',
+          natureOfBusiness: 'N/A',
+          businessType: 'N/A',
+          numberOfEmployees: '0'
+        },
+        {
+          id: 'REQ-2026-08489',
+          fullName: 'Carmela D. Hernandez',
+          age: '41',
+          address: '15 Riverside Drive',
+          purokSitio: 'Tierra Verde',
+          documentType: 'Barangay Business Clearance',
+          purpose: 'Barangay Business Clearance Renewal for 2026',
+          date: 'October 10, 2026',
+          status: 'Ready for Pickup',
+          residencySince: 'January 2010',
+          businessName: 'Hernandez Sari-Sari Store & Carinderia',
+          businessAddress: '15 Riverside Drive, Tierra Verde, Barangay Pallocan Kanluran',
+          natureOfBusiness: 'Retail Food Commodities & Eatery',
+          businessType: 'Sole Proprietorship',
+          numberOfEmployees: '3'
+        }
+      ];
+
+      // 2. Dynamic Document Templates Definitions (5 Exact Templates)
+      const DOCUMENT_TEMPLATES = {
+        CLEARANCE: {
+          title: 'BARANGAY CLEARANCE',
+          render: (data) => `
+            <div class="salutation">TO WHOM IT MAY CONCERN:</div>
+            <p class="cert-body-p">
+              This is to certify that <span class="doc-field-text font-bold" data-field="fullName">${escape(data.fullName)}</span>, 
+              <span class="doc-field-text" data-field="age">${escape(data.age)}</span> years old, and a bona fide resident of 
+              <span class="doc-field-text" data-field="address">${escape(data.address)}</span>, Purok/Sitio 
+              <span class="doc-field-text font-bold" data-field="purokSitio">${escape(data.purokSitio)}</span>, Barangay Pallocan Kanluran, Batangas City, Batangas Province, is known to this office as a resident of this barangay.
+            </p>
+            <p class="cert-body-p">
+              This certification is issued upon the request of the above-named person for <span class="doc-field-text font-bold" data-field="purpose">${escape(data.purpose)}</span>.
+            </p>
+            <p class="cert-body-p">
+              Issued this <span class="doc-field-text font-bold" data-field="date" id="certIssuedDate">${escape(data.date || 'October 11, 2026')}</span> at Barangay Pallocan Kanluran, Batangas City, Batangas Province.
+            </p>
+          `
+        },
+        RESIDENCY: {
+          title: 'CERTIFICATE OF RESIDENCY',
+          render: (data) => `
+            <div class="salutation">TO WHOM IT MAY CONCERN:</div>
+            <p class="cert-body-p">
+              This is to certify that <span class="doc-field-text font-bold" data-field="fullName">${escape(data.fullName)}</span>, 
+              <span class="doc-field-text" data-field="age">${escape(data.age)}</span> years old, is a resident of 
+              <span class="doc-field-text" data-field="address">${escape(data.address)}</span>, Purok/Sitio 
+              <span class="doc-field-text font-bold" data-field="purokSitio">${escape(data.purokSitio)}</span>, Barangay Pallocan Kanluran, Batangas City, Batangas Province.
+            </p>
+            <p class="cert-body-p">
+              According to the records available to this office, the above-named person has been residing in this barangay since <span class="doc-field-text font-bold" data-field="residencySince">${escape(data.residencySince)}</span>.
+            </p>
+            <p class="cert-body-p">
+              This certification is issued upon request for <span class="doc-field-text font-bold" data-field="purpose">${escape(data.purpose)}</span>.
+            </p>
+            <p class="cert-body-p">
+              Issued this <span class="doc-field-text font-bold" data-field="date" id="certIssuedDate">${escape(data.date || 'October 11, 2026')}</span> at Barangay Pallocan Kanluran, Batangas City, Batangas Province.
+            </p>
+          `
+        },
+        INDIGENCY: {
+          title: 'CERTIFICATE OF INDIGENCY',
+          render: (data) => `
+            <div class="salutation">TO WHOM IT MAY CONCERN:</div>
+            <p class="cert-body-p">
+              This is to certify that <span class="doc-field-text font-bold" data-field="fullName">${escape(data.fullName)}</span>, 
+              <span class="doc-field-text" data-field="age">${escape(data.age)}</span> years old, is a resident of 
+              <span class="doc-field-text" data-field="address">${escape(data.address)}</span>, Purok/Sitio 
+              <span class="doc-field-text font-bold" data-field="purokSitio">${escape(data.purokSitio)}</span>, Barangay Pallocan Kanluran, Batangas City, Batangas Province.
+            </p>
+            <p class="cert-body-p">
+              This certification is issued upon the request of the above-named person for <span class="doc-field-text font-bold" data-field="purpose">${escape(data.purpose)}</span>.
+            </p>
+            <p class="cert-body-p">
+              Issued this <span class="doc-field-text font-bold" data-field="date" id="certIssuedDate">${escape(data.date || 'October 11, 2026')}</span> at Barangay Pallocan Kanluran, Batangas City, Batangas Province.
+            </p>
+          `
+        },
+        JOBSEEKER: {
+          title: 'CERTIFICATION FOR FIRST-TIME JOB SEEKER',
+          render: (data) => `
+            <div class="salutation">TO WHOM IT MAY CONCERN:</div>
+            <p class="cert-body-p">
+              This is to certify that <span class="doc-field-text font-bold" data-field="fullName">${escape(data.fullName)}</span>, 
+              <span class="doc-field-text" data-field="age">${escape(data.age)}</span> years old, a resident of 
+              <span class="doc-field-text" data-field="address">${escape(data.address)}</span>, Purok/Sitio 
+              <span class="doc-field-text font-bold" data-field="purokSitio">${escape(data.purokSitio)}</span>, Barangay Pallocan Kanluran, Batangas City, Batangas Province, has requested this certification in connection with their application for employment.
+            </p>
+            <p class="cert-body-p">
+              The certification is issued for the purpose of <span class="doc-field-text font-bold" data-field="purpose">${escape(data.purpose)}</span>.
+            </p>
+            <p class="cert-body-p">
+              Issued this <span class="doc-field-text font-bold" data-field="date" id="certIssuedDate">${escape(data.date || 'October 11, 2026')}</span> at Barangay Pallocan Kanluran, Batangas City, Batangas Province.
+            </p>
+          `
+        },
+        BUSINESS: {
+          title: 'BARANGAY BUSINESS CLEARANCE',
+          render: (data) => `
+            <div class="salutation">TO WHOM IT MAY CONCERN:</div>
+            <p class="cert-body-p">
+              This is to certify that <span class="doc-field-text font-bold" data-field="businessName">${escape(data.businessName)}</span>, owned/operated by 
+              <span class="doc-field-text font-bold" data-field="fullName">${escape(data.fullName)}</span>, 
+              <span class="doc-field-text" data-field="age">${escape(data.age)}</span> years old, with business address at 
+              <span class="doc-field-text" data-field="businessAddress">${escape(data.businessAddress)}</span>, Barangay Pallocan Kanluran, Batangas City, Batangas Province, has applied for a Barangay Business Clearance.
+            </p>
+            <div class="business-specs-box">
+              <div class="business-spec-item">
+                <span class="spec-name">Nature of Business:</span>
+                <span class="doc-field-text font-bold" data-field="natureOfBusiness">${escape(data.natureOfBusiness)}</span>
+              </div>
+              <div class="business-spec-item">
+                <span class="spec-name">Business Type:</span>
+                <span class="doc-field-text font-bold" data-field="businessType">${escape(data.businessType)}</span>
+              </div>
+              <div class="business-spec-item">
+                <span class="spec-name">Number of Employees:</span>
+                <span class="doc-field-text font-bold" data-field="numberOfEmployees">${escape(data.numberOfEmployees)}</span>
+              </div>
+            </div>
+            <p class="cert-body-p" style="margin-top: 18px;">
+              This clearance is issued subject to applicable barangay requirements and regulations.
+            </p>
+            <p class="cert-body-p">
+              Issued this <span class="doc-field-text font-bold" data-field="date" id="certIssuedDate">${escape(data.date || 'October 11, 2026')}</span> at Barangay Pallocan Kanluran, Batangas City, Batangas Province.
+            </p>
+          `
+        }
+      };
+
+      // 3. Render Data Table Function
+      let currentFilter = 'all';
+      let searchQuery = '';
+
+      function renderTable() {
+        const tbody = document.getElementById('tableBody');
+        if (!tbody) return;
+
+        const filtered = serviceRequestsData.filter(item => {
+          const matchesFilter = currentFilter === 'all' || item.status === currentFilter;
+          const query = searchQuery.toLowerCase();
+          const matchesSearch = !query ||
+            item.id.toLowerCase().includes(query) ||
+            item.fullName.toLowerCase().includes(query) ||
+            item.documentType.toLowerCase().includes(query) ||
+            item.purokSitio.toLowerCase().includes(query) ||
+            item.purpose.toLowerCase().includes(query);
+
+          return matchesFilter && matchesSearch;
+        });
+
+        tbody.innerHTML = '';
+
+        if (filtered.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="6" style="text-align: center; padding: 32px; color: #94a3b8;">
+                No service requests found matching the filter criteria.
+              </td>
+            </tr>
+          `;
+          return;
+        }
+
+        filtered.forEach(req => {
+          const tr = document.createElement('tr');
+
+          let badgeClass = 'amber';
+          if (req.status === 'Ready for Pickup') badgeClass = 'green';
+          else if (req.status === 'In Review') badgeClass = 'amber';
+          else if (req.status === 'Completed') badgeClass = 'blue';
+
+          tr.innerHTML = `
+            <td><strong><code>${escape(req.id)}</code></strong></td>
+            <td>
+              <span class="applicant-name">${escape(req.fullName)}</span>
+              <span class="applicant-sub">${escape(req.purokSitio)}</span>
+            </td>
+            <td><strong>${escape(req.documentType)}</strong></td>
+            <td><span class="status-badge ${badgeClass}">${escape(req.status)}</span></td>
+            <td>${escape(req.date)}</td>
+            <td class="text-right">
+              <button type="button" class="btn-action-print" data-id="${req.id}" title="Print Certificate (Ctrl+P)" aria-label="Print Certificate">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                  <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                  <rect x="6" y="14" width="12" height="8"></rect>
+                </svg>
+              </button>
+            </td>
+          `;
+
+          tbody.appendChild(tr);
+        });
+
+        // Bind Print Certificate Buttons (triggers print like Ctrl+P)
+        tbody.querySelectorAll('.btn-action-print').forEach(btn => {
+          btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            const id = this.getAttribute('data-id');
+            const targetData = serviceRequestsData.find(item => item.id === id);
+            if (targetData) {
+              openPrintModal(targetData, true); // Works like Ctrl+P!
+            }
+          });
+        });
+      }
+
+      // 4. Modal Open & Dynamic Template Selection (with auto-print support)
+      function openPrintModal(data, triggerPrint = false) {
+        if (!data) return;
+
+        const modal = document.getElementById('printModal');
+        if (!modal) return;
+
+        // Determine template by documentType string
+        const typeStr = (data.documentType || '').toLowerCase();
+        let selectedKey = 'CLEARANCE';
+
+        if (typeStr.includes('business')) {
+          selectedKey = 'BUSINESS';
+        } else if (typeStr.includes('job') || typeStr.includes('seeker')) {
+          selectedKey = 'JOBSEEKER';
+        } else if (typeStr.includes('indigency')) {
+          selectedKey = 'INDIGENCY';
+        } else if (typeStr.includes('residency')) {
+          selectedKey = 'RESIDENCY';
+        } else {
+          selectedKey = 'CLEARANCE';
+        }
+
+        const template = DOCUMENT_TEMPLATES[selectedKey];
+
+        // Format Date nicely for Certificate
+        const certDateStr = data.date || 'October 11, 2026';
+
+        // Set Document Title
+        const certTitleEl = document.getElementById('certTitle');
+        if (certTitleEl) certTitleEl.textContent = template.title;
+
+        const modalTitleEl = document.getElementById('printModalTitle');
+        if (modalTitleEl) modalTitleEl.textContent = `${template.title} · ${data.fullName}`;
+
+        // Populate Document Body via Template Injection
+        const certBodyEl = document.getElementById('certBody');
+        if (certBodyEl) {
+          certBodyEl.innerHTML = template.render(data);
+        }
+
+        // Populate Common Footer Date
+        const issuedDateEl = document.getElementById('certIssuedDate');
+        if (issuedDateEl) {
+          issuedDateEl.textContent = certDateStr;
+        }
+
+        // Show Modal Overlay
+        modal.removeAttribute('hidden');
+        modal.classList.add('active');
+        document.body.classList.add('modal-open');
+
+        // Accessibility: set focus on print button
+        const printBtn = document.getElementById('btnPrintModalAction');
+        if (printBtn) printBtn.focus();
+
+        // Trigger native browser print dialog like Ctrl+P
+        if (triggerPrint) {
+          setTimeout(() => {
+            window.print();
+          }, 100);
+        }
+      }
+
+      function closePrintModal() {
+        const modal = document.getElementById('printModal');
+        if (!modal) return;
+        modal.setAttribute('hidden', '');
+        modal.classList.remove('active');
+        document.body.classList.remove('modal-open');
+      }
+
+      // 5. Utility Helper for String Escaping
+      function escape(str) {
+        if (!str) return '';
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      // 6. Event Listeners & Binding
+      const btnPrintModalAction = document.getElementById('btnPrintModalAction');
+      if (btnPrintModalAction) {
+        btnPrintModalAction.addEventListener('click', function () {
+          window.print();
+        });
+      }
+
+      const btnCloseModalBtn = document.getElementById('btnCloseModalBtn');
+      if (btnCloseModalBtn) {
+        btnCloseModalBtn.addEventListener('click', closePrintModal);
+      }
+
+      const printModal = document.getElementById('printModal');
+      if (printModal) {
+        printModal.addEventListener('click', function (e) {
+          if (e.target === printModal) {
+            closePrintModal();
+          }
+        });
+      }
+
+      // Global Escape & Ctrl+P Key Handlers
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' || e.keyCode === 27) {
+          const modal = document.getElementById('printModal');
+          if (modal && (!modal.hasAttribute('hidden') || modal.classList.contains('active'))) {
+            closePrintModal();
+          }
+        }
+        if ((e.ctrlKey || e.metaKey) && (e.key === 'p' || e.key === 'P')) {
+          const modal = document.getElementById('printModal');
+          if (modal && (!modal.hasAttribute('hidden') || modal.classList.contains('active'))) {
+            e.preventDefault();
+            window.print();
+          }
+        }
+      });
+
+      // Filter and Search Listeners
+      const filterPills = document.querySelectorAll('#statusFilterGroup .filter-pill');
+      filterPills.forEach(pill => {
+        pill.addEventListener('click', function () {
+          filterPills.forEach(p => p.classList.remove('active'));
+          this.classList.add('active');
+          currentFilter = this.getAttribute('data-filter');
+          renderTable();
+        });
+      });
+
+      const searchInput = document.getElementById('searchInput');
+      if (searchInput) {
+        searchInput.addEventListener('input', function () {
+          searchQuery = this.value.trim();
+          renderTable();
+        });
+      }
+
+      // Expose globally for testing or admin desk integrations
+      window.openPrintModal = openPrintModal;
+      window.closePrintModal = closePrintModal;
+
+      // Initial Render
+      renderTable();
+    })();
+  </script>
+</body>
+</html>

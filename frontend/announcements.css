@@ -1,0 +1,811 @@
+/* ==========================================================
+   Brgy360 - Announcements Feed & Detail View (announcements.css)
+   Vertical Stacked Layout + Dynamic Search & Category Filter
+   Strictly utilizes site CSS variables:
+   --primary-color, --border-radius, --bg-surface, --text-main
+   ========================================================== */
+
+/* 1. SECTION & CONTAINER */
+.announcements-section {
+  padding: 80px 20px;
+  background-color: var(--white, #ffffff);
+  scroll-margin-top: 80px;
+  position: relative;
+}
+
+/* 2. SECTION HEADER (Signature Civic Blue Banner with Speaker Icon) */
+.announcements-header {
+  background: linear-gradient(135deg, #0d47a1 0%, #0a2540 100%);
+  color: var(--white, #ffffff);
+  border-radius: var(--border-radius, 16px);
+  padding: 42px 36px;
+  margin-bottom: 28px;
+  box-shadow: 0 10px 25px rgba(13, 71, 161, 0.18);
+  position: relative;
+  overflow: hidden;
+  text-align: left;
+}
+
+.announcements-header::after {
+  content: "";
+  position: absolute;
+  right: -50px;
+  bottom: -50px;
+  width: 220px;
+  height: 220px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.announcements-header-content {
+  position: relative;
+  z-index: 1;
+}
+
+.announcements-kicker {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--yellow, #FFD93D);
+  margin-bottom: 8px;
+}
+
+.announcements-title {
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1.25;
+  color: var(--white, #ffffff);
+  letter-spacing: -0.5px;
+  margin: 0 0 8px 0;
+}
+
+.announcements-title .text-yellow {
+  color: var(--yellow, #FFD93D);
+}
+
+.announcements-subtitle {
+  font-size: 15.5px;
+  color: rgba(255, 255, 255, 0.88);
+  max-width: 820px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* 3. SEARCH & DYNAMIC FILTER BAR */
+.announcements-filter-bar {
+  background-color: #f8fafc;
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: var(--border-radius, 16px);
+  padding: 16px 20px;
+  margin-bottom: 28px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.announcements-search-box {
+  position: relative;
+  flex: 1;
+  min-width: 260px;
+  max-width: 440px;
+}
+
+.search-box-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  color: #64748b;
+  pointer-events: none;
+}
+
+.announcements-search-input {
+  width: 100%;
+  padding: 11px 38px 11px 42px;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--text-main, #1e293b);
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.announcements-search-input:focus {
+  border-color: var(--primary-color, #0d47a1);
+  box-shadow: 0 0 0 3px rgba(13, 71, 161, 0.12);
+}
+
+.search-clear-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+}
+
+.search-clear-btn:hover {
+  color: var(--text-main, #1e293b);
+}
+
+.announcements-category-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.category-dropdown-label {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #475569;
+  white-space: nowrap;
+}
+
+.category-dropdown-wrapper {
+  position: relative;
+  min-width: 190px;
+}
+
+.announcements-category-select {
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 10px 38px 10px 14px;
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #1e293b;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.announcements-category-select:focus {
+  border-color: var(--primary-color, #0d47a1);
+  box-shadow: 0 0 0 3px rgba(13, 71, 161, 0.12);
+}
+
+.dropdown-chevron-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: #64748b;
+  pointer-events: none;
+}
+
+.announcements-feed-count {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--primary-color, #0d47a1);
+  background: rgba(13, 71, 161, 0.08);
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid rgba(13, 71, 161, 0.18);
+  white-space: nowrap;
+}
+
+/* 4. ANNOUNCEMENT CARDS FEED (Vertical Stacked Layout) */
+.announcements-cards-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 100%;
+}
+
+/* Base Card */
+.announcement-card {
+  background-color: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: var(--border-radius, 16px);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.03);
+  cursor: pointer;
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+}
+
+.announcement-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(13, 71, 161, 0.08);
+  border-color: #cbd5e1;
+}
+
+.announcement-card:focus-visible {
+  outline: 3px solid var(--primary-color, #0d47a1);
+  outline-offset: 2px;
+}
+
+/* A. EMERGENCY ANNOUNCEMENT CARD (CRITICAL STYLING) */
+.announcement-card.emergency-card {
+  border: 1px solid #fecdd3; /* Light crimson outer border */
+  box-shadow: 0 4px 16px rgba(220, 38, 38, 0.08);
+  background-color: #ffffff;
+}
+
+.announcement-card.emergency-card:hover {
+  border-color: #f87171;
+  box-shadow: 0 8px 28px rgba(220, 38, 38, 0.15);
+}
+
+/* Red Top Banner Bar */
+.emergency-top-banner {
+  background-color: #dc2626; /* Crimson Red strip */
+  color: #ffffff;
+  padding: 10px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.emergency-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.emergency-banner-icon {
+  font-size: 15px;
+  line-height: 1;
+}
+
+.emergency-banner-text {
+  letter-spacing: 0.6px;
+}
+
+.emergency-banner-tag {
+  background-color: rgba(255, 255, 255, 0.24);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.4px;
+}
+
+/* Card Inner Padding */
+.announcement-card-inner {
+  padding: 22px 26px;
+}
+
+/* Meta Information Row */
+.announcement-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.meta-left-group {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* Light gray category pill tag */
+.meta-category-pill {
+  background-color: #f1f5f9; /* Light gray pill tag */
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 3px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+}
+
+.meta-category-pill.pill-emergency {
+  background-color: #fee2e2;
+  color: #dc2626;
+  border-color: #fecaca;
+  font-weight: 700;
+}
+
+.meta-date-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #64748b;
+  font-variant-numeric: tabular-nums;
+}
+
+.meta-date-item svg {
+  width: 14px;
+  height: 14px;
+  color: #94a3b8;
+}
+
+.meta-department-text {
+  font-size: 12.5px;
+  color: #94a3b8;
+}
+
+.meta-department-text::before {
+  content: "·";
+  margin-right: 8px;
+}
+
+/* Content: Title & Summary */
+.announcement-card-title {
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--text-main, #0f172a);
+  line-height: 1.4;
+  margin-bottom: 8px;
+  transition: color 0.2s ease;
+}
+
+.announcement-card:hover .announcement-card-title {
+  color: var(--primary-color, #0d47a1);
+}
+
+.announcement-card.emergency-card .announcement-card-title {
+  color: #991b1b;
+}
+
+.announcement-card.emergency-card:hover .announcement-card-title {
+  color: #dc2626;
+}
+
+.announcement-card-summary {
+  font-size: 14.5px;
+  color: #475569;
+  line-height: 1.65;
+  margin: 0;
+}
+
+.announcement-card.emergency-card .announcement-card-summary {
+  color: #7f1d1d;
+}
+
+/* 5. INTERACTIVE DETAIL MODAL OVERLAY */
+.announcement-detail-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(15, 23, 42, 0.65);
+  opacity: 1;
+  visibility: visible;
+}
+
+.announcement-detail-modal .announcement-modal-card {
+  max-width: 680px;
+  width: 92%;
+  padding: 0;
+  border-radius: var(--border-radius, 16px);
+  overflow: hidden;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background-color: #ffffff;
+}
+
+.announcement-modal-header-banner {
+  background-color: #dc2626;
+  color: #ffffff;
+  padding: 12px 24px;
+  font-size: 13.5px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.announcement-modal-scrollable {
+  padding: 30px 32px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.modal-meta-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.modal-announcement-title {
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.35;
+  color: #0f172a;
+  margin-bottom: 12px;
+  letter-spacing: -0.3px;
+}
+
+.modal-department-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 6px 14px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.modal-department-badge svg {
+  width: 15px;
+  height: 15px;
+  color: var(--primary-color, #0d47a1);
+}
+
+/* Modal Schedule Callout */
+.modal-schedule-callout {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+}
+
+.modal-schedule-callout.schedule-callout-emergency {
+  background-color: #fff1f2;
+  border-color: #fecdd3;
+}
+
+.modal-schedule-icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.modal-schedule-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #16a34a;
+  margin-bottom: 2px;
+}
+
+.modal-schedule-callout.schedule-callout-emergency .modal-schedule-label {
+  color: #dc2626;
+}
+
+.modal-schedule-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #14532d;
+}
+
+.modal-schedule-callout.schedule-callout-emergency .modal-schedule-value {
+  color: #881337;
+}
+
+.modal-emergency-callout {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-left: 5px solid #dc2626;
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin-bottom: 22px;
+}
+
+.modal-emergency-callout-header {
+  color: #991b1b;
+  font-size: 14.5px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.modal-emergency-callout p {
+  color: #7f1d1d;
+  font-size: 13.5px;
+  line-height: 1.55;
+  margin-bottom: 10px;
+}
+
+.modal-hotlines-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.modal-hotline-pill {
+  background: #ffffff;
+  border: 1px solid #f87171;
+  color: #991b1b;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.modal-announcement-body {
+  font-size: 15px;
+  line-height: 1.75;
+  color: #334155;
+  margin-bottom: 26px;
+}
+
+.modal-announcement-body p {
+  margin-bottom: 12px;
+}
+
+.modal-announcement-body ul,
+.modal-announcement-body ol {
+  padding-left: 20px;
+  margin-bottom: 16px;
+}
+
+.modal-announcement-body li {
+  margin-bottom: 6px;
+}
+
+.modal-attachment-card {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.modal-attachment-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.modal-attachment-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background-color: #fee2e2;
+  color: #dc2626;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.modal-attachment-name {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 2px;
+}
+
+.modal-attachment-meta {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.modal-download-btn {
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: var(--primary-color, #0d47a1);
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 7px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.modal-download-btn:hover {
+  background-color: var(--primary-color, #0d47a1);
+  color: #ffffff;
+  border-color: var(--primary-color, #0d47a1);
+}
+
+.modal-actions-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-top: 18px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.btn-modal-action {
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.btn-modal-action:hover {
+  background-color: #f1f5f9;
+  color: var(--primary-color, #0d47a1);
+}
+
+.btn-modal-close-action {
+  background-color: #f1f5f9;
+  border-color: #e2e8f0;
+  color: #475569;
+}
+
+/* Empty filter state */
+.announcements-empty-state {
+  background-color: #ffffff;
+  border: 1px dashed #cbd5e1;
+  border-radius: var(--border-radius, 16px);
+  padding: 60px 24px;
+  text-align: center;
+  color: #64748b;
+}
+
+.empty-state-icon {
+  width: 48px;
+  height: 48px;
+  color: #94a3b8;
+  margin-bottom: 12px;
+}
+
+.empty-state-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 6px;
+}
+
+.empty-state-subtitle {
+  font-size: 14px;
+  color: #64748b;
+  margin-bottom: 16px;
+}
+
+.btn-reset-filters {
+  background-color: var(--primary-color, #0d47a1);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 18px;
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-reset-filters:hover {
+  background-color: var(--blue-hover, #1565c0);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .announcements-header {
+    padding: 30px 22px;
+  }
+
+  .announcements-title {
+    font-size: 26px;
+  }
+
+  .announcements-filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .announcements-search-box {
+    max-width: 100%;
+  }
+
+  .announcements-category-box {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .category-dropdown-wrapper {
+    width: 100%;
+  }
+
+  .announcement-card-inner {
+    padding: 18px 20px;
+  }
+
+  .announcement-card-title {
+    font-size: 17px;
+  }
+
+  .announcement-modal-scrollable {
+    padding: 22px 20px;
+  }
+
+  .modal-announcement-title {
+    font-size: 20px;
+  }
+}
+
+.announcement-modal-card {
+  position: relative;
+}
+
+#closeAnnouncementModalBtn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 10;
+}
+
+.modal-meta-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+  padding-right: 45px;
+}
+
+.modal-reference-number {
+  white-space: nowrap;
+  font-size: 12px;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+/* Keep the reference text from overlapping the X */
+.announcement-modal-card .announcement-modal-meta,
+.announcement-modal-card .announcement-meta-row {
+  padding-right: 48px;
+}

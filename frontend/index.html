@@ -1,0 +1,2290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Brgy360 - Barangay Services Platform</title>
+  <meta name="description" content="Brgy360 civic governance platform with full-spectrum descriptive, predictive, and prescriptive analytics console for Barangay Pallocan West.">
+  <meta property="og:title" content="Brgy360 - Barangay Services Platform">
+  <meta property="og:description" content="Brgy360 civic governance platform with full-spectrum descriptive, predictive, and prescriptive analytics console for Barangay Pallocan West.">
+  <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+
+  <!-- Google Font: Poppins (Complete weights for consistent typography) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="about.css">
+  <link rel="stylesheet" href="projects.css">
+  <link rel="stylesheet" href="services.css">
+  <link rel="stylesheet" href="budget.css">
+  <link rel="stylesheet" href="announcements.css">
+  <link rel="stylesheet" href="reports.css">
+  <link rel="stylesheet" href="auth.css">
+  <!-- Universal Authentication & Route Guard -->
+  <script type="module" src="./auth.js"></script>
+  <!-- Chart.js CDN for trend chart -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-container">
+      <!-- Left side: Logo & Title -->
+      <a href="#home" class="logo-group">
+        <img src="assets/logo.svg" alt="Brgy360 Logo" class="nav-logo">
+        <span class="nav-title">Brgy360</span>
+      </a>
+
+      <!-- Mobile hamburger toggle button -->
+      <button class="menu-toggle" id="menuToggle" aria-label="Toggle Navigation">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      <!-- Right side: Navigation links -->
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#home">Home</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#projects">Projects</a></li>
+        <li><a href="#services">Services</a></li>
+        <li><a href="#budget">Budget</a></li>
+        <li><a href="#reports">Report</a></li>
+        <li><a href="#announcements">Announcement</a></li>
+        <li id="navAuthSlot"><a href="#login" class="nav-btn-auth" id="openLoginBtn">Login / Register</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- HERO SECTION -->
+  <header class="hero" id="home">
+
+    <!-- Background photo slideshow -->
+  <div class="hero-slides">
+        <div class="hero-slide active" style="background-image: url('assets/brgy.jpg');"></div>
+        <div class="hero-slide" style="background-image: url('assets/brgy1.jpg');"></div>
+        <div class="hero-slide" style="background-image: url('assets/brgy2.jpg');"></div>
+        <div class="hero-slide" style="background-image: url('assets/brgy3.jpg');"></div>
+        <div class="hero-slide" style="background-image: url('assets/brgy4.jpg');"></div>
+        <div class="hero-slide" style="background-image: url('assets/brgy5.jpg');"></div>
+    </div>
+
+    <div class="hero-content">
+      <!-- Large centered logo (approx 140px) -->
+      <img src="assets/logo.svg" alt="Brgy360 Emblem" class="hero-logo">
+
+      <!-- Small uppercase tagline -->
+      <p class="tagline">Your Barangay, All in One.</p>
+
+      <!-- Main heading wrapping onto 2 lines -->
+      <h1 class="hero-heading">
+        <span class="text-white">Welcome to</span>
+        <span class="text-yellow">Brgy360</span>
+      </h1>
+
+      <!-- Subheading -->
+      <p class="hero-subheading">
+        Connecting Pallocaños with essential barangay services, information, and community updates—making local services easier, faster, and more accessible.
+      </p>
+
+      <!-- Social Media Circular Link Buttons -->
+      <div class="social-links-wrap">
+        <span class="social-links-title">Official Social Media Channels</span>
+        <div class="social-circle-group">
+          <!-- Facebook -->
+          <a href="https://www.facebook.com/profile.php?id=61553126976171" target="_blank" rel="noopener noreferrer" class="social-circle-btn facebook" title="Official Facebook Page" aria-label="Official Facebook Page">
+            <svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          </a>
+
+          <!-- Email -->
+          <a href="https://mail.google.com/mail/?view=cm&fs=1&to=info.pallocanwest@gmail.com" target="_blank" rel="noopener noreferrer" class="social-circle-btn email" title="Official Barangay Email" aria-label="Official Barangay Email">
+            <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+          </a>
+
+          <!-- Messenger -->
+          <a href="https://m.me/61553126976171" target="_blank" rel="noopener noreferrer" class="social-circle-btn messenger" title="Official Barangay Messenger Desk" aria-label="Official Messenger">
+            <svg viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 4.974 0 11.111c0 3.498 1.744 6.614 4.469 8.654V24l4.088-2.242c1.092.302 2.247.464 3.443.464 6.627 0 12-4.975 12-11.111C24 4.974 18.627 0 12 0zm1.191 14.963l-3.055-3.26-5.963 3.26L10.732 8.24l3.131 3.259L19.75 8.24l-6.559 6.723z"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==========================================================
+       ABOUT SECTION (#about)
+       Order:
+       1. Feature cards (6 cards, 3 cols x 2 rows)
+       2. "How Brgy360 Works" (4-step process)
+       3. Barangay Officials (5 cols x 2 rows = 10 people total)
+       ========================================================== -->
+
+
+  <section class="section bg-light about-section" id="about">
+    <div class="container">
+
+      <!-- BLOCK 1: FEATURE CARDS BLOCK -->
+      <div class="about-block">
+        <div class="section-title-wrap">
+          <span class="kicker">Platform Overview</span>
+          <h2>About Brgy360</h2>
+          <p>Bridging technology and governance to empower residents and barangay administrations.</p>
+        </div>
+
+        <div class="about-features-grid">
+          <!-- Card 1: Purpose -->
+          <article class="about-card feature-card">
+            <div class="icon-tile" aria-hidden="true">
+              <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <circle cx="12" cy="12" r="6"/>
+                <circle cx="12" cy="12" r="2"/>
+              </svg>
+            </div>
+            <h3>Purpose</h3>
+            <p class="feature-card-desc">To make barangay services more accessible, organized, and convenient for residents while helping barangay personnel manage requests and records efficiently.</p>
+          </article>
+
+          <!-- Card 2: Resident Access -->
+          <article class="about-card feature-card">
+            <div class="icon-tile" aria-hidden="true">
+              <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+            </div>
+            <h3>Resident Access</h3>
+            <p class="feature-card-desc">Residents create an account, get verified, and request services online, reducing repeated trips to the barangay hall.</p>
+          </article>
+
+          <!-- Card 3: Digital Service Requests -->
+          <article class="about-card feature-card">
+            <div class="icon-tile" aria-hidden="true">
+              <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <polyline points="10 9 9 9 8 9"/>
+              </svg>
+            </div>
+            <h3>Digital Service Requests</h3>
+            <p class="feature-card-desc">Every service has its own request form. The resident provides information once; the system auto-fills the official document.</p>
+          </article>
+
+          <!-- Card 4: Barangay Personnel Management -->
+          <article class="about-card feature-card">
+            <div class="icon-tile" aria-hidden="true">
+              <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                <polyline points="9 12 11 14 15 10"/>
+              </svg>
+            </div>
+            <h3>Barangay Personnel Management</h3>
+            <p class="feature-card-desc">Admins review, approve, generate, preview, and print documents, streamlining the entire processing workflow.</p>
+          </article>
+
+          <!-- Card 5: Transparency -->
+          <article class="about-card feature-card">
+            <div class="icon-tile" aria-hidden="true">
+              <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="20" x2="18" y2="10"/>
+                <line x1="12" y1="20" x2="12" y2="4"/>
+                <line x1="6" y1="20" x2="6" y2="14"/>
+              </svg>
+            </div>
+            <h3>Transparency</h3>
+            <p class="feature-card-desc">Public budget and project information keeps the community informed and accountable.</p>
+          </article>
+
+          <!-- Card 6: Community Participation -->
+          <article class="about-card feature-card">
+            <div class="icon-tile" aria-hidden="true">
+              <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m3 11 18-5v12L3 13v-2z"/>
+                <path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/>
+              </svg>
+            </div>
+            <h3>Community Participation</h3>
+            <p class="feature-card-desc">Residents can report concerns and propose community projects, fostering active civic engagement.</p>
+          </article>
+        </div>
+      </div>
+
+      <!-- BLOCK 2: "HOW BRGY360 WORKS" (4-STEP PROCESS) -->
+      <div class="about-block">
+        <div class="section-title-wrap">
+          <span class="kicker">SIMPLE PROCESS</span>
+          <h2>How Brgy360 Works</h2>
+          <p>Four simple steps from registration to a completed barangay document.</p>
+        </div>
+
+        <div class="about-steps-grid">
+          <!-- Step 01 -->
+          <article class="about-card step-card">
+            <div class="step-header">
+              <span class="step-number">01</span>
+              <div class="icon-tile" aria-hidden="true">
+                <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                  <circle cx="8.5" cy="7" r="4"/>
+                  <line x1="20" y1="8" x2="20" y2="14"/>
+                  <line x1="23" y1="11" x2="17" y2="11"/>
+                </svg>
+              </div>
+            </div>
+            <h3>Create an Account</h3>
+            <p class="step-card-desc">Register your resident information.</p>
+          </article>
+
+          <!-- Step 02 -->
+          <article class="about-card step-card">
+            <div class="step-header">
+              <span class="step-number">02</span>
+              <div class="icon-tile" aria-hidden="true">
+                <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                  <circle cx="8.5" cy="7" r="4"/>
+                  <polyline points="17 11 19 13 23 9"/>
+                </svg>
+              </div>
+            </div>
+            <h3>Get Verified</h3>
+            <p class="step-card-desc">Barangay personnel review your residency information.</p>
+          </article>
+
+          <!-- Step 03 -->
+          <article class="about-card step-card">
+            <div class="step-header">
+              <span class="step-number">03</span>
+              <div class="icon-tile" aria-hidden="true">
+                <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+                  <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+                  <path d="M9 14l2 2 4-4"/>
+                </svg>
+              </div>
+            </div>
+            <h3>Request a Service</h3>
+            <p class="step-card-desc">Choose a service and complete the required form.</p>
+          </article>
+
+          <!-- Step 04 -->
+          <article class="about-card step-card">
+            <div class="step-header">
+              <span class="step-number">04</span>
+              <div class="icon-tile" aria-hidden="true">
+                <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"/>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                  <polyline points="11 8 11 11 13 13"/>
+                </svg>
+              </div>
+            </div>
+            <h3>Track Your Request</h3>
+            <p class="step-card-desc">Monitor the status of your request until it is completed.</p>
+          </article>
+        </div>
+      </div>
+
+      <!-- BLOCK 3: BARANGAY OFFICIALS (5x2 Grid - All 10 Officials) -->
+      <div class="about-block">
+        <div class="section-title-wrap">
+          <span class="kicker">LEADERSHIP</span>
+          <h2>Barangay Officials</h2>
+          <p>Dedicated public servants committed to transparent governance and community welfare.</p>
+        </div>
+
+        <div class="about-officials-grid">
+
+          <!-- ==========================================
+               ROW 1, COLUMN 1: Punong Barangay
+               ========================================== -->
+          <article class="about-card official-card official-r1c1 is-punong-barangay">
+            <div class="official-avatar" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2l3 7h7l-5.5 4.5 2 7.5-6.5-5-6.5 5 2-7.5-5.5-4.5h7z"/>
+              </svg>
+            </div>
+            <h3>Romy D. Catilo</h3>
+            <p class="official-position">Punong Barangay</p>
+            <div class="official-meta">
+              <div class="official-contact">
+                <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                </svg>
+                <a href="tel:09175128843">0917 512 8843</a>
+              </div>
+              <div class="official-schedule">
+                <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                <span>Monday, 8:00 AM - 5:00 PM</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- ==========================================
+               ROW 1, COLUMN 2: Sangguniang Member
+               ========================================== -->
+          <article class="about-card official-card official-r1c2">
+            <div class="official-avatar" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+            </div>
+            <h3>Ricardo C. Villestas</h3>
+            <p class="official-position">Sangguniang Barangay Member</p>
+            <div class="official-meta">
+              <div class="official-contact">
+                <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                </svg>
+                <a href="tel:09182267741">0918 226 7741</a>
+              </div>
+              <div class="official-schedule">
+                <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                <span>Tuesday, 8:00 AM - 5:00 PM</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- ==========================================
+               ROW 1, COLUMN 3: Sangguniang Member
+               ========================================== -->
+          <article class="about-card official-card official-r1c3">
+            <div class="official-avatar" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+            </div>
+            <h3>Jesus M. Bagos</h3>
+            <p class="official-position">Sangguniang Barangay Member</p>
+            <div class="official-meta">
+              <div class="official-contact">
+                <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                </svg>
+                <a href="tel:09204459128">0920 445 9128</a>
+              </div>
+              <div class="official-schedule">
+                <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                <span>Wednesday, 8:00 AM - 5:00 PM</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- ==========================================
+               ROW 1, COLUMN 4: Sangguniang Member
+               ========================================== -->
+          <article class="about-card official-card official-r1c4">
+            <div class="official-avatar" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+            </div>
+            <h3>Lucila D. Macalalad</h3>
+            <p class="official-position">Sangguniang Barangay Member</p>
+            <div class="official-meta">
+              <div class="official-contact">
+                <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                </svg>
+                <a href="tel:09213376605">0921 337 6605</a>
+              </div>
+              <div class="official-schedule">
+                <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                <span>Thursday, 8:00 AM - 5:00 PM</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- ====================================================
+               ROW 1, COLUMN 5: Barangay Secretary
+               ==================================================== -->
+          <article class="about-card official-card official-r1c5">
+            <div class="official-avatar" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+            </div>
+            <h3>Ma. Victoria M. Marasigan</h3>
+            <p class="official-position">Brgy. Secretary</p>
+            <div class="official-meta">
+              <div class="official-contact">
+                <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                </svg>
+                <a href="tel:09395501186">0939 550 1186</a>
+              </div>
+              <div class="official-schedule">
+                <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                <span>Monday - Friday, 8:00 AM - 5:00 PM</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- ==========================================
+               ROW 2, COLUMN 1: Sangguniang Member
+               ========================================== -->
+          <article class="about-card official-card official-r2c1">
+            <div class="official-avatar" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+            </div>
+            <h3>Aldrin P. Abraham</h3>
+            <p class="official-position">Sangguniang Barangay Member</p>
+            <div class="official-meta">
+              <div class="official-contact">
+                <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                </svg>
+                <a href="tel:09271184432">0927 118 4432</a>
+              </div>
+              <div class="official-schedule">
+                <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                <span>Monday, 8:00 AM - 5:00 PM</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- ==========================================
+               ROW 2, COLUMN 2: Sangguniang Member
+               ========================================== -->
+          <article class="about-card official-card official-r2c2">
+            <div class="official-avatar" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+            </div>
+            <h3>Christopher M. Santos</h3>
+            <p class="official-position">Sangguniang Barangay Member</p>
+            <div class="official-meta">
+              <div class="official-contact">
+                <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                </svg>
+                <a href="tel:09289045576">0928 904 5576</a>
+              </div>
+              <div class="official-schedule">
+                <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                <span>Tuesday, 8:00 AM - 5:00 PM</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- ==========================================
+               ROW 2, COLUMN 3: Sangguniang Member
+               ========================================== -->
+          <article class="about-card official-card official-r2c3">
+            <div class="official-avatar" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+            </div>
+            <h3>Emelia C. Obsioma</h3>
+            <p class="official-position">Sangguniang Barangay Member</p>
+            <div class="official-meta">
+              <div class="official-contact">
+                <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                </svg>
+                <a href="tel:09356723390">0935 672 3390</a>
+              </div>
+              <div class="official-schedule">
+                <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                <span>Wednesday, 8:00 AM - 5:00 PM</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- ==========================================
+               ROW 2, COLUMN 4: Sangguniang Member
+               ========================================== -->
+          <article class="about-card official-card official-r2c4">
+            <div class="official-avatar" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+            </div>
+            <h3>Ismael A. Catilo</h3>
+            <p class="official-position">Sangguniang Barangay Member</p>
+            <div class="official-meta">
+              <div class="official-contact">
+                <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                </svg>
+                <a href="tel:09362218847">0936 221 8847</a>
+              </div>
+              <div class="official-schedule">
+                <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                <span>Thursday, 8:00 AM - 5:00 PM</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- ====================================================
+               ROW 2, COLUMN 5: Barangay Treasurer
+               ==================================================== -->
+          <article class="about-card official-card official-r2c5">
+            <div class="official-avatar" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+            </div>
+            <h3>Mennen M. Bolos</h3>
+            <p class="official-position">Brgy. Treasurer</p>
+            <div class="official-meta">
+              <div class="official-contact">
+                <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                </svg>
+                <a href="tel:09458832274">0945 883 2274</a>
+              </div>
+              <div class="official-schedule">
+                <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                <span>Monday - Friday, 8:00 AM - 5:00 PM</span>
+              </div>
+            </div>
+          </article>
+
+        </div>
+
+        <!-- Leadership Footer Line -->
+        <div class="officials-footer-wrap">
+          <p class="officials-footer">Led by <strong>Romy D. Catilo</strong>, Punong Barangay</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- PROJECTS SECTION (#projects) -->
+  <section class="section" id="projects">
+    <div class="container">
+
+      <!-- 1. SECTION OVERVIEW (Top Header) -->
+      <div class="projects-section-header">
+        <span class="projects-kicker">OVERVIEW</span>
+        <h2>Project status at a glance</h2>
+        <p>A summary of all projects on record, including the share that has been completed.</p>
+      </div>
+
+      <!-- 2. METRICS DISPLAY & TREND CHART (Top Dashboard Block) -->
+      <div class="projects-dashboard-block">
+        <!-- KPI Row: 5 horizontal slots -->
+        <div class="kpi-row" role="region" aria-label="Project Status Summary KPIs">
+          <div class="kpi-slot">
+            <span class="kpi-label">Planning</span>
+            <span class="kpi-value" id="kpiPlanning">1</span>
+            <span class="kpi-subtext">Under preliminary review</span>
+          </div>
+          <div class="kpi-slot">
+            <span class="kpi-label">Ongoing</span>
+            <span class="kpi-value" id="kpiOngoing">2</span>
+            <span class="kpi-subtext">Active in construction</span>
+          </div>
+          <div class="kpi-slot">
+            <span class="kpi-label">Completed</span>
+            <span class="kpi-value" id="kpiCompleted">2</span>
+            <span class="kpi-subtext">Turned over & in service</span>
+          </div>
+          <div class="kpi-slot">
+            <span class="kpi-label">Delayed</span>
+            <span class="kpi-value" id="kpiDelayed">1</span>
+            <span class="kpi-subtext">Procurement / Weather hold</span>
+          </div>
+          <div class="kpi-slot kpi-slot-highlight">
+            <span class="kpi-label">Completion Rate</span>
+            <span class="kpi-value kpi-rate-accent" id="kpiRate">33%</span>
+            <span class="kpi-subtext" id="kpiRateSubtext">2 of 6 projects delivered</span>
+          </div>
+        </div>
+
+        <!-- Trend Chart Block: Tracking 2025 (100%) to 2026 (23%) -->
+        <div class="projects-trend-block">
+          <div class="trend-header">
+            <div>
+              <h3 class="trend-title">Completion Rate Trend by Year</h3>
+              <p class="trend-subtitle">Year-over-year completion velocity tracking historical 2025 and active 2026 projects</p>
+            </div>
+            <div class="trend-legend">
+              <span class="legend-indicator"></span>
+              <span class="legend-text">Historical & In-Progress Completion Rate</span>
+            </div>
+          </div>
+
+          <div class="trend-chart-container">
+            <div class="chart-wrapper" style="position: relative; width: 100%; height: 200px; max-height: 220px;">
+              <canvas id="projectTrendChart" aria-label="Completion Rate Trend Line Chart tracking 2025 (100%) to 2026 (23%)" role="img"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. CONTROLS & FILTER BAR -->
+      <div class="projects-controls-bar">
+        <div class="search-input-wrap">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" id="projectSearchInput" class="project-search-input" placeholder="Search projects..." aria-label="Search projects by name, description, or location">
+          <button type="button" id="clearSearchBtn" class="clear-search-btn" aria-label="Clear search query" style="display: none;">&times;</button>
+        </div>
+
+        <div class="filter-dropdowns-wrap">
+          <div class="custom-select-wrap">
+            <select id="projectStatusFilter" class="project-filter-select" aria-label="Filter by project status">
+              <option value="all">All Statuses</option>
+              <option value="planning">Planning</option>
+              <option value="ongoing">Ongoing</option>
+              <option value="completed">Completed</option>
+              <option value="delayed">Delayed</option>
+            </select>
+          </div>
+
+          <div class="custom-select-wrap">
+            <select id="projectYearFilter" class="project-filter-select" aria-label="Filter by project year">
+              <option value="all">All Years</option>
+              <option value="2026">2026</option>
+              <option value="2025">2025</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Filter Status & Count -->
+      <div class="projects-results-count">
+        <span>Showing <strong id="visibleProjectsCount">6</strong> of <strong id="totalProjectsCount">6</strong> projects</span>
+        <button type="button" id="resetFiltersBtn" class="reset-filters-btn" style="display: none;">Reset Filters</button>
+      </div>
+
+      <!-- 4. PROJECT CARDS GRID (2-Column Grid Layout) -->
+      <div class="projects-grid" id="projectsGrid">
+
+        <!-- Project Card 1: Completed, 2025 -->
+        <article class="project-card card-completed" data-status="completed" data-year="2025">
+          <div>
+            <!-- Top Row: Status badge pill on top-left, Year on top-right -->
+            <div class="project-card-top">
+              <span class="status-badge-pill">
+                <span class="status-dot"></span>
+                Completed
+              </span>
+              <span class="project-year-pill">2025</span>
+            </div>
+
+            <!-- Title & Description -->
+            <div class="project-card-body">
+              <h3 class="project-title">E-Library & Free WiFi Tech Hub</h3>
+              <p class="project-desc">Refurbishment of the Barangay Hall 2nd Floor into a high-speed digital study center with 15 computer terminals and free internet for students.</p>
+            </div>
+
+            <!-- Details: Location & Date Range -->
+            <ul class="project-details-list">
+              <li class="detail-item">
+                <svg class="detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                <span>Sitio Ibaba</span>
+              </li>
+              <li class="detail-item">
+                <svg class="detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                  <line x1="8" y1="2" x2="8" y2="6"></line>
+                  <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                <span>2025-01-10 – 2025-08-15</span>
+              </li>
+            </ul>
+
+            <!-- Budget -->
+            <div class="project-budget-row">
+              <span class="budget-label">Budget:</span>
+              <span class="budget-amount">₱420,000.00</span>
+            </div>
+          </div>
+
+          <!-- Progress Bar Block -->
+          <div class="project-progress-wrap">
+            <div class="progress-header">
+              <span>Progress</span>
+              <span class="progress-percentage">100%</span>
+            </div>
+            <div class="progress-track" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-fill" style="width: 100%;"></div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Project Card 2: Completed, 2025 -->
+        <article class="project-card card-completed" data-status="completed" data-year="2025">
+          <div>
+            <!-- Top Row: Status badge pill on top-left, Year on top-right -->
+            <div class="project-card-top">
+              <span class="status-badge-pill">
+                <span class="status-dot"></span>
+                Completed
+              </span>
+              <span class="project-year-pill">2025</span>
+            </div>
+
+            <!-- Title & Description -->
+            <div class="project-card-body">
+              <h3 class="project-title">Community Health Station Modernization</h3>
+              <p class="project-desc">Upgrading medical diagnostic tools, maternal care equipment, and procurement of essential pharmaceuticals for residents.</p>
+            </div>
+
+            <!-- Details: Location & Date Range -->
+            <ul class="project-details-list">
+              <li class="detail-item">
+                <svg class="detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                <span>Sitio Ilaya</span>
+              </li>
+              <li class="detail-item">
+                <svg class="detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                  <line x1="8" y1="2" x2="8" y2="6"></line>
+                  <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                <span>2025-03-01 – 2025-11-20</span>
+              </li>
+            </ul>
+
+            <!-- Budget -->
+            <div class="project-budget-row">
+              <span class="budget-label">Budget:</span>
+              <span class="budget-amount">₱580,000.00</span>
+            </div>
+          </div>
+
+          <!-- Progress Bar Block -->
+          <div class="project-progress-wrap">
+            <div class="progress-header">
+              <span>Progress</span>
+              <span class="progress-percentage">100%</span>
+            </div>
+            <div class="progress-track" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-fill" style="width: 100%;"></div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Project Card 3: Ongoing, 2026 -->
+        <article class="project-card card-ongoing" data-status="ongoing" data-year="2026">
+          <div>
+            <!-- Top Row: Status badge pill on top-left, Year on top-right -->
+            <div class="project-card-top">
+              <span class="status-badge-pill">
+                <span class="status-dot"></span>
+                Ongoing
+              </span>
+              <span class="project-year-pill">2026</span>
+            </div>
+
+            <!-- Title & Description -->
+            <div class="project-card-body">
+              <h3 class="project-title">Smart Solar LED Streetlighting Project</h3>
+              <p class="project-desc">Installation of 85 standalone solar-powered LED streetlights across Dark Zone areas in Sitio Santolan, Tierra Verde, and Potenciana Village to bolster nighttime pedestrian safety.</p>
+            </div>
+
+            <!-- Details: Location & Date Range -->
+            <ul class="project-details-list">
+              <li class="detail-item">
+                <svg class="detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                <span>Sitio Santolan</span>
+              </li>
+              <li class="detail-item">
+                <svg class="detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                  <line x1="8" y1="2" x2="8" y2="6"></line>
+                  <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                <span>2026-02-15 – 2026-11-30</span>
+              </li>
+            </ul>
+
+            <!-- Budget -->
+            <div class="project-budget-row">
+              <span class="budget-label">Budget:</span>
+              <span class="budget-amount">₱680,000.00</span>
+            </div>
+          </div>
+
+          <!-- Progress Bar Block -->
+          <div class="project-progress-wrap">
+            <div class="progress-header">
+              <span>Progress</span>
+              <span class="progress-percentage">75%</span>
+            </div>
+            <div class="progress-track" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-fill" style="width: 75%;"></div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Project Card 4: Ongoing, 2026 -->
+        <article class="project-card card-ongoing" data-status="ongoing" data-year="2026">
+          <div>
+            <!-- Top Row: Status badge pill on top-left, Year on top-right -->
+            <div class="project-card-top">
+              <span class="status-badge-pill">
+                <span class="status-dot"></span>
+                Ongoing
+              </span>
+              <span class="project-year-pill">2026</span>
+            </div>
+
+            <!-- Title & Description -->
+            <div class="project-card-body">
+              <h3 class="project-title">Flood Control Canal Dredging & Retaining Wall</h3>
+              <p class="project-desc">Reinforcement of the creek embankment along Sitio Ibaba to prevent flash flood overflows and residential soil erosion during tropical storms.</p>
+            </div>
+
+            <!-- Details: Location & Date Range -->
+            <ul class="project-details-list">
+              <li class="detail-item">
+                <svg class="detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                <span>Sitio Ibaba</span>
+              </li>
+              <li class="detail-item">
+                <svg class="detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                  <line x1="8" y1="2" x2="8" y2="6"></line>
+                  <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                <span>2026-03-01 – 2026-12-15</span>
+              </li>
+            </ul>
+
+            <!-- Budget -->
+            <div class="project-budget-row">
+              <span class="budget-label">Budget:</span>
+              <span class="budget-amount">₱1,150,000.00</span>
+            </div>
+          </div>
+
+          <!-- Progress Bar Block -->
+          <div class="project-progress-wrap">
+            <div class="progress-header">
+              <span>Progress</span>
+              <span class="progress-percentage">40%</span>
+            </div>
+            <div class="progress-track" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-fill" style="width: 40%;"></div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Project Card 5: Delayed, 2026 -->
+        <article class="project-card card-delayed" data-status="delayed" data-year="2026">
+          <div>
+            <!-- Top Row: Status badge pill on top-left, Year on top-right -->
+            <div class="project-card-top">
+              <span class="status-badge-pill">
+                <span class="status-dot"></span>
+                Delayed
+              </span>
+              <span class="project-year-pill">2026</span>
+            </div>
+
+            <!-- Title & Description -->
+            <div class="project-card-body">
+              <h3 class="project-title">Multi-Purpose Covered Evacuation Court</h3>
+              <p class="project-desc">Construction of an all-weather covered court designed as a disaster evacuation shelter and community athletic venue.</p>
+            </div>
+
+            <!-- Details: Location & Date Range -->
+            <ul class="project-details-list">
+              <li class="detail-item">
+                <svg class="detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                <span>Sitio Gitna</span>
+              </li>
+              <li class="detail-item">
+                <svg class="detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                  <line x1="8" y1="2" x2="8" y2="6"></line>
+                  <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                <span>2026-01-20 – 2026-10-30</span>
+              </li>
+            </ul>
+
+            <!-- Budget -->
+            <div class="project-budget-row">
+              <span class="budget-label">Budget:</span>
+              <span class="budget-amount">₱2,450,000.00</span>
+            </div>
+          </div>
+
+          <!-- Progress Bar Block -->
+          <div class="project-progress-wrap">
+            <div class="progress-header">
+              <span>Progress</span>
+              <span class="progress-percentage">25%</span>
+            </div>
+            <div class="progress-track" role="progressbar" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-fill" style="width: 25%;"></div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Project Card 6: Planning, 2026 -->
+        <article class="project-card card-planning" data-status="planning" data-year="2026">
+          <div>
+            <!-- Top Row: Status badge pill on top-left, Year on top-right -->
+            <div class="project-card-top">
+              <span class="status-badge-pill">
+                <span class="status-dot"></span>
+                Planning
+              </span>
+              <span class="project-year-pill">2026</span>
+            </div>
+
+            <!-- Title & Description -->
+            <div class="project-card-body">
+              <h3 class="project-title">Automated Barangay CCTVs & Operations Center</h3>
+              <p class="project-desc">Deployment of 32 high-definition security cameras across major intersections, commercial strips, and barangay entry checkpoints.</p>
+            </div>
+
+            <!-- Details: Location & Date Range -->
+            <ul class="project-details-list">
+              <li class="detail-item">
+                <svg class="detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                <span>G.C Berberabe</span>
+              </li>
+              <li class="detail-item">
+                <svg class="detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                  <line x1="8" y1="2" x2="8" y2="6"></line>
+                  <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                <span>2026-09-01 – 2027-02-28</span>
+              </li>
+            </ul>
+
+            <!-- Budget -->
+            <div class="project-budget-row">
+              <span class="budget-label">Budget:</span>
+              <span class="budget-amount">₱890,000.00</span>
+            </div>
+          </div>
+
+          <!-- Progress Bar Block -->
+          <div class="project-progress-wrap">
+            <div class="progress-header">
+              <span>Progress</span>
+              <span class="progress-percentage">10%</span>
+            </div>
+            <div class="progress-track" role="progressbar" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-fill" style="width: 10%;"></div>
+            </div>
+          </div>
+        </article>
+
+      </div>
+
+      <!-- Empty State for Search/Filter -->
+      <div id="projectsEmptyState" class="projects-empty-state" style="display: none;">
+        <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          <line x1="8" y1="11" x2="14" y2="11"></line>
+        </svg>
+        <h4>No projects found</h4>
+        <p>No recorded projects match your current search and filter combination.</p>
+        <button type="button" class="form-submit-btn" id="emptyStateResetBtn" style="display: inline-block; width: auto; padding: 10px 22px; font-size: 13.5px; background-color: var(--primary-blue);">Clear Filters</button>
+      </div>
+
+      <!-- 5. PROPOSE A PROJECT CTA (Centered Primary Action) -->
+      <div class="projects-cta-section">
+        <div class="projects-cta-card">
+          <span class="projects-cta-badge">Citizen Initiative</span>
+          <h3 class="projects-cta-title">Have a project idea for your community?</h3>
+          <p class="projects-cta-subtitle">Submit infrastructure repairs, public safety enhancements, or youth and livelihood programs for the Barangay Development Council's review.</p>
+          <button type="button" class="btn-propose-project" id="openProposeModalBtn">
+            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="16"></line>
+              <line x1="8" y1="12" x2="16" y2="12"></line>
+            </svg>
+            <span>Propose a Project</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- PROPOSE A PROJECT FORM MODAL -->
+  <div class="project-modal-backdrop" id="proposeProjectModal" role="dialog" aria-modal="true" aria-labelledby="proposeModalTitle" aria-hidden="true">
+    <div class="project-modal-dialog">
+      <!-- Modal Header -->
+      <div class="project-modal-header">
+        <div>
+          <span class="modal-kicker">COMMUNITY INITIATIVE</span>
+          <h3 class="project-modal-title" id="proposeModalTitle">Propose a Community Project</h3>
+          <p class="project-modal-desc">Share your idea to improve public infrastructure, safety, or citizen programs in our barangay.</p>
+        </div>
+        <button type="button" class="project-modal-close" id="closeProposeModalBtn" aria-label="Close modal">&times;</button>
+      </div>
+
+      <!-- Modal Body / Form -->
+      <form id="modalProposeForm" class="project-modal-form" novalidate>
+        <div class="modal-form-grid">
+          <!-- Project Name -->
+          <div class="form-group span-2">
+            <label for="modalProjectName">Project Name <span class="req-star">*</span></label>
+            <input type="text" id="modalProjectName" class="modal-input" placeholder="e.g. Sitio Gitna Drainage De-clogging & Safety Cover" required>
+            <span class="field-error" id="errorProjectName">Please provide a descriptive project name.</span>
+          </div>
+
+          <!-- Category Dropdown -->
+          <div class="form-group">
+            <label for="modalProjectCategory">Category <span class="req-star">*</span></label>
+            <select id="modalProjectCategory" class="modal-select" required>
+              <option value="" disabled selected>Select a category</option>
+              <option value="Roads & Infrastructure">Roads & Infrastructure</option>
+              <option value="Streetlighting & Public Safety">Streetlighting & Public Safety</option>
+              <option value="Drainage & Flood Mitigation">Drainage & Flood Mitigation</option>
+              <option value="Health Station & Sanitation">Health Station & Sanitation</option>
+              <option value="SK Youth & Sports Program">SK Youth & Sports Program</option>
+              <option value="Livelihood & Skills Training">Livelihood & Skills Training</option>
+            </select>
+            <span class="field-error" id="errorProjectCategory">Please select a project category.</span>
+          </div>
+
+          <!-- Location -->
+          <div class="form-group">
+            <label for="modalProjectLocation">Location / Sitio <span class="req-star">*</span></label>
+            <select id="modalProjectLocation" class="modal-input" required>
+              <option value="" disabled selected>Select Sitio / Location</option>
+              <option value="Sitio Ibaba">Sitio Ibaba</option>
+              <option value="Sitio Santolan">Sitio Santolan</option>
+              <option value="Sitio Ilaya">Sitio Ilaya</option>
+              <option value="Sitio Gitna">Sitio Gitna</option>
+              <option value="Tierra Verde">Tierra Verde</option>
+              <option value="Potenciana Village">Potenciana Village</option>
+              <option value="G.C Berberabe">G.C Berberabe</option>
+            </select>
+            <span class="field-error" id="errorProjectLocation">Please specify the project location or sitio.</span>
+          </div>
+
+          <!-- Estimated Budget (₱) -->
+          <div class="form-group">
+            <label for="modalProjectBudget">Estimated Budget (₱) <span class="req-star">*</span></label>
+            <div class="budget-input-wrapper">
+              <span class="currency-prefix">₱</span>
+              <input type="number" id="modalProjectBudget" class="modal-input budget-input" placeholder="e.g. 250000" min="1000" step="500" required>
+            </div>
+            <span class="field-error" id="errorProjectBudget">Please enter an estimated budget in Philippine Pesos.</span>
+          </div>
+
+          <!-- Target Start Date -->
+          <div class="form-group">
+            <label for="modalProjectStartDate">Proposed Target Timeline <span class="req-star">*</span></label>
+            <input type="date" id="modalProjectStartDate" class="modal-input" required>
+            <span class="field-error" id="errorProjectStartDate">Please choose a target start date.</span>
+          </div>
+
+          <!-- Description & Rationale -->
+          <div class="form-group span-2">
+            <label for="modalProjectDescription">Description & Rationale <span class="req-star">*</span></label>
+            <textarea id="modalProjectDescription" class="modal-textarea" rows="3" placeholder="Explain why this project is needed, who will benefit, and the expected community impact..." required></textarea>
+            <span class="field-error" id="errorProjectDescription">Please provide a brief justification and community benefit.</span>
+          </div>
+
+          <!-- Contact Info Group Heading -->
+          <div class="form-group span-2 contact-header-divider">
+            <h4 class="contact-section-title">Proponent Contact Information</h4>
+            <p class="contact-section-desc">We will reach out to verify and discuss this proposal during the Council session.</p>
+          </div>
+
+          <!-- Contact Name -->
+          <div class="form-group">
+            <label for="modalProponentName">Full Name <span class="req-star">*</span></label>
+            <input type="text" id="modalProponentName" class="modal-input" placeholder="Juan Dela Cruz" pattern="[a-zA-Z\s]+" required>
+            <span class="field-error" id="errorProponentName">Name must contain letters and spaces only.</span>
+          </div>
+
+          <!-- Contact Email -->
+          <div class="form-group">
+            <label for="modalProponentEmail">Email Address <span class="req-star">*</span></label>
+            <input type="email" id="modalProponentEmail" class="modal-input" placeholder="juan@example.com" required>
+            <span class="field-error" id="errorProponentEmail">Please enter a valid email address.</span>
+          </div>
+
+          <!-- Contact Phone -->
+          <div class="form-group">
+            <label for="modalProponentPhone">Phone / Mobile <span class="req-star">*</span></label>
+            <input type="tel" id="modalProponentPhone" class="modal-input" placeholder="09171234567" inputmode="numeric" pattern="[0-9]*" maxlength="11" required>
+            <span class="field-error" id="errorProponentPhone">Contact number must contain numeric digits only (7-11 digits).</span>
+          </div>
+
+          <!-- File Upload -->
+          <div class="form-group">
+            <label for="modalProjectFile">Supporting Documents / Photos <span class="optional-tag">(Optional)</span></label>
+            <input type="file" id="modalProjectFile" class="modal-file-input" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+            <span class="file-hint">PDF, Word, or JPG/PNG photos up to 10MB</span>
+          </div>
+        </div>
+
+        <!-- Modal Actions -->
+        <div class="project-modal-actions">
+          <button type="button" class="btn-modal-cancel" id="cancelProposeModalBtn">Cancel</button>
+          <button type="submit" class="btn-modal-submit" id="submitProposalBtn">
+            <span>Submit Proposal</span>
+            <svg class="btn-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+          </button>
+        </div>
+      </form>
+
+      <!-- Success Feedback State -->
+      <div id="modalSuccessState" class="modal-success-state" style="display: none;">
+        <div class="success-icon-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </div>
+        <h4 class="success-title">Proposal Submitted Successfully!</h4>
+        <p class="success-text">Your community project proposal has been logged with tracking code <strong id="successTrackingId" class="tracking-code">PROP-8421</strong>. The Barangay Development Council will review it in the upcoming planning session.</p>
+        <button type="button" class="btn-modal-done" id="dismissSuccessModalBtn">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 2: BARANGAY SERVICES & DETAIL VIEW (#services) -->
+  <section class="section" id="services">
+    <div class="container">
+
+      <!-- MAIN SERVICES LIST VIEW (Default Screen) -->
+      <div id="services-grid-view">
+        <!-- Dark banner header -->
+        <div class="services-dark-banner">
+          <span class="services-banner-kicker">MUNICIPAL &amp; BARANGAY SERVICES</span>
+          <h2 class="services-banner-title">Barangay Services</h2>
+          <p class="services-banner-subtext" id="servicesBannerSubtext">Browse the services available at the barangay. Log in or create a verified resident account to submit a request.</p>
+        </div>
+
+        <!-- 2-Column Services Grid (Dynamically rendered via JS) -->
+        <div class="services-cards-grid" id="servicesGridContainer">
+          <!-- Populated dynamically by script.js -->
+        </div>
+      </div>
+
+      <!-- SERVICE DETAIL VIEW (Initially hidden via CSS, toggled via JS) -->
+      <div id="service-detail-view" class="service-detail-view" style="display: none;">
+        <!-- Injected dynamically by script.js when "View details →" is clicked -->
+      </div>
+
+    </div>
+  </section>
+
+  <!-- BUDGET & SPENDING TRANSPARENCY SECTION (#budget) -->
+  <section class="section budget-section" id="budget">
+    <div class="container">
+
+      <!-- 1. SECTION HEADER & FILTERS -->
+      <div class="budget-header">
+        <span class="budget-kicker">FINANCIAL GOVERNANCE</span>
+        <h2 class="budget-title">Budget & Spending Transparency</h2>
+        <p class="budget-subtitle">See how your barangay allocates and spends public funds. This is a view-only transparency report.</p>
+      </div>
+
+      <!-- Filter Controls Bar -->
+      <div class="budget-filters-bar" role="search" aria-label="Budget report filters">
+        <div class="filter-label-group">
+          <svg class="filter-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+          </svg>
+          <span>Filters:</span>
+        </div>
+
+        <div class="filter-dropdowns-row">
+          <!-- Dropdown 1: Year (Default "2026") -->
+          <div class="budget-select-wrap">
+            <select id="budgetYearFilter" class="budget-select" aria-label="Filter by Year">
+              <option value="2026" selected>2026</option>
+              <option value="2025">2025</option>
+            </select>
+            <svg class="budget-select-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+
+          <!-- Dropdown 2: Quarters -->
+          <div class="budget-select-wrap">
+            <select id="budgetQuarterFilter" class="budget-select" aria-label="Filter by Quarter">
+              <option value="all" selected>All Quarters</option>
+              <option value="Q1">Q1</option>
+              <option value="Q2">Q2</option>
+              <option value="Q3">Q3</option>
+              <option value="Q4">Q4</option>
+            </select>
+            <svg class="budget-select-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+
+          <!-- Dropdown 3: Categories -->
+          <div class="budget-select-wrap">
+            <select id="budgetCategoryFilter" class="budget-select" aria-label="Filter by Category">
+              <option value="all" selected>All Categories</option>
+              <option value="Infrastructure">Infrastructure</option>
+              <option value="Health">Health</option>
+              <option value="Social Services">Social Services</option>
+              <option value="Administration">Administration</option>
+              <option value="Emergency Preparedness">Emergency Preparedness</option>
+              <option value="Education, Sports &amp; Recreation">Education, Sports &amp; Recreation</option>
+              <option value="Agriculture &amp; Livelihood">Agriculture &amp; Livelihood</option>
+              <option value="Environment &amp; Waste Management">Environment &amp; Waste Management</option>
+            </select>
+            <svg class="budget-select-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+
+          <!-- Reset Filter Button -->
+          <button type="button" id="budgetResetFiltersBtn" class="budget-filter-reset" style="display: none;">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="1 4 1 10 7 10"></polyline>
+              <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+            </svg>
+            <span>Reset Filters</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 2. SUMMARY KPI METRICS GRID (2x2 Grid) -->
+      <div class="budget-kpi-grid">
+        <!-- Total Annual Budget -->
+        <div class="budget-kpi-card kpi-annual-budget">
+          <div class="budget-kpi-header">
+            <span class="budget-kpi-label">Total Annual Budget</span>
+            <div class="budget-kpi-icon-pill" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+              </svg>
+            </div>
+          </div>
+          <div class="budget-kpi-value" id="kpiTotalBudget">₱2,185,000</div>
+          <p class="budget-kpi-subtext" id="kpiTotalBudgetSub">Appropriated across all 4 quarters</p>
+        </div>
+
+        <!-- Total Spending -->
+        <div class="budget-kpi-card kpi-spending">
+          <div class="budget-kpi-header">
+            <span class="budget-kpi-label">Total Spending</span>
+            <div class="budget-kpi-icon-pill" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="1" x2="12" y2="23"></line>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+              </svg>
+            </div>
+          </div>
+          <div class="budget-kpi-value" id="kpiTotalSpending">₱1,418,000</div>
+          <p class="budget-kpi-subtext" id="kpiTotalSpendingSub">Actual disbursed expenditures</p>
+        </div>
+
+        <!-- Remaining Budget -->
+        <div class="budget-kpi-card kpi-remaining">
+          <div class="budget-kpi-header">
+            <span class="budget-kpi-label">Remaining Budget</span>
+            <div class="budget-kpi-icon-pill" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 14 14"></polyline>
+              </svg>
+            </div>
+          </div>
+          <div class="budget-kpi-value" id="kpiRemainingBudget">₱767,000</div>
+          <p class="budget-kpi-subtext" id="kpiRemainingBudgetSub">Available uncommitted balance</p>
+        </div>
+
+        <!-- Utilization Rate -->
+        <div class="budget-kpi-card kpi-utilization">
+          <div class="budget-kpi-header">
+            <span class="budget-kpi-label">Utilization Rate</span>
+            <div class="budget-kpi-icon-pill" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="20" x2="18" y2="10"></line>
+                <line x1="12" y1="20" x2="12" y2="4"></line>
+                <line x1="6" y1="20" x2="6" y2="14"></line>
+              </svg>
+            </div>
+          </div>
+          <div class="budget-kpi-value" id="kpiUtilizationRate">65%</div>
+          <p class="budget-kpi-subtext" id="kpiUtilizationRateSub">Fiscal disbursement velocity</p>
+        </div>
+      </div>
+
+      <!-- 3. OVERALL BUDGET UTILIZATION PROGRESS BAR -->
+      <div class="budget-utilization-card">
+        <div class="util-card-header">
+          <h3 class="util-card-title">Budget Utilization</h3>
+          <span class="util-badge-tag" id="utilizationBadge">65% spent</span>
+        </div>
+
+        <!-- Dual-color segmented linear progress bar showing spent vs. remaining -->
+        <div class="util-progress-track" role="progressbar" id="utilProgressBar" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100" aria-label="Budget Utilization Progress">
+          <div class="util-progress-spent" id="utilSpentBar" style="width: 65%;"></div>
+          <div class="util-progress-remaining" id="utilRemainingBar" style="width: 35%;"></div>
+        </div>
+
+        <div class="util-card-footer">
+          <span class="util-subtext-label" id="utilSubtextLabel">
+            <strong>₱1,418,000</strong> of <strong>₱2,185,000</strong> used · <strong>₱767,000</strong> remaining
+          </span>
+          <div class="util-legend-row">
+            <span class="util-legend-item">
+              <span class="util-legend-dot dot-spent"></span>
+              <span>Spent Funds</span>
+            </span>
+            <span class="util-legend-item">
+              <span class="util-legend-dot dot-remaining"></span>
+              <span>Remaining Balance</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. VISUAL ANALYTICS (Charts Row) -->
+      <div class="budget-analytics-grid">
+        <!-- Chart 1: Dual Bar Chart (Budget vs Actual per Quarter) -->
+        <div class="analytics-card">
+          <div class="analytics-card-header">
+            <h3 class="analytics-card-title">Budget vs. Actual per Quarter</h3>
+            <p class="analytics-card-subtitle">Quarterly allocation and actual spending comparison</p>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="budgetQuarterBarChart" aria-label="Budget versus Actual spending bar chart per quarter" role="img"></canvas>
+          </div>
+        </div>
+
+        <!-- Chart 2: Doughnut/Pie Chart (Spending / Allocation by Category) -->
+        <div class="analytics-card">
+          <div class="analytics-card-header analytics-header-split">
+            <div>
+              <h3 class="analytics-card-title" id="publicPieChartTitle">Spending by Category</h3>
+              <p class="analytics-card-subtitle" id="publicPieChartSubtitle">Disbursement breakdown across operational sectors</p>
+            </div>
+            <div class="chart-mode-toggle" id="publicPieChartModeToggle" role="group" aria-label="Pie chart metric mode">
+              <button type="button" class="chart-mode-btn active" data-pie-mode="actual">Actual</button>
+              <button type="button" class="chart-mode-btn" data-pie-mode="budget">Allocated</button>
+            </div>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="budgetCategoryPieChart" aria-label="Budget distribution by category doughnut chart" role="img"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. EXPLANATORY INFO CALLOUT -->
+      <div class="budget-info-callout" role="note">
+        <div class="info-callout-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+          </svg>
+        </div>
+        <div class="info-callout-content">
+          <h4 class="info-callout-title">Where do barangay funds go?</h4>
+          <p class="info-callout-text">
+            Barangay budget allocations are strictly administered in compliance with Republic Act No. 7160 (The Local Government Code) and DILG Full Disclosure policies to ensure fiscal transparency and community empowerment:
+          </p>
+          <ul class="info-callout-bullets">
+            <li><strong>Infrastructure:</strong> Road repairs, drainage and flood mitigation canal desiltation, smart solar streetlights, and public assembly facilities.</li>
+            <li><strong>Health:</strong> Barangay health station maintenance, maternal & infant diagnostic tools, medical missions, medicine procurement, and sanitation campaigns.</li>
+            <li><strong>Administration:</strong> Daily barangay governance, digital portal maintenance, civil registries, document verification, and staff capacity development.</li>
+            <li><strong>Social Services:</strong> Sangguniang Kabataan (SK) youth programs, Senior Citizens & PWD welfare initiatives, day care learning kits, and disaster relief reserves.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 6. BUDGET ALLOCATION RECORDS (Interactive Table View Toggle) -->
+      <div class="budget-records-section">
+        <div class="budget-toggle-wrapper">
+          <button type="button" class="btn-toggle-records" id="btnToggleBudgetRecords" aria-expanded="false" aria-controls="budgetRecordsTableContainer">
+            <span id="toggleRecordsText">View Budget Allocation Records</span>
+            <svg class="btn-toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Collapsible Table Container (Initially hidden) -->
+        <div class="budget-table-collapsible" id="budgetRecordsTableContainer" style="display: none;">
+          <div class="budget-table-header-bar">
+            <div>
+              <h3 class="budget-table-title">Budget Allocation Records</h3>
+              <p class="budget-table-count" id="budgetTableItemCount">Showing 14 allocation line items</p>
+            </div>
+          </div>
+
+          <div class="budget-table-responsive">
+            <table class="records-table" id="budgetRecordsTable">
+              <thead>
+                <tr>
+                  <th scope="col">Quarter</th>
+                  <th scope="col">Category</th>
+                  <th scope="col">Description</th>
+                  <th scope="col">Budget</th>
+                  <th scope="col">Actual</th>
+                  <th scope="col">Utilization</th>
+                </tr>
+              </thead>
+              <tbody id="budgetRecordsTbody">
+                <!-- Dynamically populated via vanilla JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- REPORT A CONCERN SECTION (#reports) -->
+  <section class="section report-concern-section" id="reports">
+    <div class="container">
+      <!-- Dark banner header matching Services and Announcements -->
+      <div class="reports-dark-banner">
+        <span class="reports-banner-kicker">COMMUNITY ISSUES & CITIZEN DESK</span>
+        <h2 class="reports-banner-title">Report a Concern</h2>
+        <p class="reports-banner-subtext">A transparent and accountable system to report neighborhood problems and track barangay action.</p>
+      </div>
+
+      <div class="report-concern-container">
+
+        <!-- 1. TOP INFO BLOCK ("About this service") -->
+        <div class="concern-info-card">
+          <div class="concern-info-header">
+            <div class="concern-info-icon-badge" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+              </svg>
+            </div>
+            <h3 class="concern-info-title">About this service</h3>
+          </div>
+          <div class="concern-info-body">
+            <p class="concern-info-paragraph">
+              Reporting a concern lets you formally inform the barangay about a problem in your area — a damaged streetlight, uncollected garbage, a drainage blockage, excessive noise, or any matter that needs the attention of the barangay. Every concern is logged, given its own tracking number, and acted on by the assigned barangay personnel.
+            </p>
+            <p class="concern-info-paragraph">
+              Filing a concern through this portal is available to registered residents so the barangay can verify the report and get back to you with the action taken.
+            </p>
+          </div>
+        </div>
+
+        <!-- 2. PROCESS & RESPONSE WORKFLOW (2-Column Desktop Grid, 1-Column Mobile) -->
+        <div class="concern-workflow-grid">
+
+          <!-- Left Card ("How to send a concern") -->
+          <div class="concern-workflow-card left-process-card">
+            <div class="workflow-card-header">
+              <div class="workflow-header-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="12" y1="18" x2="12" y2="12"></line>
+                  <line x1="9" y1="15" x2="15" y2="15"></line>
+                </svg>
+              </div>
+              <h3 class="workflow-card-title">How to send a concern</h3>
+            </div>
+
+            <ol class="workflow-steps-list">
+              <!-- Step 1 (User Plus Icon) -->
+              <li class="workflow-step-item">
+                <div class="step-icon-wrap" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="8.5" cy="7" r="4"></circle>
+                    <line x1="20" y1="8" x2="20" y2="14"></line>
+                    <line x1="23" y1="11" x2="17" y2="11"></line>
+                  </svg>
+                </div>
+                <div class="step-text-content">
+                  <span class="step-number-tag">Step 1</span>
+                  <p id="workflowStep1Text">Create a resident account or sign in to the portal.</p>
+                </div>
+              </li>
+
+              <!-- Step 2 (Document/Category Icon) -->
+              <li class="workflow-step-item">
+                <div class="step-icon-wrap" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
+                  </svg>
+                </div>
+                <div class="step-text-content">
+                  <span class="step-number-tag">Step 2</span>
+                  <p>Open Report a Concern and choose a category — infrastructure, sanitation, safety, noise, public utility, or other.</p>
+                </div>
+              </li>
+
+              <!-- Step 3 (Map Pin Icon) -->
+              <li class="workflow-step-item">
+                <div class="step-icon-wrap" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                    <circle cx="12" cy="10" r="3"></circle>
+                  </svg>
+                </div>
+                <div class="step-text-content">
+                  <span class="step-number-tag">Step 3</span>
+                  <p>Describe the issue and give the exact location or nearest landmark.</p>
+                </div>
+              </li>
+
+              <!-- Step 4 (Hashtag/ID Icon) -->
+              <li class="workflow-step-item">
+                <div class="step-icon-wrap" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="4" y1="9" x2="20" y2="9"></line>
+                    <line x1="4" y1="15" x2="20" y2="15"></line>
+                    <line x1="10" y1="3" x2="8" y2="21"></line>
+                    <line x1="16" y1="3" x2="14" y2="21"></line>
+                  </svg>
+                </div>
+                <div class="step-text-content">
+                  <span class="step-number-tag">Step 4</span>
+                  <p>Submit the concern and keep the tracking number that is issued to you.</p>
+                </div>
+              </li>
+            </ol>
+          </div>
+
+          <!-- Right Card ("How the barangay responds") -->
+          <div class="concern-workflow-card right-response-card">
+            <div class="workflow-card-header">
+              <div class="workflow-header-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+              </div>
+              <h3 class="workflow-card-title">How the barangay responds</h3>
+            </div>
+
+            <div class="workflow-status-list">
+              <!-- Status 1 (Dark Blue Icon Badge - "New") -->
+              <div class="workflow-status-item">
+                <div class="status-badge-container">
+                  <div class="dark-blue-badge">
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                      <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                    </svg>
+                    <span class="status-badge-text">New</span>
+                  </div>
+                  <div class="status-timeline-line" aria-hidden="true"></div>
+                </div>
+                <div class="status-text-content">
+                  <p>Your concern is logged and given a tracking number. Barangay personnel are notified.</p>
+                </div>
+              </div>
+
+              <!-- Status 2 (Dark Blue Magnifying Glass Icon Badge - "In Review") -->
+              <div class="workflow-status-item">
+                <div class="status-badge-container">
+                  <div class="dark-blue-badge">
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <circle cx="11" cy="11" r="8"></circle>
+                      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <span class="status-badge-text">In Review</span>
+                  </div>
+                  <div class="status-timeline-line" aria-hidden="true"></div>
+                </div>
+                <div class="status-text-content">
+                  <p>The report is validated, the site is inspected, and it is assigned to the proper committee or office.</p>
+                </div>
+              </div>
+
+              <!-- Status 3 (Dark Blue Checkmark Icon Badge - "Resolved") -->
+              <div class="workflow-status-item">
+                <div class="status-badge-container">
+                  <div class="dark-blue-badge">
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    <span class="status-badge-text">Resolved</span>
+                  </div>
+                </div>
+                <div class="status-text-content">
+                  <p>The action taken is recorded and the resolution notes are attached to your concern for you to read.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- 3. BOTTOM CALLOUT CTA BANNER ("Ready to report a concern?") -->
+        <div class="concern-cta-banner" id="concernCtaBanner">
+          <div class="concern-cta-content">
+            <div class="concern-cta-heading-row">
+              <div class="concern-cta-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                  <polyline points="9 12 11 14 15 10"></polyline>
+                </svg>
+              </div>
+              <h3 class="concern-cta-title" id="concernCtaTitle">Ready to report a concern?</h3>
+            </div>
+            <p class="concern-cta-description" id="concernCtaDescription">
+              Sign in to your resident account to file a concern and track the barangay's response, or create an account if you are not registered yet.
+            </p>
+          </div>
+
+          <div class="concern-cta-actions" id="concernCtaActions">
+            <button type="button" class="btn-concern-login" id="btnConcernLogin">Log in</button>
+            <button type="button" class="btn-concern-register" id="btnConcernRegister">Create an Account</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ANNOUNCEMENTS SECTION (#announcements) -->
+  <section class="section announcements-section" id="announcements">
+    <div class="container">
+
+      <!-- 1. SECTION HEADER (Clean Heading + Subtitle) -->
+      <div class="announcements-header">
+        <div class="announcements-header-content">
+          <span class="announcements-kicker">PUBLIC ADVISORIES &amp; BULLETINS</span>
+          <h2 class="announcements-title">Barangay Announcements</h2>
+          <p class="announcements-subtitle">Stay informed about barangay news, advisories, events, and emergency notices.</p>
+        </div>
+      </div>
+
+      <!-- 2. SEARCH & DYNAMIC FILTER BAR -->
+      <div class="announcements-filter-bar">
+        <!-- Search Input with Magnifying Glass -->
+        <div class="announcements-search-box">
+          <svg class="search-box-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" id="announcementsSearchInput" class="announcements-search-input" placeholder="Search announcements..." aria-label="Search announcements">
+          <button type="button" id="announcementsSearchClear" class="search-clear-btn" aria-label="Clear search" style="display: none;">&times;</button>
+        </div>
+
+        <!-- Category Dropdown Filter -->
+        <div class="announcements-category-box">
+          <label for="announcementsCategoryFilter" class="category-dropdown-label">Category:</label>
+          <div class="category-dropdown-wrapper">
+            <select id="announcementsCategoryFilter" class="announcements-category-select" aria-label="Filter announcements by category">
+              <option value="All">All Categories</option>
+              <option value="Emergency">Emergency</option>
+              <option value="Health">Health</option>
+              <option value="Infrastructure">Infrastructure</option>
+              <option value="Event">Event</option>
+              <option value="Social Services">Social Services</option>
+              <option value="General">General</option>
+            </select>
+            <svg class="dropdown-chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Dynamic Result Count Display -->
+        <div class="announcements-feed-count" id="announcementsFeedCount">
+          <span>6 Announcements</span>
+        </div>
+      </div>
+
+      <!-- 3. ANNOUNCEMENT CARDS FEED (Vertical Stacked Layout) -->
+      <div class="announcements-cards-feed" id="announcementsCardsFeed" role="feed" aria-label="Barangay Announcements Feed">
+        <!-- Dynamically rendered via Vanilla JS -->
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 4. INTERACTIVE DETAIL MODAL OVERLAY -->
+  <div class="modal-overlay announcement-detail-modal" id="announcementDetailModal" role="dialog" aria-modal="true" aria-hidden="true" style="display: none;">
+    <div class="modal-box announcement-modal-card">
+      <button class="modal-close" id="closeAnnouncementModalBtn" aria-label="Close modal">&times;</button>
+      <div id="announcementModalContent">
+        <!-- Populated dynamically via Vanilla JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- LOGIN & RESIDENT REGISTRATION AUTHENTICATION INTERFACE -->
+  <div class="modal-overlay" id="authModal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-box auth-card-container">
+      <button class="modal-close" id="closeModalBtn" aria-label="Close modal">&times;</button>
+
+      <!-- VIEW 1: LOGIN FORM (#login-view) -->
+      <div id="login-view" class="auth-view">
+        <div class="auth-header">
+          <div class="auth-icon-badge" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+              <polyline points="10 17 15 12 10 7"></polyline>
+              <line x1="15" y1="12" x2="3" y2="12"></line>
+            </svg>
+          </div>
+          <h2 class="auth-heading">Welcome Back!</h2>
+          <p class="auth-subtitle">Access barangay services, submit requests, and track your transactions.</p>
+        </div>
+
+        <form id="loginForm" novalidate>
+          <div class="auth-feedback-banner" id="loginFeedback" style="display: none;" role="alert"></div>
+
+          <!-- Email Field -->
+          <div class="auth-field-group">
+            <label for="loginEmail" class="auth-label">Email</label>
+            <div class="auth-input-wrapper">
+              <svg class="auth-field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                <polyline points="22,6 12,13 2,6"></polyline>
+              </svg>
+              <input type="email" id="loginEmail" class="auth-input" placeholder="you@example.com" required autocomplete="email">
+            </div>
+            </div>
+
+          <!-- Password Field -->
+          <div class="auth-field-group">
+            <div class="auth-label-row">
+              <label for="loginPassword" class="auth-label">Password</label>
+              <a href="#forgot" class="auth-link-sm" id="linkForgotPassword">Forgot password?</a>
+            </div>
+            <div class="auth-input-wrapper">
+              <svg class="auth-field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+              </svg>
+              <input type="password" id="loginPassword" class="auth-input has-password-toggle" placeholder="••••••••" required autocomplete="current-password">
+              <button type="button" class="password-toggle-btn" aria-label="Show password" title="Show password" data-target="loginPassword" tabindex="-1">
+                <svg class="eye-icon eye-show" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+                <svg class="eye-icon eye-hide" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display: none;">
+                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                  <line x1="1" y1="1" x2="23" y2="23"></line>
+                </svg>
+              </button>
+            </div>
+            <span class="auth-error-text" id="loginPasswordError"></span>
+          </div>
+
+          <!-- Checkbox Row -->
+          <div class="auth-checkbox-row">
+            <label class="auth-checkbox-label">
+              <input type="checkbox" id="loginRememberMe" class="auth-checkbox">
+              <span>Remember me</span>
+            </label>
+          </div>
+
+          <!-- Primary Submit Button -->
+          <button type="submit" class="auth-btn-primary" id="btnLoginSubmit">Log In</button>
+        </form>
+
+        <!-- Bottom Switch Link -->
+        <div class="auth-bottom-switch">
+          <span>Don't have an account?</span>
+          <button type="button" class="auth-switch-link" id="switchToRegisterBtn">Create an Account</button>
+        </div>
+      </div>
+
+      <!-- VIEW 2: REGISTRATION FORM (#register-view - initially hidden) -->
+      <div id="register-view" class="auth-view" style="display: none;">
+        <div class="auth-header">
+          <div class="auth-icon-badge" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="8.5" cy="7" r="4"></circle>
+              <line x1="20" y1="8" x2="20" y2="14"></line>
+              <line x1="23" y1="11" x2="17" y2="11"></line>
+            </svg>
+          </div>
+          <h2 class="auth-heading">Create Your Resident Account</h2>
+          <p class="auth-subtitle">Register to request barangay services online.</p>
+        </div>
+
+        <!-- Notice Callout Banner -->
+        <div class="auth-notice-callout">
+          <svg class="notice-callout-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+          </svg>
+          <div class="notice-callout-text">
+            <strong>Resident Verification:</strong> Your account will be reviewed by authorized barangay personnel before you can access resident services.
+          </div>
+        </div>
+
+        <form id="registerForm" novalidate>
+          <div class="auth-feedback-banner" id="registerFeedback" style="display: none;" role="alert"></div>
+
+          <!-- Full Name -->
+          <div class="auth-field-group">
+            <label for="regFullName" class="auth-label">Full Legal Name <span class="auth-required-mark">*</span></label>
+            <input type="text" id="regFullName" class="auth-input no-icon" placeholder="Juan Dela Cruz Santos" required autocomplete="name">
+            <span class="auth-error-text" id="regFullNameError"></span>
+          </div>
+
+          <!-- 2-Column Row: Gender + Civil Status -->
+          <div class="auth-row-2col">
+            <div class="auth-field-group">
+              <label for="regGender" class="auth-label">Gender<span class="auth-required-mark">*</span></label>
+              <div class="auth-input-wrapper">
+                <svg class="auth-field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                <select id="regGender" class="auth-input" required>
+                  <option value="" disabled selected>Select Gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other / Non-Binary">Other / Non-Binary</option>
+                  <option value="Prefer not to say">Prefer not to say</option>
+                </select>
+              </div>
+              <span class="auth-error-text" id="regGenderError"></span>
+            </div>
+
+            <div class="auth-field-group">
+              <label for="regCivilStatus" class="auth-label">Civil Status <span class="auth-required-mark">*</span></label>
+              <div class="auth-input-wrapper">
+                <svg class="auth-field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+                <select id="regCivilStatus" class="auth-input" required>
+                  <option value="" disabled selected>Select Civil Status</option>
+                  <option value="Single">Single</option>
+                  <option value="Married">Married</option>
+                  <option value="Widowed">Widowed</option>
+                  <option value="Separated">Separated</option>
+                  <option value="Divorced">Divorced</option>
+                </select>
+              </div>
+              <span class="auth-error-text" id="regCivilStatusError"></span>
+            </div>
+          </div>
+
+          <!-- 2-Column Row: Date of Birth + Age -->
+          <div class="auth-row-2col">
+            <div class="auth-field-group">
+              <label for="regDob" class="auth-label">Date of Birth <span class="auth-required-mark">*</span></label>
+              <div class="auth-input-wrapper">
+                <svg class="auth-field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                  <line x1="8" y1="2" x2="8" y2="6"></line>
+                  <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                <input type="date" id="regDob" class="auth-input" required autocomplete="bday">
+              </div>
+              <span class="auth-error-text" id="regDobError"></span>
+            </div>
+
+            <div class="auth-field-group">
+              <label for="regAge" class="auth-label">Age <span class="auth-required-mark">*</span></label>
+              <div class="auth-input-wrapper">
+                <svg class="auth-field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                <input type="text" id="regAge" class="auth-input" inputmode="numeric" pattern="[0-9]*" maxlength="3" disabled>
+              </div>
+              <span class="auth-error-text" id="regAgeError"></span>
+            </div>
+          </div>
+
+          <!-- 2-Column Row: Mobile Number + Email Address -->
+          <div class="auth-row-2col">
+            <div class="auth-field-group">
+              <label for="regMobile" class="auth-label">
+                Mobile Number <span class="auth-required-mark">*</span>
+              </label>
+              <div class="auth-input-wrapper">
+                <svg class="auth-field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                </svg>
+                <input type="tel" id="regMobile" class="auth-input" placeholder="09171234567" inputmode="numeric" pattern="[0-9]*" maxlength="11" required autocomplete="tel">
+              </div>
+              <span class="auth-error-text" id="regMobileError"></span>
+            </div>
+
+            <div class="auth-field-group">
+              <label for="regEmail" class="auth-label">
+                Email Address <span class="auth-required-mark">*</span>
+              </label>
+
+              <div class="auth-input-wrapper">
+                <svg class="auth-field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                  <polyline points="22,6 12,13 2,6"></polyline>
+                </svg>
+
+                <input type="email" id="regEmail" class="auth-input" placeholder="you@example.com" required autocomplete="email">
+              </div>
+
+              <span class="auth-error-text" id="regEmailError" style="display: none; width: 100%; margin-top: 5px;"></span>
+            </div>
+            </div>
+
+          <!-- Address -->
+          <div class="auth-field-group">
+            <label for="regAddress" class="auth-label">Address (House No. / Street) <span class="auth-required-mark">*</span></label>
+            <div class="auth-input-wrapper">
+              <svg class="auth-field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+              </svg>
+              <input type="text" id="regAddress" class="auth-input" placeholder="House No., Street Name" required autocomplete="street-address">
+            </div>
+            <span class="auth-error-text" id="regAddressError"></span>
+          </div>
+
+          <!-- Sitio / Purok -->
+          <div class="auth-field-group">
+            <label for="regSitio" class="auth-label">Sitio / Purok <span class="auth-required-mark">*</span></label>
+            <select id="regSitio" class="auth-input no-icon" required>
+              <option value="" disabled selected>Select Sitio / Purok</option>
+              <option value="Sitio Ibaba">Sitio Ibaba</option>
+              <option value="Sitio Santolan">Sitio Santolan</option>
+              <option value="Sitio Ilaya">Sitio Ilaya</option>
+              <option value="Sitio Gitna">Sitio Gitna</option>
+              <option value="Tierra Verde">Tierra Verde</option>
+              <option value="Potenciana Village">Potenciana Village</option>
+              <option value="G.C Berberabe">G.C Berberabe</option>
+            </select>
+            <span class="auth-error-text" id="regSitioError"></span>
+          </div>
+
+          <!-- Submit ID (Picture / Attachment) Field -->
+          <div class="auth-field-group">
+            <div class="auth-label-row">
+              <label for="regIdType" class="auth-label">Submit ID (Picture / Attachment) <span class="auth-required-mark">*</span></label>
+            </div>
+            <div class="auth-input-wrapper" style="margin-bottom: 8px;">
+              <svg class="auth-field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="3" y="4" width="18" height="16" rx="2"></rect>
+                <circle cx="9" cy="10" r="2"></circle>
+                <line x1="15" y1="8" x2="17" y2="8"></line>
+                <line x1="15" y1="12" x2="17" y2="12"></line>
+                <line x1="7" y1="16" x2="17" y2="16"></line>
+              </svg>
+              <select id="regIdType" class="auth-input" required>
+                <option value="Philippine National ID (PhilID)" selected>Philippine National ID (PhilID)</option>
+                <option value="Driver's License">Driver's License (LTO)</option>
+                <option value="COMELEC Voter's ID / Cert">COMELEC Voter's ID / Certification</option>
+                <option value="UMID / SSS ID">UMID / SSS ID</option>
+                <option value="Postal ID">Postal ID</option>
+                <option value="Philippine Passport">Philippine Passport</option>
+                <option value="Senior Citizen ID">Senior Citizen ID</option>
+                <option value="Student / School ID">Student / School ID</option>
+                <option value="PRC Professional ID">PRC Professional ID</option>
+                <option value="Barangay Resident ID">Barangay Resident ID</option>
+              </select>
+            </div>
+
+            <!-- ID Upload Dropzone -->
+            <input type="file" id="regIdFile" accept="image/jpeg,image/png,image/webp,application/pdf" style="display: none;">
+            <div class="auth-file-dropzone" id="regIdDropzone" tabindex="0" role="button" aria-label="Upload Government ID picture or attachment">
+              <svg class="auth-file-dropzone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                <polyline points="21 15 16 10 5 21"></polyline>
+              </svg>
+              <span class="auth-file-dropzone-title">Upload Valid ID Photo or Document Attachment <span class="auth-required-mark">*</span></span>
+              <span class="auth-file-dropzone-sub">Click to browse or drag &amp; drop (PNG, JPG, WEBP, or PDF max 10MB)</span>
+            </div>
+            
+            <!-- ID File Preview Container (hidden until file selected) -->
+            <div id="regIdPreviewCard" class="auth-file-preview-card" style="display: none;">
+              <div class="auth-file-preview-left">
+                <img id="regIdPreviewThumb" class="auth-file-preview-thumb" src="" alt="ID Preview" style="display: none;">
+                <div id="regIdPreviewIcon" class="auth-file-preview-icon">
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                </div>
+                <div class="auth-file-preview-meta">
+                  <span id="regIdFileName" class="auth-file-preview-name">id-document.jpg</span>
+                  <span id="regIdFileSize" class="auth-file-preview-size">0 KB</span>
+                </div>
+              </div>
+              <button type="button" id="btnRemoveRegIdFile" class="auth-file-remove-btn" title="Remove attached file">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                <span>Remove</span>
+              </button>
+            </div>
+            <span class="auth-error-text" id="regIdFileError"></span>
+          </div>
+
+          <!-- Proof of Residency Field (Optional) -->
+          <div class="auth-field-group">
+            <div class="auth-label-row">
+              <label for="regProofType" class="auth-label">Proof of Residency <span class="auth-optional-badge">(Optional)</span></label>
+            </div>
+            <div class="auth-input-wrapper" style="margin-bottom: 8px;">
+              <svg class="auth-field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+              </svg>
+              <select id="regProofType" class="auth-input">
+                <option value="">-- No Proof of Residency Attached (Optional) --</option>
+                <option value="PrimeWater Utility Bill">PrimeWater Utility Bill (Last 3 mos)</option>
+                <option value="Meralco Electric Bill">Meralco Electric Bill</option>
+                <option value="Barangay Certification of Residence">Barangay Certification of Residence</option>
+                <option value="Lease Agreement Contract">Notarized Lease Agreement</option>
+                <option value="PLDT / Telecom Billing Statement">PLDT / Telecom Billing Statement</option>
+              </select>
+            </div>
+
+            <!-- Proof of Residency File Dropzone -->
+            <input type="file" id="regProofFile" accept="image/jpeg,image/png,image/webp,application/pdf" style="display: none;">
+            <div class="auth-file-dropzone" id="regProofDropzone" tabindex="0" role="button" aria-label="Upload Proof of Residency attachment (optional)">
+              <svg class="auth-file-dropzone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+              <span class="auth-file-dropzone-title">Upload Billing Statement / Lease Attachment <span class="auth-optional-badge">(Optional)</span></span>
+              <span class="auth-file-dropzone-sub">Optional: Attach copy of utility bill or lease contract (JPG, PNG, PDF)</span>
+            </div>
+
+            <!-- Proof File Preview Container (hidden until file selected) -->
+            <div id="regProofPreviewCard" class="auth-file-preview-card" style="display: none;">
+              <div class="auth-file-preview-left">
+                <img id="regProofPreviewThumb" class="auth-file-preview-thumb" src="" alt="Proof Preview" style="display: none;">
+                <div id="regProofPreviewIcon" class="auth-file-preview-icon">
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                </div>
+                <div class="auth-file-preview-meta">
+                  <span id="regProofFileName" class="auth-file-preview-name">proof-of-residency.pdf</span>
+                  <span id="regProofFileSize" class="auth-file-preview-size">0 KB</span>
+                </div>
+              </div>
+              <button type="button" id="btnRemoveRegProofFile" class="auth-file-remove-btn" title="Remove attached file">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                <span>Remove</span>
+              </button>
+            </div>
+            <span class="auth-error-text" id="regProofFileError"></span>
+          </div>
+
+          <!-- 2-Column Row: Password + Confirm Password -->
+          <div class="auth-row-2col">
+            <div class="auth-field-group">
+              <label for="regPassword" class="auth-label">Password <span class="auth-required-mark">*</span></label>
+              <div class="auth-input-wrapper">
+                <svg class="auth-field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+                <input type="password" id="regPassword" class="auth-input has-password-toggle" placeholder="••••••••" required autocomplete="new-password">
+                <button type="button" class="password-toggle-btn" aria-label="Show password" title="Show password" data-target="regPassword" tabindex="-1">
+                  <svg class="eye-icon eye-show" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                  <svg class="eye-icon eye-hide" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display: none;">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                  </svg>
+                </button>
+              </div>
+              <span class="auth-error-text" id="regPasswordError"></span>
+            </div>
+
+            <div class="auth-field-group">
+              <label for="regConfirmPassword" class="auth-label">Confirm Password <span class="auth-required-mark">*</span></label>
+              <div class="auth-input-wrapper">
+                <svg class="auth-field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+                <input type="password" id="regConfirmPassword" class="auth-input has-password-toggle" placeholder="••••••••" required autocomplete="new-password">
+                <button type="button" class="password-toggle-btn" aria-label="Show password" title="Show password" data-target="regConfirmPassword" tabindex="-1">
+                  <svg class="eye-icon eye-show" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                  <svg class="eye-icon eye-hide" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display: none;">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                  </svg>
+                </button>
+              </div>
+              <span class="auth-error-text" id="regConfirmPasswordError"></span>
+            </div>
+          </div>
+
+          <!-- Primary Submit Button -->
+          <button type="submit" class="auth-btn-primary" id="btnRegisterSubmit">Create Account &amp; Submit for Admin Verification</button>
+        </form>
+
+        <!-- Bottom Switch Link -->
+        <div class="auth-bottom-switch">
+          <span>Already have an account?</span>
+          <button type="button" class="auth-switch-link" id="switchToLoginBtn">Log In</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: POST-REGISTRATION PENDING ADMIN VERIFICATION NOTICE -->
+  <div class="modal-overlay" id="regPendingModal" role="dialog" aria-modal="true" aria-labelledby="regPendingTitle">
+    <div class="auth-card-container pending-verif-card" style="max-width: 520px;">
+      <button class="modal-close" id="btnClosePendingModal" aria-label="Close dialog">&times;</button>
+
+      <div class="pending-verif-badge-pill" style="margin-top: 6px;">
+        <span>⚡ Status: Pending Administrative Verification</span>
+      </div>
+
+      <h2 class="auth-heading" id="regPendingTitle" style="font-size: 22px;">Account Submitted for Verification</h2>
+      <p class="auth-subtitle" style="margin-bottom: 14px;">
+        Your resident registration was submitted successfully and is queued for verification by the Barangay Pallocan West civil administration.
+      </p>
+
+      <div class="pending-verif-summary-box">
+        <div class="pending-verif-summary-row">
+          <span class="pending-verif-lbl">Applicant Name:</span>
+          <span class="pending-verif-val" id="summaryPendingName">Juan Dela Cruz</span>
+        </div>
+        <div class="pending-verif-summary-row">
+          <span class="pending-verif-lbl">Registered Email:</span>
+          <span class="pending-verif-val" id="summaryPendingEmail">juan@example.com</span>
+        </div>
+        <div class="pending-verif-summary-row">
+          <span class="pending-verif-lbl">Gender &amp; Civil Status:</span>
+          <span class="pending-verif-val" id="summaryPendingGenderCivil">Male · Single</span>
+        </div>
+        <div class="pending-verif-summary-row">
+          <span class="pending-verif-lbl">Submitted ID:</span>
+          <span class="pending-verif-val" id="summaryPendingIdType">Philippine National ID (PhilID)</span>
+        </div>
+        <div class="pending-verif-summary-row">
+          <span class="pending-verif-lbl">Proof of Residency:</span>
+          <span class="pending-verif-val" id="summaryPendingProofType">PrimeWater Utility Bill</span>
+        </div>
+        <div class="pending-verif-summary-row">
+          <span class="pending-verif-lbl">Account Access:</span>
+          <span class="pending-verif-val" style="color: #d97706; font-weight: 700;">Locked until Admin Approval</span>
+        </div>
+      </div>
+
+      <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 12px 14px; text-align: left; font-size: 12.5px; color: #1e3a8a; margin-bottom: 20px; line-height: 1.5;">
+        <strong>Admin Verification Policy:</strong> Accounts must be verified first by an administrator before you can sign in. An admin will review your submitted ID and residency documents.
+      </div>
+
+      <div class="pending-verif-actions-center">
+        <button type="button" class="btn-pending-return-sm" id="btnPendingToLogin">
+          Return to Sign In
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <p>© 2026 Brgy360. Your Barangay, All in One.</p>
+      <p style="color: #64748b; font-size: 13px; margin-top: 4px;">Bridging Technology and Governance.</p>
+      <div style="margin-top: 10px; display: inline-flex; align-items: center; gap: 8px;">
+        <a href="admin.html" id="footerAdminLink" style="display: inline-flex; align-items: center; gap: 6px; color: #0d47a1; font-weight: 600; font-size: 12.5px; text-decoration: none; padding: 4px 10px; background: rgba(13, 71, 161, 0.08); border-radius: 6px; border: 1px solid rgba(13, 71, 161, 0.15);">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="9" rx="1"></rect>
+            <rect x="14" y="3" width="7" height="5" rx="1"></rect>
+            <rect x="14" y="12" width="7" height="9" rx="1"></rect>
+            <rect x="3" y="16" width="7" height="5" rx="1"></rect>
+          </svg>
+          <span>Admin Analytics &amp; Governance Console &rarr;</span>
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <script type="module" src="./script.js"></script>
+</body>
+</html>

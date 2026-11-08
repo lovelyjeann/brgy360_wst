@@ -1,0 +1,1385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resident Portal | Brgy360 - Barangay Pallocan West</title>
+  <meta name="description" content="Brgy360 Resident Portal - Access municipal services, track document requests, report concerns, and propose community projects.">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+
+  <!-- Google Fonts: Poppins -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="user.css">
+
+  <!-- Universal Authentication & Route Guard -->
+  <script type="module" src="./auth.js"></script>
+</head>
+<body class="user-portal-body">
+
+  <!-- TOP BAR HEADER -->
+  <header class="user-topbar" id="userTopbar">
+    <div class="topbar-left">
+      <!-- Mobile Sidebar Toggle -->
+      <button type="button" class="sidebar-toggle-btn" id="sidebarToggle" aria-label="Toggle Navigation Sidebar">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+
+      <!-- Brand Lockup -->
+      <a href="index.html" class="topbar-brand">
+        <img src="assets/logo.svg" alt="Brgy360 Seal" class="topbar-logo">
+        <div class="topbar-brand-text">
+          <span class="topbar-brand-title">Brgy360</span>
+          <span class="topbar-brand-sub">Resident Portal</span>
+        </div>
+      </a>
+
+      <!-- Breadcrumb indicator -->
+      <div class="topbar-breadcrumb">
+        <span class="breadcrumb-separator">/</span>
+        <span class="breadcrumb-current" id="breadcrumbTitle">Dashboard Home</span>
+      </div>
+    </div>
+
+    <div class="topbar-right">
+      <!-- Notification Bell -->
+      <div class="topbar-dropdown-wrap">
+        <button type="button" class="topbar-icon-btn" id="notifBellBtn" aria-label="View notifications" aria-expanded="false">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
+          <span class="notif-badge" id="notifCountBadge">0</span>
+        </button>
+
+        <!-- Notification Dropdown Menu -->
+        <div class="topbar-dropdown-menu notif-dropdown" id="notifDropdown">
+          <div class="dropdown-header">
+            <div>
+              <h4 class="dropdown-title">Notifications</h4>
+              <span class="dropdown-subtitle" id="notifUnreadCount">0 unread notices</span>
+            </div>
+            <button type="button" class="btn-text-action" id="markAllReadBtn">Mark all as read</button>
+          </div>
+          <div class="notif-items-list" id="notifList">
+            <!-- Populated via user.js -->
+          </div>
+        </div>
+      </div>
+
+      <!-- User Profile Avatar Pill -->
+      <div class="topbar-dropdown-wrap">
+        <button type="button" class="user-profile-pill" id="userProfileBtn" aria-expanded="false" aria-label="User account menu">
+          <div class="user-avatar-circle" id="topbarAvatar">—</div>
+          <div class="user-pill-info">
+            <span class="user-pill-name" id="topbarUserName">Loading...</span>
+          </div>
+          <svg class="chevron-down-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
+
+        <!-- Profile Dropdown Menu -->
+        <div class="topbar-dropdown-menu profile-dropdown" id="profileDropdown">
+          <div class="profile-dropdown-header">
+            <div class="user-avatar-circle large" id="dropdownAvatar">—</div>
+            <div class="profile-header-details">
+              <span class="profile-header-name" id="dropdownUserName">Loading...</span>
+              <span class="profile-header-email" id="dropdownUserEmail">Loading...</span>
+              <span class="profile-header-tier" id="dropdownUserTier">Loading...</span>
+            </div>
+          </div>
+          <div class="dropdown-divider"></div>
+          <div class="profile-menu-links">
+            <button type="button" class="dropdown-menu-item" data-goto-tab="account">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              <span>Profile Settings</span>
+            </button>
+            <button type="button" class="dropdown-menu-item" data-goto-tab="services">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+              </svg>
+              <span>My Requests</span>
+            </button>
+            <button type="button" class="dropdown-menu-item" data-goto-tab="reports">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+              </svg>
+              <span>My Concerns</span>
+            </button>
+            <div class="dropdown-divider"></div>
+            <button type="button" class="dropdown-menu-item logout-item" id="topbarLogoutBtn">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
+              <span>Log Out</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- PORTAL WRAPPER (SIDEBAR + MAIN CONTENT) -->
+  <div class="user-portal-container">
+    
+    <!-- MOBILE BACKDROP OVERLAY -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+    <!-- STICKY SIDEBAR NAVIGATION -->
+    <aside class="user-sidebar" id="userSidebar">
+      <!-- Resident Profile Card in Sidebar -->
+      <div class="sidebar-resident-card">
+        <div class="sidebar-avatar-wrap">
+          <div class="user-avatar-circle" id="sidebarAvatar">—</div>
+          <span class="avatar-verified-badge" title="Identity Verified">
+            <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </span>
+        </div>
+        <div class="sidebar-resident-meta">
+          <h4 class="sidebar-resident-name" id="sidebarUserName">Loading...</h4>
+          <span class="sidebar-resident-badge" id="sidebarUserStatus">Loading...</span>
+        </div>
+      </div>
+
+      <!-- Main Navigation Menu Links -->
+      <nav class="sidebar-nav" aria-label="Resident Portal Tabs">
+        <ul class="sidebar-nav-list">
+          <li class="sidebar-nav-item">
+            <button type="button" class="sidebar-nav-link active" data-tab="dashboard" id="tabBtn-dashboard">
+              <svg class="nav-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="7" height="7"></rect>
+                <rect x="14" y="3" width="7" height="7"></rect>
+                <rect x="14" y="14" width="7" height="7"></rect>
+                <rect x="3" y="14" width="7" height="7"></rect>
+              </svg>
+              <span class="nav-label">Dashboard Home</span>
+            </button>
+          </li>
+
+          <li class="sidebar-nav-item">
+            <button type="button" class="sidebar-nav-link" data-tab="services" id="tabBtn-services">
+              <svg class="nav-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+              </svg>
+              <span class="nav-label">My Service Requests</span>
+              <span class="nav-counter-tag" id="sidebarServicesCount"></span>
+            </button>
+          </li>
+
+          <li class="sidebar-nav-item">
+            <button type="button" class="sidebar-nav-link" data-tab="reports" id="tabBtn-reports">
+              <svg class="nav-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              <span class="nav-label">My Concerns &amp; Reports</span>
+              <span class="nav-counter-tag warning" id="sidebarReportsCount"></span>
+            </button>
+          </li>
+
+          <li class="sidebar-nav-item">
+            <button type="button" class="sidebar-nav-link" data-tab="proposals" id="tabBtn-proposals">
+              <svg class="nav-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="2" x2="12" y2="6"></line>
+                <line x1="12" y1="18" x2="12" y2="22"></line>
+                <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line>
+                <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
+                <line x1="2" y1="12" x2="6" y2="12"></line>
+                <line x1="18" y1="12" x2="22" y2="12"></line>
+                <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line>
+                <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
+              </svg>
+              <span class="nav-label">Propose Project</span>
+            </button>
+          </li>
+
+          <li class="sidebar-nav-item">
+            <button type="button" class="sidebar-nav-link" data-tab="account" id="tabBtn-account">
+              <svg class="nav-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              <span class="nav-label">My Account &amp; Verification</span>
+            </button>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- Sidebar Bottom Actions -->
+      <div class="sidebar-bottom-section">
+        <div class="sidebar-divider"></div>
+        <a href="index.html" class="sidebar-secondary-link">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+          <span>Return to Website</span>
+        </a>
+
+        <button type="button" class="sidebar-logout-btn" id="sidebarLogoutBtn">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          <span>Sign Out</span>
+        </button>
+
+        <div class="sidebar-seal-badge">
+          <span class="seal-dot"></span>
+          <span>Barangay Pallocan West • Official Portal</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN VIEWPORT CONTENT (TABBED SPA ARCHITECTURE) -->
+    <main class="user-main" id="userMain">
+
+      <!-- ========================================== -->
+      <!-- TAB 1: DASHBOARD HOME (#user-dashboard)   -->
+      <!-- ========================================== -->
+      <section class="user-tab-panel active" id="user-dashboard">
+        
+        <!-- Welcome Banner Card -->
+        <div class="dash-welcome-card">
+          <div class="welcome-text-wrap">
+            <div class="welcome-top-meta">
+              <span class="welcome-badge-verified">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <span id="welcomeVerificationBadge">Loading...</span>
+              </span>
+              <span class="welcome-date-text" id="welcomeCurrentDate">Loading...</span>
+            </div>
+            <h1 class="welcome-heading">Welcome back, <span id="welcomeUserName">Loading...</span>!</h1>
+            <p class="welcome-subtext">Access official barangay clearance and certification services, monitor submitted community concerns, and collaborate on local development projects.</p>
+          </div>
+          <div class="welcome-actions">
+            <button type="button" class="btn-dash-primary" id="btnDashNewRequest">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              <span>Request Document</span>
+            </button>
+            <button type="button" class="btn-dash-outline" id="btnDashNewConcern">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+              </svg>
+              <span>Report a Concern</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 4 KPI Summary Cards Grid -->
+        <div class="dash-kpi-grid">
+          <!-- Card 1: Active Service Requests -->
+          <div class="kpi-card" data-goto-tab="services">
+            <div class="kpi-card-header">
+              <span class="kpi-card-label">Active Service Requests</span>
+              <div class="kpi-icon-wrap blue" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-card-body">
+              <div class="kpi-number" id="kpiActiveRequests">2</div>
+              <div class="kpi-status-sub">
+                <span class="status-pill status-ready">1 Ready for Pickup</span>
+                <span class="status-pill status-in-review">1 In Review</span>
+              </div>
+            </div>
+            <div class="kpi-card-footer">
+              <span>View requests and claim slips &rarr;</span>
+            </div>
+          </div>
+
+          <!-- Card 2: Submitted Concerns -->
+          <div class="kpi-card" data-goto-tab="reports">
+            <div class="kpi-card-header">
+              <span class="kpi-card-label">Submitted Concerns</span>
+              <div class="kpi-icon-wrap amber" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                  <line x1="12" y1="9" x2="12" y2="13"></line>
+                  <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-card-body">
+              <div class="kpi-number" id="kpiTotalConcerns">3</div>
+              <div class="kpi-status-sub" id="kpiConcernsStatusSub">
+                <span class="status-pill status-resolved">2 Resolved</span>
+                <span class="status-pill status-in-review">1 In Progress</span>
+              </div>
+            </div>
+            <div class="kpi-card-footer">
+              <span>Check personnel action &rarr;</span>
+            </div>
+          </div>
+
+          <!-- Card 3: Community Project Proposals -->
+          <div class="kpi-card" data-goto-tab="proposals">
+            <div class="kpi-card-header">
+              <span class="kpi-card-label">Project Proposals</span>
+              <div class="kpi-icon-wrap green" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-card-body">
+              <div class="kpi-number" id="kpiTotalProposals">1</div>
+              <div class="kpi-status-sub">
+                <span class="status-pill status-pending">Under BDC Review</span>
+              </div>
+            </div>
+            <div class="kpi-card-footer">
+              <span>Track council deliberation &rarr;</span>
+            </div>
+          </div>
+
+          <!-- Card 4: Resident Verification Status -->
+          <div class="kpi-card" data-goto-tab="account">
+            <div class="kpi-card-header">
+              <span class="kpi-card-label">Verification Tier</span>
+              <div class="kpi-icon-wrap gold" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                  <polyline points="9 12 11 14 15 10"></polyline>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-card-body">
+              <div class="kpi-status-main">
+                <span class="verified-dot"></span>
+                <span>Active &amp; Verified</span>
+              </div>
+              <p class="kpi-detail-text">Level 2 Resident • Philippine National ID Verified</p>
+            </div>
+            <div class="kpi-card-footer">
+              <span>View residency credentials &rarr;</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dashboard 2-Column Section: Recent Activity + Helpful Info -->
+        <div class="dash-split-grid">
+          <!-- Left: Recent Activity Feed & Table -->
+          <div class="dash-card">
+            <div class="dash-card-header">
+              <div>
+                <h3 class="dash-card-title">Recent Activity &amp; Submissions</h3>
+                <p class="dash-card-subtitle">Real-time status updates of your barangay transactions</p>
+              </div>
+              <button type="button" class="btn-card-link" data-goto-tab="services">View All &rarr;</button>
+            </div>
+            <div class="activity-table-wrap">
+              <table class="dash-table" id="recentActivityTable">
+                <thead>
+                  <tr>
+                    <th>Reference</th>
+                    <th>Type &amp; Subject</th>
+                    <th>Date Filed</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="dashActivityTableBody">
+                  <!-- Injected via user.js -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Right: Barangay Hall Service Info & Emergency Contacts -->
+          <div class="dash-card">
+            <div class="dash-card-header">
+              <div>
+                <h3 class="dash-card-title">Barangay Desk Information</h3>
+                <p class="dash-card-subtitle">Hall schedule, pickup guidelines, and assistance</p>
+              </div>
+            </div>
+
+            <div class="desk-info-box">
+              <div class="desk-info-row">
+                <div class="desk-info-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                  </svg>
+                </div>
+                <div>
+                  <h4 class="desk-info-title">Window Service Hours</h4>
+                  <p class="desk-info-text">Monday to Friday: <strong>8:00 AM – 5:00 PM</strong> (No noon break). Document release window operates continuously.</p>
+                </div>
+              </div>
+
+              <div class="desk-info-row">
+                <div class="desk-info-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                    <circle cx="12" cy="10" r="3"></circle>
+                  </svg>
+                </div>
+                <div>
+                  <h4 class="desk-info-title">Hall Location &amp; Claiming</h4>
+                  <p class="desk-info-text">Barangay Hall, Pallocan West, Batangas City. Present your Reference Code (e.g. <code>BRGY-XXXXXX</code>) and 1 valid ID.</p>
+                </div>
+              </div>
+
+              <div class="desk-info-row">
+                <div class="desk-info-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                  </svg>
+                </div>
+                <div>
+                  <h4 class="desk-info-title">Emergency &amp; Help Desk</h4>
+                  <p class="desk-info-text">BPSO Hotline: <strong>(043) 723-1568</strong> / <strong>0917-888-BRGY</strong><br>CDRMO Disaster Rescue: <strong>(043) 702-3900</strong></p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Preemptive Advisory Card -->
+            <div class="desk-advisory-callout">
+              <span class="advisory-badge">Advisory</span>
+              <p>Typhoon Alert Level 1 remains in effect. Emergency assistance units are on standby 24/7. Stay safe and report hazards promptly.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- TAB 2: MY SERVICE REQUESTS (#user-services)    -->
+      <!-- ============================================== -->
+      <section class="user-tab-panel" id="user-services">
+        <!-- Tab Header -->
+        <div class="panel-header">
+          <div>
+            <span class="panel-kicker">DOCUMENT APPLICATIONS &amp; CERTIFICATIONS</span>
+            <h2 class="panel-title">My Service Requests</h2>
+            <p class="panel-subtitle">Apply for official barangay clearances, residency certificates, and track application progress from submission to claiming.</p>
+          </div>
+          <button type="button" class="btn-dash-primary" id="btnOpenNewDocModal">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span>New Document Request</span>
+          </button>
+        </div>
+
+        <!-- Available Services Selector Cards -->
+        <div class="services-selector-section">
+          <h3 class="section-subheading">Choose a Service to Apply</h3>
+          <div class="services-mini-grid" id="servicesCatalogGrid">
+            <!-- Populated via user.js -->
+          </div>
+        </div>
+
+        <!-- Request Status Tracker & History -->
+        <div class="dash-card">
+          <div class="dash-card-header flex-column-mobile" style="margin-bottom: 14px;">
+            <div>
+              <h3 class="dash-card-title">My Application History</h3>
+              <p class="dash-card-subtitle">Real-time status updates, pickup slips, and tracking numbers</p>
+            </div>
+          </div>
+
+          <!-- Single Row Search & Filters Toolbar -->
+          <div class="card-filters-row card-filters-single-row">
+            <div class="table-search-box">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input type="text" id="requestsSearchInput" placeholder="Search reference or document..." class="table-search-input">
+            </div>
+
+            <div class="filter-pills-row" id="requestsFilterPills">
+              <button type="button" class="filter-pill-btn active" data-filter="All">All (<span id="countAllReq">0</span>)</button>
+              <button type="button" class="filter-pill-btn" data-filter="Ready for Pickup">Ready for Pickup (<span id="countReadyReq">0</span>)</button>
+              <button type="button" class="filter-pill-btn" data-filter="Completed">Completed (<span id="countDoneReq">0</span>)</button>
+              <button type="button" class="filter-pill-btn" data-filter="Cancelled">Cancelled (<span id="countCancelReq">0</span>)</button>
+            </div>
+          </div>
+
+          <!-- Requests Table -->
+          <div class="activity-table-wrap">
+            <table class="dash-table" id="servicesRequestsTable">
+              <thead>
+                <tr>
+                  <th class="table-col-nowrap">Reference No.</th>
+                  <th>Document Type</th>
+                  <th>Purpose</th>
+                  <th class="table-col-nowrap">Date Filed</th>
+                  <th class="table-col-nowrap">Claim Method</th>
+                  <th class="table-col-nowrap">Status</th>
+                  <th class="table-col-nowrap">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="servicesRequestsTableBody">
+                <!-- Dynamically populated via user.js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- TAB 3: MY CONCERNS & COMPLAINTS (#user-reports)-->
+      <!-- ============================================== -->
+      <section class="user-tab-panel" id="user-reports">
+        <!-- Tab Header -->
+        <div class="panel-header">
+          <div>
+            <span class="panel-kicker">CITIZEN ASSISTANCE &amp; INCIDENT DESK</span>
+            <h2 class="panel-title">My Concerns &amp; Reports</h2>
+            <p class="panel-subtitle">Report neighborhood issues such as broken streetlights, uncollected waste, drainage clogs, or noise disturbances with real-time verification and inspection updates.</p>
+          </div>
+          <button type="button" class="btn-dash-primary" id="btnOpenNewConcernModal">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span>Report a Concern</span>
+          </button>
+        </div>
+
+        <!-- 3-Step Process Reminder Banner -->
+        <div class="workflow-info-banner">
+          <div class="workflow-banner-title">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="16" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+            <span>How Barangay Pallocan West Resolves Your Concern</span>
+          </div>
+          <div class="workflow-banner-steps">
+            <div class="step-pill">
+              <span class="step-num">1</span>
+              <span><strong>Pending:</strong> Ticket submitted &amp; awaiting review</span>
+            </div>
+            <span class="step-arrow">&rarr;</span>
+            <div class="step-pill">
+              <span class="step-num">2</span>
+              <span><strong>In Progress:</strong> Admin reviewing &amp; action underway</span>
+            </div>
+            <span class="step-arrow">&rarr;</span>
+            <div class="step-pill">
+              <span class="step-num">3</span>
+              <span><strong>Resolved:</strong> Action completed &amp; documented</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Inline Submission Success Banner -->
+        <div class="concern-success-banner" id="concernSuccessBanner" role="status" aria-live="polite" style="display: none;">
+          <div class="concern-success-icon">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </div>
+          <div class="concern-success-content">
+            <h4 class="concern-success-title" id="concernSuccessTitle">Concern Submitted Successfully!</h4>
+            <p class="concern-success-desc" id="concernSuccessDesc">Your concern has been recorded and forwarded to the Barangay Admin Concern Desk.</p>
+          </div>
+          <button type="button" class="concern-success-close" id="closeConcernSuccessBanner" aria-label="Dismiss message">&times;</button>
+        </div>
+
+        <!-- Concerns Feed & History -->
+        <div class="dash-card">
+          <div class="dash-card-header flex-column-mobile">
+            <div>
+              <h3 class="dash-card-title">My Reported Concerns</h3>
+              <p class="dash-card-subtitle">Tracking submitted concerns, urgency levels, and real-time admin status updates</p>
+            </div>
+
+            <!-- Filters -->
+            <div class="card-filters-row">
+              <div class="table-search-box">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" id="concernsSearchInput" placeholder="Search ticket, title, or issue..." class="table-search-input">
+              </div>
+
+              <div class="filter-pills-row" id="concernsFilterPills">
+                <button type="button" class="filter-pill-btn active" data-filter="All">All (<span id="countAllConcerns">0</span>)</button>
+                <button type="button" class="filter-pill-btn" data-filter="Pending">Pending (<span id="countPendingConcerns">0</span>)</button>
+                <button type="button" class="filter-pill-btn" data-filter="In Progress">In Progress (<span id="countProgressConcerns">0</span>)</button>
+                <button type="button" class="filter-pill-btn" data-filter="Resolved">Resolved (<span id="countResolvedConcerns">0</span>)</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Concerns Cards Feed -->
+          <div class="concerns-feed-container" id="concernsFeedContainer">
+            <!-- Dynamically populated via user.js -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- TAB 4: PROPOSE A PROJECT (#user-proposals)      -->
+      <!-- ============================================== -->
+      <section class="user-tab-panel" id="user-proposals">
+        <!-- Tab Header -->
+        <div class="panel-header">
+          <div>
+            <span class="panel-kicker">COMMUNITY PARTICIPATION &amp; INITIATIVES</span>
+            <h2 class="panel-title">Propose a Community Project</h2>
+            <p class="panel-subtitle">Submit grassroots project ideas directly to the Barangay Development Council (BDC) for inclusion in the Annual Barangay Development Plan.</p>
+          </div>
+          <button type="button" class="btn-dash-primary" id="btnOpenNewProposalModal">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span>Submit Proposal</span>
+          </button>
+        </div>
+
+        <!-- Participatory Budgeting Guide -->
+        <div class="proposal-guide-card">
+          <div class="guide-icon-badge" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="16" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+          </div>
+          <div class="guide-text-content">
+            <h4 class="guide-title">How Citizen Project Proposals Work</h4>
+            <p class="guide-desc">Every year, 20% of Barangay Pallocan West's Internal Revenue Allotment (IRA) is earmarked for Community Development Fund projects. Verified residents can propose small-scale infrastructure, sanitation improvements, solar lighting, youth sports hubs, and greening initiatives. Proposals are reviewed by the BDC during the Barangay Assembly.</p>
+          </div>
+        </div>
+
+        <!-- Proposals List -->
+        <div class="dash-card">
+          <div class="dash-card-header">
+            <div>
+              <h3 class="dash-card-title">My Submitted Proposals</h3>
+              <p class="dash-card-subtitle">Tracking review status, council endorsements, and estimated budget evaluations</p>
+            </div>
+          </div>
+
+          <div class="proposals-feed-container" id="proposalsFeedContainer">
+            <!-- Dynamically populated via user.js -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- TAB 5: MY ACCOUNT & VERIFICATION (#user-account)-->
+      <!-- ============================================== -->
+      <section class="user-tab-panel" id="user-account">
+        <!-- Tab Header -->
+        <div class="panel-header">
+          <div>
+            <span class="panel-kicker">RESIDENT PROFILE &amp; IDENTITY SECURITY</span>
+            <h2 class="panel-title">My Account &amp; Verification</h2>
+            <p class="panel-subtitle">Manage personal information, verify government-issued identification credentials, and configure account security.</p>
+          </div>
+        </div>
+
+        <div class="account-grid-layout">
+          <!-- Left Column: Resident Profile & ID Status -->
+          <div class="account-col-left">
+            <!-- Profile Overview Card -->
+            <div class="dash-card">
+              <div class="profile-card-top">
+                <div class="user-avatar-circle xlarge" id="accountAvatar">—</div>
+                <div class="profile-meta-top">
+                  <h3 class="profile-resident-name" id="accountFullName">Loading...</h3>
+                  <span class="profile-resident-id">
+                    Resident ID: <strong id="accountResidentId">Loading...</strong>
+                  </span>
+                  <div class="profile-tier-badge">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                    </svg>
+                    <span>Tier 2: Fully Verified Resident</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="profile-details-list">
+                <div class="profile-detail-item">
+                  <span class="detail-label">Gender</span>
+                  <span class="detail-value" id="accountGender">Loading...</span>
+                </div>
+                <div class="profile-detail-item">
+                  <span class="detail-label">Civil Status</span>
+                  <span class="detail-value" id="accountCivilStatus">Loading...</span>
+                </div>
+                <div class="profile-detail-item">
+                  <span class="detail-label">Date of Birth</span>
+                  <span class="detail-value" id="accountDob">Loading...</span>
+                </div>
+                <div class="profile-detail-item">
+                  <span class="detail-label">Sitio / Purok</span>
+                  <span class="detail-value" id="accountSitio">Loading...</span>
+                </div>
+                <div class="profile-detail-item">
+                  <span class="detail-label">Member Since</span>
+                  <span class="detail-value" id="accountMemberSince">Loading...</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- ID Verification Card -->
+            <div class="dash-card">
+              <div class="dash-card-header">
+                <div>
+                  <h3 class="dash-card-title">Residency Verification ID</h3>
+                  <p class="dash-card-subtitle">Official identification on file with the barangay registry</p>
+                </div>
+              </div>
+
+              <div class="id-verification-box">
+                <div class="id-verified-state">
+                  <div class="id-check-icon">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 class="id-doc-title" id="accountIdDocTitle">Loading...</h4>
+                    <strong id="accountIdDocNum">Loading...</strong>
+                    <span class="id-doc-date">Verified on file by Barangay Secretary</span>
+                  </div>
+                </div>
+
+                <div class="id-upload-prompt">
+                  <h5 class="upload-prompt-title">Need to renew or upload additional ID?</h5>
+                  <p class="upload-prompt-desc">You may upload your updated Cedula (Community Tax Certificate) or Barangay ID to renew certification eligibility.</p>
+                  
+                  <form id="idUploadForm" class="id-upload-form">
+                    <div class="form-row">
+                      <label for="newIdType" class="form-label">ID Type</label>
+                      <select id="newIdType" class="form-select">
+                        <option value="Cedula">Cedula / Community Tax Certificate</option>
+                        <option value="Barangay ID">Barangay Pallocan West ID</option>
+                        <option value="Driver's License">Driver's License</option>
+                        <option value="UMID">UMID / SSS ID</option>
+                        <option value="Voter's ID">COMELEC Voter's ID / Certification</option>
+                      </select>
+                    </div>
+
+                    <div class="form-row">
+                      <label for="newIdFile" class="form-label">Upload Document Photo</label>
+                      <div class="custom-file-upload">
+                        <input type="file" id="newIdFile" accept="image/*,.pdf" class="file-input-hidden">
+                        <label for="newIdFile" class="file-upload-dropzone">
+                          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                          </svg>
+                          <span id="newIdFileName">Click to select photo or scan (PNG, JPG, PDF)</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div class="form-row id-submit-row">
+                      <button type="submit" class="btn-dash-primary full-width" id="btnSubmitId">
+                        <span>Submit ID for Re-Verification</span>
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Edit Profile & Security Forms -->
+          <div class="account-col-right">
+            <!-- Edit Contact Information Form -->
+            <div class="dash-card">
+              <div class="dash-card-header">
+                <div>
+                  <h3 class="dash-card-title">Contact &amp; Residential Information</h3>
+                  <p class="dash-card-subtitle">Keep your address and mobile numbers up-to-date for SMS release notifications</p>
+                </div>
+              </div>
+
+              <form id="updateProfileForm" class="portal-form" novalidate>
+                <div class="form-grid-3" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px;">
+                  <div class="form-group">
+                    <label for="profileMobile" class="form-label">Mobile Number <span class="text-danger">*</span></label>
+                    <input
+                      type="tel"
+                      id="profileMobile"
+                      class="form-input"
+                      value=""
+                      placeholder="0917 123 4567"
+                      inputmode="tel"
+                      maxlength="13"
+                      required
+                  >
+                    <span class="field-error-msg" id="profileMobileError" style="display: none;"></span>
+                  </div>
+                  <div class="form-group">
+                    <label for="profileEmail" class="form-label">Email Address <span class="text-danger">*</span></label>
+                    <input type="email" id="profileEmail" class="form-input" value="" placeholder="you@example.com" required>
+                    <span class="field-error-msg" id="profileEmailError" style="display: none;"></span>
+                  </div>
+                  <div class="form-group">
+                    <label for="profileAge" class="form-label">Age <span class="text-danger">*</span></label>
+                    <input
+                        type="text"
+                        id="profileAge"
+                        class="form-input"
+                        value=""
+                        placeholder="Automatically calculated"
+                        readonly
+                    >
+                    <span class="field-error-msg" id="profileAgeError" style="display: none;"></span>
+                  </div>
+                </div>
+
+                <div class="form-group" style="margin-top: 14px;">
+                  <label for="profileAddress" class="form-label">Complete Residential Address <span class="text-danger">*</span></label>
+                  <input type="text" id="profileAddress" class="form-input" value="" placeholder="House No., Street Name" required>
+                  <span class="field-error-msg" id="profileAddressError" style="display: none;"></span>
+                </div>
+
+                <div class="form-grid-2" style="margin-top: 14px;">
+                  <div class="form-group">
+                    <label for="profileSitio" class="form-label">Sitio / Purok <span class="text-danger">*</span></label>
+                    <select id="profileSitio" class="form-select" required>
+                      <option value="" selected disabled>Select your Sitio / Purok</option>
+                      <option value="Sitio Ibaba">Sitio Ibaba</option>
+                      <option value="Sitio Santolan">Sitio Santolan</option>
+                      <option value="Sitio Ilaya">Sitio Ilaya</option>
+                      <option value="Sitio Gitna">Sitio Gitna</option>
+                      <option value="Tierra Verde">Tierra Verde</option>
+                      <option value="Potenciana Village">Potenciana Village</option>
+                      <option value="G.C Berberabe">G.C Berberabe</option>
+                    </select>
+                    <span class="field-error-msg" id="profileSitioError" style="display: none;"></span>
+                  </div>
+                  <div class="form-group">
+                    <label for="profileCity" class="form-label">City / Province</label>
+                    <input type="text" id="profileCity" class="form-input" value="Batangas City, Batangas" readonly disabled>
+                  </div>
+                </div>
+
+                <div class="form-actions-right">
+                  <button type="submit" class="btn-dash-primary" id="btnSaveProfile">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                      <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                      <polyline points="7 3 7 8 15 8"></polyline>
+                    </svg>
+                    <span>Save Contact Changes</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Change Password Card -->
+            <div class="dash-card">
+              <div class="dash-card-header">
+                <div>
+                  <h3 class="dash-card-title">Security &amp; Password</h3>
+                  <p class="dash-card-subtitle">Ensure your account is protected with a strong passphrase</p>
+                </div>
+              </div>
+
+              <form id="changePasswordForm" class="portal-form" novalidate>
+                <div class="form-group">
+                  <label for="currentPassword" class="form-label">Current Password</label>
+                  <div class="portal-password-wrapper">
+                    <input type="password" id="currentPassword" class="form-input has-password-toggle" placeholder="••••••••" autocomplete="current-password">
+                    <button type="button" class="password-toggle-btn" aria-label="Show password" title="Show password" data-target="currentPassword" tabindex="-1">
+                      <svg class="eye-icon eye-show" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                      </svg>
+                      <svg class="eye-icon eye-hide" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display: none;">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                        <line x1="1" y1="1" x2="23" y2="23"></line>
+                      </svg>
+                    </button>
+                  </div>
+                  <small style="display: block; margin-top: 5px; font-size: 11.5px; color: #64748b;">Enter the current password created with your resident account.</small>
+                  <div class="field-error-msg" id="currentPasswordError" style="display: none;"></div>
+                </div>
+
+                <div class="form-grid-2">
+                  <div class="form-group">
+                    <label for="newPassword" class="form-label">New Password</label>
+                    <div class="portal-password-wrapper">
+                      <input type="password" id="newPassword" class="form-input has-password-toggle" placeholder="At least 8 characters" autocomplete="new-password">
+                      <button type="button" class="password-toggle-btn" aria-label="Show password" title="Show password" data-target="newPassword" tabindex="-1">
+                        <svg class="eye-icon eye-show" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                          <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                        <svg class="eye-icon eye-hide" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display: none;">
+                          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                          <line x1="1" y1="1" x2="23" y2="23"></line>
+                        </svg>
+                      </button>
+                    </div>
+                    <div class="field-error-msg" id="newPasswordError" style="display: none;"></div>
+                  </div>
+                  <div class="form-group">
+                    <label for="confirmNewPassword" class="form-label">Confirm New Password</label>
+                    <div class="portal-password-wrapper">
+                      <input type="password" id="confirmNewPassword" class="form-input has-password-toggle" placeholder="••••••••" autocomplete="new-password">
+                      <button type="button" class="password-toggle-btn" aria-label="Show password" title="Show password" data-target="confirmNewPassword" tabindex="-1">
+                        <svg class="eye-icon eye-show" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                          <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                        <svg class="eye-icon eye-hide" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display: none;">
+                          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                          <line x1="1" y1="1" x2="23" y2="23"></line>
+                        </svg>
+                      </button>
+                    </div>
+                    <div class="field-error-msg" id="confirmNewPasswordError" style="display: none;"></div>
+                  </div>
+                </div>
+
+                <div id="passwordErrorMsg" class="form-error-banner" style="display: none;"></div>
+
+                <div class="form-actions-right">
+                  <button type="submit" class="btn-dash-primary" id="btnUpdatePassword">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                    <span>Update Password</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL 1: NEW DOCUMENT REQUEST MODAL            -->
+  <!-- ============================================== -->
+  <div class="portal-modal-overlay" id="docRequestModal" role="dialog" aria-modal="true" aria-hidden="true" style="display: none;">
+    <div class="portal-modal-card">
+      <div class="portal-modal-header">
+        <div>
+          <span class="modal-kicker">BARANGAY CERTIFICATION DESK</span>
+          <h3 class="portal-modal-title">Request Official Document</h3>
+        </div>
+        <button type="button" class="portal-modal-close" id="closeDocModalBtn" aria-label="Close modal">&times;</button>
+      </div>
+
+      <form id="docApplicationForm" class="portal-modal-form">
+        <!-- Document Type Selector -->
+        <div class="form-group">
+          <label for="modalDocType" class="form-label">Select Document <span class="required">*</span></label>
+          <select id="modalDocType" class="form-select" required>
+            <option value="" selected disabled>Select Document</option>
+            <option value="Barangay Clearance">Barangay Clearance (₱50.00)</option>
+            <option value="Certificate of Residency">Certificate of Residency (₱50.00)</option>
+            <option value="Certificate of Indigency">Certificate of Indigency (Free)</option>
+            <option value="Barangay Business Clearance">Barangay Business Clearance (₱200.00)</option>
+            <option value="First-Time Jobseeker (RA 11261)">First-Time Jobseeker Certificate (Free under RA 11261)</option>
+            <option value="Katarungang Pambarangay Mediation">Katarungang Pambarangay / Mediation Request (Free)</option>
+          </select>
+        </div>
+
+        <!-- Purpose of Request -->
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label for="modalDocPurposeCategory" class="form-label">Purpose Category <span class="required">*</span></label>
+            <select id="modalDocPurposeCategory" class="form-select" required>
+              <option value="" selected disabled>Select Purpose Category</option>
+              <option value="Local Employment">Local Employment / Job Application</option>
+              <option value="Government ID Requirement">Government ID / Passport / NBI Requirement</option>
+              <option value="Scholarship / School Requirement">Scholarship / School Requirement</option>
+              <option value="Bank / Loan Requirement">Bank / Financial Loan Requirement</option>
+              <option value="Business Permit">New Business Permit / Renewal</option>
+              <option value="Legal / Court Requirement">Legal / Court / Police Requirement</option>
+              <option value="Medical Assistance / DSWD">Medical Assistance / DSWD / Hospital</option>
+              <option value="Other">Other Specific Purpose</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="modalDocPurposeSpecific" class="form-label">Specific Details / Company <span class="required">*</span></label>
+            <input type="text" id="modalDocPurposeSpecific" class="form-input" placeholder="e.g. For SM Batangas Job Application" required>
+            <span class="field-error-msg" id="modalDocPurposeSpecificError" style="display: none;"></span>
+          </div>
+        </div>
+
+        <!-- Pre-filled Resident Info Grid -->
+        <div class="form-prefill-box">
+          <div class="prefill-box-header">
+            <span>Resident Credentials (Auto-filled from profile)</span>
+          </div>
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label-sm">Applicant Full Name</label>
+              <input type="text" id="modalDocFullName" class="form-input form-input-sm" readonly>
+            </div>
+            <div class="form-group">
+              <label class="form-label-sm">Mobile Number</label>
+              <input type="text" id="modalDocMobile" class="form-input form-input-sm" readonly>
+            </div>
+          </div>
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label-sm">Sitio / Purok</label>
+              <input type="text" id="modalDocSitio" class="form-input form-input-sm" readonly>
+            </div>
+            <div class="form-group">
+              <label class="form-label-sm">Registered Address</label>
+              <input type="text" id="modalDocAddress" class="form-input form-input-sm" readonly>
+            </div>
+          </div>
+        </div>
+
+        <!-- Supporting Document Upload -->
+        <div class="form-group">
+          <label for="modalDocAttachment" class="form-label">Supporting Document / Valid ID (Optional)</label>
+          <div class="custom-file-upload">
+            <input type="file" id="modalDocAttachment" class="file-input-hidden">
+            <label for="modalDocAttachment" class="file-upload-dropzone">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+              <span id="modalDocAttachmentName">Attach Valid ID or proof of residence (Click to browse)</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="portal-modal-footer">
+          <button type="button" class="btn-dash-outline" id="btnCancelDocModal">Cancel</button>
+          <button type="submit" class="btn-dash-primary" id="btnSubmitDocRequest">
+            <span>Submit Application</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL 2: NEW CONCERN / COMPLAINT MODAL         -->
+  <!-- ============================================== -->
+  <div class="portal-modal-overlay" id="concernModal" role="dialog" aria-modal="true" aria-hidden="true" style="display: none;">
+    <div class="portal-modal-card">
+      <div class="portal-modal-header">
+        <div>
+          <span class="modal-kicker">INCIDENT DESK &amp; CITIZEN ACTION</span>
+          <h3 class="portal-modal-title">Report a Concern to Barangay</h3>
+        </div>
+        <button type="button" class="portal-modal-close" id="closeConcernModalBtn" aria-label="Close modal">&times;</button>
+      </div>
+
+      <form id="concernReportForm" class="portal-modal-form">
+        <!-- Concern Title -->
+        <div class="form-group">
+          <label for="modalConcernTitle" class="form-label">Concern Title <span class="required">*</span></label>
+          <input type="text" id="modalConcernTitle" class="form-input" placeholder="e.g. Broken streetlight along Sitio Ibaba main walkway" required>
+          <span class="field-error-msg" id="modalConcernTitleError" style="display: none;"></span>
+        </div>
+
+        <!-- Category & Date Submitted -->
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label for="modalConcernCategory" class="form-label">Category <span class="required">*</span></label>
+            <select id="modalConcernCategory" class="form-select" required>
+              <option value="Infrastructure">Infrastructure (Damaged road, open manhole, streetlights)</option>
+              <option value="Sanitation">Sanitation (Uncollected garbage, canal blockage, illegal dumping)</option>
+              <option value="Public Safety">Public Safety (Obstructed walkways, security hazard, stray animals)</option>
+              <option value="Noise Disturbance">Noise Disturbance (Late night karaoke, loud construction)</option>
+              <option value="Public Utility">Public Utility (Water supply interruption, dangling electric wires)</option>
+              <option value="Other">Other Neighborhood Concern</option>
+            </select>
+            <span class="field-error-msg" id="modalConcernCategoryError" style="display: none;"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="modalConcernDate" class="form-label">Date Submitted <span class="required">*</span></label>
+            <input type="date" id="modalConcernDate" class="form-input" required>
+            <span class="field-error-msg" id="modalConcernDateError" style="display: none;"></span>
+          </div>
+        </div>
+
+        <!-- Urgency Level (Strictly Standard and Urgent) -->
+        <div class="form-group">
+          <label class="form-label">Urgency Level <span class="required">*</span></label>
+          <input type="hidden" id="modalConcernUrgency" value="Standard">
+          <div class="radio-cards-row urgency-level-cards" id="concernUrgencyCards" role="radiogroup" aria-label="Urgency Level">
+            <label class="radio-card urgency-card is-selected" data-urgency-card="Standard">
+              <input type="radio" name="concernUrgencyRadio" value="Standard" checked>
+              <div>
+                <span class="radio-title">
+                  <span class="status-pill status-standard">Standard</span>
+                </span>
+                <span class="radio-desc">Regular neighborhood maintenance or non-emergency concern</span>
+              </div>
+            </label>
+            <label class="radio-card urgency-card is-urgent-option" data-urgency-card="Urgent">
+              <input type="radio" name="concernUrgencyRadio" value="Urgent">
+              <div>
+                <span class="radio-title">
+                  <span class="status-pill status-urgent">Urgent</span>
+                </span>
+                <span class="radio-desc">Immediate safety risk, severe blockage, or active hazard</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Location / Sitio -->
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label for="modalConcernSitio" class="form-label">Sitio / Area <span class="required">*</span></label>
+            <select id="modalConcernSitio" class="form-select" required>
+              <option value="" disabled selected>Select Sitio</option>
+              <option value="Sitio Ibaba">Sitio Ibaba</option>
+              <option value="Sitio Santolan">Sitio Santolan</option>
+              <option value="Sitio Ilaya">Sitio Ilaya</option>
+              <option value="Sitio Gitna">Sitio Gitna</option>
+              <option value="Tierra Verde">Tierra Verde</option>
+              <option value="Potenciana Village">Potenciana Village</option>
+              <option value="G.C Berberabe">G.C Berberabe</option>
+            </select>
+            <span class="field-error-msg" id="modalConcernSitioError" style="display: none;"></span>
+          </div>
+          <div class="form-group">
+            <label for="modalConcernLocation" class="form-label">Exact Location / Landmark <span class="required">*</span></label>
+            <input type="text" id="modalConcernLocation" class="form-input" placeholder="e.g. Near Chapel, Main Road" required>
+            <span class="field-error-msg" id="modalConcernLocationError" style="display: none;"></span>
+          </div>
+        </div>
+
+        <!-- Issue Description -->
+        <div class="form-group">
+          <label for="modalConcernDesc" class="form-label">Detailed Description <span class="required">*</span></label>
+          <textarea id="modalConcernDesc" class="form-textarea" rows="4" placeholder="Please describe what happened, when it started, and how it affects the area..." required></textarea>
+          <span class="field-error-msg" id="modalConcernDescError" style="display: none;"></span>
+        </div>
+
+        <!-- Pre-filled Resident Information -->
+        <div class="form-prefill-box">
+          <div class="prefill-box-header">
+            <span>Submitted By (Auto-attached Resident Information)</span>
+          </div>
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label-sm">Resident Full Name</label>
+              <input type="text" id="modalConcernReporter" class="form-input form-input-sm" readonly>
+            </div>
+            <div class="form-group">
+              <label class="form-label-sm">Contact / Email</label>
+              <input type="text" id="modalConcernContact" class="form-input form-input-sm" readonly>
+            </div>
+          </div>
+        </div>
+
+        <!-- Photo Upload -->
+        <div class="form-group">
+          <label for="modalConcernPhoto" class="form-label">Attach Photo / Evidence (Optional)</label>
+          <div class="custom-file-upload">
+            <input type="file" id="modalConcernPhoto" accept="image/*" class="file-input-hidden">
+            <label for="modalConcernPhoto" class="file-upload-dropzone">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                <polyline points="21 15 16 10 5 21"></polyline>
+              </svg>
+              <span id="modalConcernPhotoName">Upload photo of the issue (JPG, PNG)</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="portal-modal-footer">
+          <button type="button" class="btn-dash-outline" id="btnCancelConcernModal">Cancel</button>
+          <button type="submit" class="btn-dash-primary" id="btnSubmitConcern">
+            <span>Submit Concern</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL 3: NEW PROJECT PROPOSAL MODAL            -->
+  <!-- ============================================== -->
+  <div class="portal-modal-overlay" id="proposalModal" role="dialog" aria-modal="true" aria-hidden="true" style="display: none;">
+    <div class="portal-modal-card">
+      <div class="portal-modal-header">
+        <div>
+          <span class="modal-kicker">PARTICIPATORY GOVERNANCE</span>
+          <h3 class="portal-modal-title">Propose a Community Initiative</h3>
+        </div>
+        <button type="button" class="portal-modal-close" id="closeProposalModalBtn" aria-label="Close modal">&times;</button>
+      </div>
+
+      <form id="proposalSubmitForm" class="portal-modal-form" novalidate>
+        <div class="form-group">
+          <label for="modalPropTitle" class="form-label">Project Title <span class="required">*</span></label>
+          <input type="text" id="modalPropTitle" class="form-input" placeholder="e.g. Installation of Solar LED Streetlights along Sitio Ibaba Riverbank" required>
+          <span class="field-error-msg" id="modalPropTitleError" style="display: none;"></span>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label for="modalPropCategory" class="form-label">Sector Category <span class="required">*</span></label>
+            <select id="modalPropCategory" class="form-select" required>
+              <option value="Infrastructure">Infrastructure &amp; Public Works</option>
+              <option value="Environment & Sanitation">Environment &amp; Waste Management</option>
+              <option value="Public Safety">Public Safety &amp; Disaster Resilience</option>
+              <option value="Youth & Sports">Youth Development &amp; Sports Hub</option>
+              <option value="Health & Social Services">Community Health &amp; Senior Services</option>
+              <option value="Livelihood & Skills">Livelihood &amp; Vocational Skills</option>
+            </select>
+            <span class="field-error-msg" id="modalPropCategoryError" style="display: none;"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="modalPropLocation" class="form-label">Target Location / Sitio <span class="required">*</span></label>
+            <select id="modalPropLocation" class="form-select" required>
+              <option value="" disabled selected>Select Target Sitio</option>
+              <option value="Sitio Ibaba">Sitio Ibaba</option>
+              <option value="Sitio Santolan">Sitio Santolan</option>
+              <option value="Sitio Ilaya">Sitio Ilaya</option>
+              <option value="Sitio Gitna">Sitio Gitna</option>
+              <option value="Tierra Verde">Tierra Verde</option>
+              <option value="Potenciana Village">Potenciana Village</option>
+              <option value="G.C Berberabe">G.C Berberabe</option>
+            </select>
+            <span class="field-error-msg" id="modalPropLocationError" style="display: none;"></span>
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label for="modalPropBudget" class="form-label">Estimated Budget (₱) <span class="required">*</span></label>
+            <input type="number" id="modalPropBudget" class="form-input" placeholder="e.g. 150000" min="5000" step="5000" inputmode="numeric" pattern="[0-9]*" required>
+            <span class="field-error-msg" id="modalPropBudgetError" style="display: none;"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="modalPropTimeline" class="form-label">Proposed Target Timeline</label>
+            <input type="text" id="modalPropTimeline" class="form-input" placeholder="e.g. Q1 2027 (3 months implementation)">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="modalPropRationale" class="form-label">Rationale &amp; Community Impact <span class="required">*</span></label>
+          <textarea id="modalPropRationale" class="form-textarea" rows="4" placeholder="Explain the current problem, who benefits, and why this initiative is important for our barangay..." required></textarea>
+          <span class="field-error-msg" id="modalPropRationaleError" style="display: none;"></span>
+        </div>
+
+        <div class="portal-modal-footer">
+          <button type="button" class="btn-dash-outline" id="btnCancelPropModal">Cancel</button>
+          <button type="submit" class="btn-dash-primary" id="btnSubmitProposal">
+            <span>Submit Proposal to Council</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL 4: RECORD DETAIL VIEWER MODAL            -->
+  <!-- ============================================== -->
+  <div class="portal-modal-overlay" id="detailViewerModal" role="dialog" aria-modal="true" aria-hidden="true" style="display: none;">
+    <div class="portal-modal-card">
+      <div class="portal-modal-header">
+        <div>
+          <span class="modal-kicker" id="detailModalKicker">TRANSACTION DETAILS</span>
+          <h3 class="portal-modal-title" id="detailModalTitle">Record View</h3>
+        </div>
+        <button type="button" class="portal-modal-close" id="closeDetailModalBtn" aria-label="Close modal">&times;</button>
+      </div>
+
+      <div class="portal-modal-body" id="detailModalBody">
+        <!-- Injected via user.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTION CONFIRMATION MODAL (Cancel / Delete / Restriction Notice) -->
+  <div class="portal-modal-overlay" id="actionConfirmModal" role="dialog" aria-modal="true" aria-hidden="true" style="display: none;">
+    <div class="portal-modal-card" style="max-width: 480px;">
+      <div class="portal-modal-header">
+        <div>
+          <span class="portal-modal-kicker" id="confirmModalKicker">APPLICATION ACTION</span>
+          <h3 class="portal-modal-title" id="confirmModalTitle">Confirm Action</h3>
+        </div>
+        <button type="button" class="portal-modal-close" id="closeConfirmModalBtn" aria-label="Close modal">&times;</button>
+      </div>
+
+      <div class="portal-modal-body" id="confirmModalBody" style="padding-top: 16px;">
+        <div id="confirmModalIconBox" style="display: flex; align-items: flex-start; gap: 14px; margin-bottom: 14px;">
+          <!-- Dynamically populated -->
+        </div>
+        <p id="confirmModalMessage" style="font-size: 13.5px; color: #334155; line-height: 1.55; margin: 0;"></p>
+        <div id="confirmModalDetailsBox" style="margin-top: 14px; background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-size: 12.5px; display: none;"></div>
+      </div>
+
+      <div class="portal-modal-footer">
+        <button type="button" class="btn-dash-outline" id="btnCancelConfirmModal">Go Back</button>
+        <button type="button" class="btn-dash-primary" id="btnExecuteConfirmAction">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FLOATING TOAST FEEDBACK NOTIFICATION -->
+  <div class="portal-toast" id="portalToast" role="status" aria-live="polite" style="display: none;">
+    <div class="toast-icon-wrap" id="toastIcon">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+    </div>
+    <div class="toast-message-wrap">
+      <h5 class="toast-title" id="toastTitle">Success</h5>
+      <p class="toast-desc" id="toastDesc">Operation completed successfully.</p>
+    </div>
+  </div>
+
+  <!-- JavaScript -->
+  <script type="module" src="./user.js"></script>
+</body>
+</html>

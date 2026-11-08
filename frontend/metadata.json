@@ -1,0 +1,6 @@
+{
+  "name": "Brgy360 - Barangay Services Platform",
+  "description": "Brgy360 civic governance platform with full-spectrum descriptive, predictive, and prescriptive analytics console for Barangay Pallocan West.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

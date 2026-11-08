@@ -1,0 +1,324 @@
+/* ==========================================================
+   Brgy360 - About Section Stylesheet (about.css)
+   Conforms to Civic Blue palette, typography & grid conventions
+   ========================================================== */
+
+/* 1. SECTION & BLOCK SPACING */
+.about-section {
+  padding: 85px 20px;
+  scroll-margin-top: 80px;
+}
+
+.about-block {
+  position: relative;
+}
+
+.about-block + .about-block {
+  margin-top: 80px;
+  padding-top: 80px;
+  border-top: 1px solid var(--border);
+}
+
+/* 2. BASE ABOUT CARDS */
+.about-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.about-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(13, 71, 161, 0.35);
+  box-shadow: 0 10px 24px rgba(13, 71, 161, 0.08);
+}
+
+/* 3. ICON TILES */
+.icon-tile {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  background-color: #eef4ff;
+  border: 1px solid rgba(13, 71, 161, 0.16);
+  color: var(--primary-blue);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  flex-shrink: 0;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.about-card:hover .icon-tile {
+  background-color: var(--primary-blue);
+  color: var(--white);
+  transform: scale(1.05);
+}
+
+.icon-svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* 4. BLOCK 1: FEATURE CARDS (3 cols x 2 rows on desktop) */
+.about-features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.feature-card h3 {
+  font-size: 19px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 10px;
+  line-height: 1.35;
+}
+
+.feature-card-desc {
+  font-size: 14.5px;
+  color: #475569;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* 5. BLOCK 2: HOW BRGY360 WORKS (4-step process) */
+.about-steps-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 22px;
+}
+
+.step-card {
+  position: relative;
+  background: var(--white);
+}
+
+.step-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.step-number {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--primary-blue);
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+
+.step-card h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 8px;
+  line-height: 1.35;
+}
+
+.step-card-desc {
+  font-size: 14px;
+  color: #475569;
+  line-height: 1.55;
+  margin: 0;
+}
+
+/* 6. BLOCK 3: BARANGAY OFFICIALS (5 columns x 2 rows = 10 people total) */
+.about-officials-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 20px;
+}
+
+/* Row 1 Positioning (Cols 1-5) */
+.official-r1c1 { grid-row: 1; grid-column: 1; }
+.official-r1c2 { grid-row: 1; grid-column: 2; }
+.official-r1c3 { grid-row: 1; grid-column: 3; }
+.official-r1c4 { grid-row: 1; grid-column: 4; }
+.official-r1c5 { grid-row: 1; grid-column: 5; }
+
+/* Row 2 Positioning (Cols 1-5) */
+.official-r2c1 { grid-row: 2; grid-column: 1; }
+.official-r2c2 { grid-row: 2; grid-column: 2; }
+.official-r2c3 { grid-row: 2; grid-column: 3; }
+.official-r2c4 { grid-row: 2; grid-column: 4; }
+.official-r2c5 { grid-row: 2; grid-column: 5; }
+
+.official-card {
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 18px;
+}
+
+.official-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #eef4ff 0%, #dbeafe 100%);
+  border: 2px solid rgba(13, 71, 161, 0.2);
+  color: var(--primary-blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+  flex-shrink: 0;
+}
+
+.official-avatar svg {
+  width: 26px;
+  height: 26px;
+}
+
+.official-card h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 4px;
+  line-height: 1.3;
+}
+
+.official-position {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--primary-blue);
+  margin-bottom: 14px;
+  line-height: 1.4;
+}
+
+.official-meta {
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.official-contact,
+.official-schedule {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12.5px;
+  color: #475569;
+  line-height: 1.4;
+}
+
+.official-contact a {
+  color: #334155;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.official-contact a:hover {
+  color: var(--primary-blue);
+  text-decoration: underline;
+}
+
+.meta-icon {
+  width: 14px;
+  height: 14px;
+  color: var(--primary-blue);
+  flex-shrink: 0;
+}
+
+/* Punong Barangay accent badge */
+.official-card.is-punong-barangay {
+  border-top: 4px solid var(--primary-blue);
+}
+
+.official-card.is-punong-barangay .official-avatar {
+  background: linear-gradient(135deg, var(--primary-blue) 0%, var(--blue-hover) 100%);
+  color: var(--white);
+  border-color: var(--yellow);
+}
+
+/* Officials Grid Footer */
+.officials-footer {
+  margin-top: 36px;
+  text-align: center;
+  font-size: 15px;
+  color: #475569;
+  background-color: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 50px;
+  padding: 12px 24px;
+  display: inline-block;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.officials-footer-wrap {
+  text-align: center;
+}
+
+.officials-footer strong {
+  color: var(--primary-blue);
+}
+
+/* 7. RESPONSIVE BREAKPOINTS */
+/* Features & Steps: 3 cols -> 2 cols; Officials: 5 cols -> 3 cols */
+@media (max-width: 1100px) {
+  .about-officials-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+  }
+
+  /* Clear explicit row/col assignments to allow fluid wrapping on smaller screens */
+  .official-r1c1, .official-r1c2, .official-r1c3, .official-r1c4, .official-r1c5,
+  .official-r2c1, .official-r2c2, .official-r2c3, .official-r2c4, .official-r2c5 {
+    grid-row: auto;
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 992px) {
+  .about-features-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .about-steps-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Tablet & Mobile: Officials: 3 cols -> 2 cols */
+@media (max-width: 768px) {
+  .about-officials-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+}
+
+/* Small mobile: 1 column */
+@media (max-width: 560px) {
+  .about-features-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .about-steps-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .about-officials-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .about-block + .about-block {
+    margin-top: 55px;
+    padding-top: 55px;
+  }
+
+  .officials-footer {
+    width: 100%;
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+}
