@@ -1,9 +1,21 @@
 
+const path = require("path");
+
+// Load environment variables from backend/.env
+require("dotenv").config({
+    path: path.resolve(__dirname, "../.env")
+});
+
 const session = require("express-session");
 const connectPgSimple = require("connect-pg-simple");
 const pool = require("../database/db");
 
-require("dotenv").config();
+// Validate session secret
+if (!process.env.SESSION_SECRET) {
+    throw new Error(
+        "SESSION_SECRET is missing. Check backend/.env."
+    );
+}
 
 const PostgreSQLStore = connectPgSimple(session);
 
