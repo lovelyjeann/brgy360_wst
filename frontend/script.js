@@ -1066,6 +1066,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Post-Registration Pending Verification Modal Handlers
   const regPendingModal = document.getElementById('regPendingModal');
+  const summaryPendingName = document.getElementById('summaryPendingName');
+  const summaryPendingEmail = document.getElementById('summaryPendingEmail');
+  const summaryPendingGenderCivil = document.getElementById('summaryPendingGenderCivil');
+  const summaryPendingIdType = document.getElementById('summaryPendingIdType');
+  const summaryPendingProofType = document.getElementById('summaryPendingProofType');
   const btnClosePendingModal = document.getElementById('btnClosePendingModal');
   const btnPendingToLogin = document.getElementById('btnPendingToLogin');
   const btnPendingToAdmin = document.getElementById('btnPendingToAdmin');
@@ -1308,6 +1313,29 @@ document.addEventListener('DOMContentLoaded', function () {
 
           if (!response.ok) {
               throw new Error(result.message || "Registration failed.");
+          }
+
+          // Populate confirmation modal using actual registration inputs
+          if (summaryPendingName) {
+              summaryPendingName.textContent = nameVal;
+          }
+
+          if (summaryPendingEmail) {
+              summaryPendingEmail.textContent = emailVal.trim().toLowerCase();
+          }
+
+          if (summaryPendingGenderCivil) {
+              summaryPendingGenderCivil.textContent =
+                  `${genderVal} · ${civilVal}`;
+          }
+
+          if (summaryPendingIdType) {
+              summaryPendingIdType.textContent = idTypeVal;
+          }
+
+          if (summaryPendingProofType) {
+              summaryPendingProofType.textContent =
+                  proofTypeVal || "No Proof of Residency";
           }
 
           // Show registration pending modal
