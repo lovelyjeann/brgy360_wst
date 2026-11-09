@@ -6,12 +6,14 @@ const { isResident } = require("../middleware/authMiddleware");
 const pool = require("../database/db");
 const bcrypt = require("bcrypt");
 
-// Get logged-in resident's profile
+// ======================================================
+// GET LOGGED-IN RESIDENT'S PROFILE
+// ======================================================
 router.get("/profile", isResident, async (req, res) => {
     try {
         const userId = req.session.user.id;
 
-        const [users] = await pool.query(
+        const result = await pool.query(
             `SELECT
                 user_id,
                 full_legal_name,
@@ -29,12 +31,12 @@ router.get("/profile", isResident, async (req, res) => {
                 verification_status,
                 verification_notes,
                 reviewed_at
-            FROM users
-            WHERE user_id = ?`,
+             FROM users
+             WHERE user_id = $1`,
             [userId]
         );
 
-        if (users.length === 0) {
+        if (result.rows.length === 0) {
             return res.status(404).json({
                 success: false,
                 message: "Resident profile not found."
@@ -43,7 +45,7 @@ router.get("/profile", isResident, async (req, res) => {
 
         return res.status(200).json({
             success: true,
-            user: users[0]
+            user: result.rows[0]
         });
 
     } catch (error) {
@@ -56,9 +58,13 @@ router.get("/profile", isResident, async (req, res) => {
     }
 });
 
-// Update logged-in resident's profile
+
+// ======================================================
+// UPDATE LOGGED-IN RESIDENT'S PROFILE
+// ======================================================
 router.put("/profile", isResident, async (req, res) => {
-        console.log("PUT /api/residents/profile reached");
+    console.log("PUT /api/residents/profile reached");
+
     try {
         const userId = req.session.user.id;
 
@@ -70,7 +76,7 @@ router.put("/profile", isResident, async (req, res) => {
             sitio_purok
         } = req.body;
 
-        // Validate required fields
+        // Validate required fields.
         if (
             !mobile_number ||
             !email ||
@@ -84,15 +90,15 @@ router.put("/profile", isResident, async (req, res) => {
             });
         }
 
-        // Update resident record
-        const [result] = await pool.query(
+        // Update resident record.
+        const result = await pool.query(
             `UPDATE users
              SET
-                mobile_number = ?,
-                email = ?,
-                address = ?,
-                sitio_purok = ?
-             WHERE user_id = ?`,
+                mobile_number = $1,
+                email = $2,
+                address = $3,
+                sitio_purok = $4
+             WHERE user_id = $5`,
             [
                 mobile_number.trim(),
                 email.trim(),
@@ -101,10 +107,11 @@ router.put("/profile", isResident, async (req, res) => {
                 userId
             ]
         );
-        console.log("Profile update result:", result);
+
+        console.log("Profile update result:", result.rowCount);
         console.log("Session user ID:", userId);
 
-        if (result.affectedRows === 0) {
+        if (result.rowCount === 0) {
             return res.status(404).json({
                 success: false,
                 message: "Resident profile not found."
@@ -117,16 +124,26 @@ router.put("/profile", isResident, async (req, res) => {
         });
 
     } catch (error) {
-    console.error("Update resident profile error:", error);
+        console.error("Update resident profile error:", error);
 
-    return res.status(500).json({
-        success: false,
-        message: error.message || "Internal server error."
-    });
-}
+        if (error.code === "23505") {
+            return res.status(409).json({
+                success: false,
+                message: "This email address is already registered."
+            });
+        }
+
+        return res.status(500).json({
+            success: false,
+            message: error.message || "Internal server error."
+        });
+    }
 });
 
-// Change password for logged-in resident
+
+// ======================================================
+// CHANGE PASSWORD FOR LOGGED-IN RESIDENT
+// ======================================================
 router.put("/change-password", isResident, async (req, res) => {
     try {
         const userId = req.session.user.id;
@@ -136,7 +153,7 @@ router.put("/change-password", isResident, async (req, res) => {
             newPassword
         } = req.body;
 
-        // Validate required fields
+        // Validate required fields.
         if (!currentPassword || !newPassword) {
             return res.status(400).json({
                 success: false,
@@ -144,7 +161,7 @@ router.put("/change-password", isResident, async (req, res) => {
             });
         }
 
-        // Validate new password
+        // Validate new password.
         if (newPassword.length < 8) {
             return res.status(400).json({
                 success: false,
@@ -159,24 +176,24 @@ router.put("/change-password", isResident, async (req, res) => {
             });
         }
 
-        // Retrieve the resident's current password hash
-        const [users] = await pool.query(
+        // Retrieve the resident's current password hash.
+        const userResult = await pool.query(
             `SELECT password_hash
              FROM users
-             WHERE user_id = ?`,
+             WHERE user_id = $1`,
             [userId]
         );
 
-        if (users.length === 0) {
+        if (userResult.rows.length === 0) {
             return res.status(404).json({
                 success: false,
                 message: "Resident account not found."
             });
         }
 
-        const user = users[0];
+        const user = userResult.rows[0];
 
-        // Verify current password
+        // Verify current password.
         const isPasswordValid = await bcrypt.compare(
             currentPassword,
             user.password_hash
@@ -189,7 +206,7 @@ router.put("/change-password", isResident, async (req, res) => {
             });
         }
 
-        // Prevent using the same password
+        // Prevent using the same password.
         if (currentPassword === newPassword) {
             return res.status(400).json({
                 success: false,
@@ -197,14 +214,14 @@ router.put("/change-password", isResident, async (req, res) => {
             });
         }
 
-        // Hash the new password
+        // Hash the new password.
         const newPasswordHash = await bcrypt.hash(newPassword, 10);
 
-        // Update password in database
+        // Update password in PostgreSQL.
         await pool.query(
             `UPDATE users
-             SET password_hash = ?
-             WHERE user_id = ?`,
+             SET password_hash = $1
+             WHERE user_id = $2`,
             [newPasswordHash, userId]
         );
 
@@ -223,6 +240,7 @@ router.put("/change-password", isResident, async (req, res) => {
     }
 });
 
+
 // ======================================================
 // RESIDENT NOTIFICATION MANAGEMENT
 // ======================================================
@@ -232,7 +250,7 @@ router.get("/notifications", isResident, async (req, res) => {
     try {
         const userId = req.session.user.id;
 
-        const [notifications] = await pool.query(
+        const result = await pool.query(
             `SELECT
                 notification_id,
                 event_type,
@@ -244,14 +262,16 @@ router.get("/notifications", isResident, async (req, res) => {
                 created_at
              FROM notifications
              WHERE recipient_type = 'resident'
-             AND user_id = ?
+               AND user_id = $1
              ORDER BY created_at DESC
              LIMIT 100`,
             [userId]
         );
 
+        const notifications = result.rows;
+
         const unreadCount = notifications.filter(
-            notification => Number(notification.is_read) === 0
+            notification => notification.is_read === false
         ).length;
 
         return res.status(200).json({
@@ -270,32 +290,33 @@ router.get("/notifications", isResident, async (req, res) => {
     }
 });
 
+
 // PATCH: Mark one resident notification as read
 router.patch("/notifications/:id/read", isResident, async (req, res) => {
     try {
         const userId = req.session.user.id;
         const notificationId = req.params.id;
 
-        const [result] = await pool.query(
+        const result = await pool.query(
             `UPDATE notifications
-             SET is_read = 1
-             WHERE notification_id = ?
-             AND recipient_type = 'resident'
-             AND user_id = ?`,
+             SET is_read = TRUE
+             WHERE notification_id = $1
+               AND recipient_type = 'resident'
+               AND user_id = $2`,
             [notificationId, userId]
         );
 
-        if (result.affectedRows === 0) {
-            const [existing] = await pool.query(
+        if (result.rowCount === 0) {
+            const existingResult = await pool.query(
                 `SELECT notification_id
                  FROM notifications
-                 WHERE notification_id = ?
-                 AND recipient_type = 'resident'
-                 AND user_id = ?`,
+                 WHERE notification_id = $1
+                   AND recipient_type = 'resident'
+                   AND user_id = $2`,
                 [notificationId, userId]
             );
 
-            if (existing.length === 0) {
+            if (existingResult.rows.length === 0) {
                 return res.status(404).json({
                     success: false,
                     message: "Notification not found."
@@ -318,6 +339,7 @@ router.patch("/notifications/:id/read", isResident, async (req, res) => {
     }
 });
 
+
 // PATCH: Mark all resident notifications as read
 router.patch("/notifications/read-all", isResident, async (req, res) => {
     try {
@@ -325,10 +347,10 @@ router.patch("/notifications/read-all", isResident, async (req, res) => {
 
         await pool.query(
             `UPDATE notifications
-             SET is_read = 1
+             SET is_read = TRUE
              WHERE recipient_type = 'resident'
-             AND user_id = ?
-             AND is_read = 0`,
+               AND user_id = $1
+               AND is_read = FALSE`,
             [userId]
         );
 
@@ -346,5 +368,6 @@ router.patch("/notifications/read-all", isResident, async (req, res) => {
         });
     }
 });
+
 
 module.exports = router;

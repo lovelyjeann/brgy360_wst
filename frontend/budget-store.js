@@ -186,7 +186,8 @@ export function normalizeBudgetRecord(raw, index = 0) {
   };
 }
 
-// Convert a MySQL budget record into the format used by the dashboards.
+// Convert a PostgreSQL budget record returned by the backend API
+// into the format used by the dashboards.
 export function normalizeBudgetApiRecord(record, index = 0) {
   if (!record) return null;
 
@@ -206,7 +207,7 @@ export function normalizeBudgetApiRecord(record, index = 0) {
   }, index);
 }
 
-// Retrieve budget records directly from MySQL through the backend.
+// Retrieve budget records from the backend API.
 export async function fetchBudgetRecords() {
   const response = await fetch('http://localhost:5000/api/budget', {
     method: 'GET',

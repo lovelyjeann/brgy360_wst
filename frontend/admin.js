@@ -1365,57 +1365,12 @@ function normalizeServiceRequest(r) {
     return norm;
 }
 
-  function loadCitizenProposals() {
-    try {
-      const stored = localStorage.getItem('brgy360_proposals');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed.map(normalizeProposalRecord);
-        }
-      }
-    } catch (e) {
-      console.warn('Error reading brgy360_proposals:', e);
-    }
-
-    // Default seed including Juan Dela Cruz initial proposal
-    const defaultJuan = {
-      id: 'PROP-8421',
-      ref: 'PROP-8421',
-      title: 'Installation of Solar LED Streetlights along Sitio Ibaba Riverbank Walkway',
-      category: 'Infrastructure',
-      year: '2026',
-      location: 'Sitio Ibaba',
-      sitio: 'Sitio Ibaba',
-      proponent: 'Juan Dela Cruz',
-      email: 'juan@gmail.com',
-      residentId: 'PW-2026-08492',
-      date: 'Sep 28, 2026',
-      dateFiled: '2026-09-28',
-      budget: 150000,
-      timeline: 'Q1 2027 (3 months implementation)',
-      status: 'Under Review',
-      description: 'The riverbank pathway is heavily traversed by over 300 residents daily but lacks grid electricity. Standalone solar lights provide clean, zero-grid-cost illumination to prevent accidents and deter nighttime criminality.',
-      rationale: 'The riverbank pathway is heavily traversed by over 300 residents daily but lacks grid electricity. Standalone solar lights provide clean, zero-grid-cost illumination to prevent accidents and deter nighttime criminality.',
-      councilNotes: 'Endorsed for technical site survey by the Committee on Infrastructure. Calendar for prioritization during the Barangay Assembly Deliberation.',
-      councilNote: 'Endorsed for technical site survey by the Committee on Infrastructure. Calendar for prioritization during the Barangay Assembly Deliberation.'
-    };
-
-    const combinedSeed = [defaultJuan, ...DEFAULT_CITIZEN_PROPOSALS].map(normalizeProposalRecord);
-    saveCitizenProposals(combinedSeed);
-    return combinedSeed;
-  }
-
-  function saveCitizenProposals(data) {
-    const listToSave = data || citizenProposals;
-    try {
-      localStorage.setItem('brgy360_proposals', JSON.stringify(listToSave));
-      window.dispatchEvent(new Event('storage'));
-      window.dispatchEvent(new CustomEvent('brgy360_proposals_changed', { detail: listToSave }));
-    } catch (e) {
-      console.warn('Error saving brgy360_proposals:', e);
-    }
-  }
+  
+function loadCitizenProposals() {
+    // Proposal records must come from the backend API.
+    // Do not load old MySQL cache or seeded sample proposals.
+    return [];
+}
 
   let citizenProposals = loadCitizenProposals();
 
@@ -1652,11 +1607,13 @@ function normalizeServiceRequest(r) {
   // Announcements Dataset (Synchronized with Public Home Page via announcements-store.js)
   let announcementsList = [];
 
-  // Budget Allocation & Expense Records Dataset (Loaded from MySQL)
+  // Retrieve and manage records through the Brgy360 backend API,
+  // which uses Supabase PostgreSQL as its database.
     let adminBudgetRecords = [];
     let adminBudgetRecordsLoaded = false;
 
-  // Load Admin Budget records directly from MySQL.
+// Retrieve and manage records through the Brgy360 backend API,
+// which uses Supabase PostgreSQL as its database.
 async function loadAdminBudgetRecordsFromDatabase() {
   try {
     adminBudgetRecords = await fetchBudgetRecords();
@@ -5168,54 +5125,38 @@ function calculateAge(dateOfBirth) {
 
   loadConcernsFromAPI();
 
-  function syncAllStoresFromStorage(changedKey) {
+  
+function syncAllStoresFromStorage(changedKey) {
     if (
-      !changedKey ||
-      changedKey === 'brgy360_service_requests' ||
-      changedKey === 'brgy360_requests' ||
-      changedKey === 'brgy360_user_requests'
+        !changedKey ||
+        changedKey === 'brgy360_service_requests' ||
+        changedKey === 'brgy360_requests' ||
+        changedKey === 'brgy360_user_requests'
     ) {
-      loadServiceRequestsFromBackend();
+        loadServiceRequestsFromBackend();
     }
+
     if (!changedKey) {
         loadProjectsFromDatabase();
         loadCitizenProposalsFromDatabase();
     }
-    if (!changedKey || changedKey === 'brgy360_proposals') {
-      citizenProposals = loadCitizenProposals();
-      if (typeof renderProposalsTable === 'function') renderProposalsTable();
+
+    // Proposals are exclusively loaded from the backend API.
+    // Never reload proposal records from localStorage.
+    if (changedKey === 'brgy360_proposals') {
+        loadCitizenProposalsFromDatabase();
     }
+
     if (!changedKey || changedKey === 'brgy360_resident_applications') {
-      loadResidentApplicationsFromAPI();
+        loadResidentApplicationsFromAPI();
     }
+
     if (changedKey === 'brgy360_budget_records_v1') {
-      loadAdminBudgetRecordsFromDatabase();
+        loadAdminBudgetRecordsFromDatabase();
     }
+
     refreshAdminDashboard();
-  }
-
-  window.addEventListener('storage', function (e) {
-    syncAllStoresFromStorage(e ? e.key : null);
-  });
-
-  window.addEventListener('focus', function () {
-    syncAllStoresFromStorage(null);
-  });
-
-  document.addEventListener('visibilitychange', function () {
-    if (document.visibilityState === 'visible') {
-      syncAllStoresFromStorage(null);
-    }
-  });
-
-  window.addEventListener('pageshow', function () {
-    syncAllStoresFromStorage(null);
-  });
-
-  window.addEventListener('brgy360_requests_changed', function () {
-  loadServiceRequestsFromBackend();
-  refreshAdminDashboard();
-});
+}
 
   // ==============================================================
   // 9. OVERVIEW OPERATIONAL ACTIONS
@@ -5961,33 +5902,75 @@ function calculateAge(dateOfBirth) {
                 e.stopPropagation();
 
                 const id = this.getAttribute('data-id');
+
                 const prop = citizenProposals.find(
                     p => p.id === id || p.ref === id
                 );
 
                 if (!prop) return;
 
+                if (!prop.proposalId) {
+                    showAdminToast(
+                        'Unable to Delete',
+                        'The database proposal ID is missing.',
+                        'error'
+                    );
+                    return;
+                }
+
                 showAdminConfirm(
                     'Delete Project Proposal',
-                    `Are you sure you want to delete proposal "${prop.title}" (${prop.id || prop.ref})?`,
-                    function() {
-                        citizenProposals = citizenProposals.filter(
-                            p => p.id !== id && p.ref !== id
-                        );
+                    `Are you sure you want to permanently delete proposal "${prop.title}" (${prop.id || prop.ref})?`,
+                    async function() {
+                        try {
+                            const response = await fetch(
+                                `http://localhost:5000/api/proposals/admin/${prop.proposalId}`,
+                                {
+                                    method: 'DELETE',
+                                    credentials: 'include'
+                                }
+                            );
 
-                        saveCitizenProposals();
-                        renderProposalsGrid();
+                            const data = await response.json();
 
-                        showAdminToast(
-                            'Proposal Deleted',
-                            `Proposal record ${id} has been removed.`,
-                            'warning'
-                        );
+                            if (!response.ok || !data.success) {
+                                throw new Error(
+                                    data.message || 'Failed to delete proposal.'
+                                );
+                            }
+
+                            // Remove the deleted proposal from the displayed list.
+                            citizenProposals = citizenProposals.filter(
+                                p => Number(p.proposalId) !== Number(prop.proposalId)
+                            );
+
+                            renderProposalsGrid();
+
+                            showAdminToast(
+                                'Proposal Deleted',
+                                `Proposal ${prop.id || prop.ref} was permanently deleted.`,
+                                'warning'
+                            );
+
+                            console.log(
+                                'Proposal deleted from database:',
+                                prop.proposalId
+                            );
+
+                        } catch (error) {
+                            console.error('Delete proposal error:', error);
+
+                            showAdminToast(
+                                'Delete Failed',
+                                error.message || 'Unable to delete proposal.',
+                                'error'
+                            );
+                        }
                     }
                 );
             });
         });
-    }
+      }
 
     console.log(
         'bindProposalCardEvents available:',
@@ -6215,7 +6198,8 @@ function calculateAge(dateOfBirth) {
 
         const prop = citizenProposals[propIndex];
 
-        // Use the actual MySQL primary key.
+// Retrieve and manage records through the Brgy360 backend API,
+// which uses Supabase PostgreSQL as its database.
         if (!prop.proposalId) {
             showAdminToast(
                 'Error',
@@ -6252,7 +6236,8 @@ function calculateAge(dateOfBirth) {
                 throw new Error(data.message || 'Unable to update proposal.');
             }
 
-            // Update frontend state only after MySQL confirms success.
+            // Retrieve and manage records through the Brgy360 backend API,
+            // which uses Supabase PostgreSQL as its database.
             prop.status = newStatus;
 
             if (requestBody.councilReviewNotes !== undefined) {
@@ -6909,11 +6894,13 @@ function calculateAge(dateOfBirth) {
 
   // C. Announcements Table Renderer & Dynamic Metrics Engine (Synced with Public Home Page)
   function persistAnnouncementsState() {
-    // Announcement saving will be handled by the MySQL API.
+    // Retrieve and manage records through the Brgy360 backend API,
+    // which uses Supabase PostgreSQL as its database.
   }
 
   
-  // Convert MySQL announcement records to the format used by the Admin Console.
+// Retrieve and manage records through the Brgy360 backend API,
+// which uses Supabase PostgreSQL as its database.
   
 function normalizeAnnouncementFromDatabase(row) {
   const publicationStatus = String(row.publication_status || '').trim();
@@ -6947,7 +6934,8 @@ function normalizeAnnouncementFromDatabase(row) {
   };
 }
 
-  // Load announcements from MySQL.
+  // Retrieve and manage records through the Brgy360 backend API,
+  // which uses Supabase PostgreSQL as its database.
   async function loadAnnouncementsFromBackend() {
     try {
       const response = await fetch(`${ADMIN_API_BASE}/announcements/admin/all`, {
@@ -7620,8 +7608,8 @@ function normalizeAnnouncementFromDatabase(row) {
     });
   }
 
-  // Announcements are now loaded from MySQL.
-  // Do not overwrite the database records with localStorage data.
+  // Retrieve and manage records through the Brgy360 backend API,
+  // which uses Supabase PostgreSQL as its database.
 
   // New Project Modal Triggers
   const btnNewProjectModal = document.getElementById('btnNewProjectModal');
@@ -9629,12 +9617,14 @@ if (projBeneficiariesInput) {
       }
     });
 
-    // Cross-tab synchronization listener — refresh from MySQL.
+    // Retrieve and manage records through the Brgy360 backend API,
+    // which uses Supabase PostgreSQL as its database.
     subscribeBudgetRecords(() => {
       loadAdminBudgetRecordsFromDatabase();
     });
 
-    // Load from MySQL first; the loader renders the table after data arrives.
+    // Retrieve and manage records through the Brgy360 backend API,
+    // which uses Supabase PostgreSQL as its database.
     loadAdminBudgetRecordsFromDatabase();
   }
 
@@ -10032,7 +10022,8 @@ async function approveResidentAccount(appId) {
     if (!app || app.status === 'Verified') return;
 
     try {
-        // First, save approval in MySQL.
+        // Retrieve and manage records through the Brgy360 backend API,
+        // which uses Supabase PostgreSQL as its database.
         const response = await fetch(
             `${ADMIN_API_BASE}/admin/residents/${app.id}/verification`,
             {
@@ -10092,7 +10083,8 @@ async function approveResidentAccount(appId) {
             );
         }
 
-        // Reload the list from MySQL.
+        // Retrieve and manage records through the Brgy360 backend API,
+        // which uses Supabase PostgreSQL as its database.
         await loadResidentApplicationsFromAPI();
         await loadGeographicBreakdownFromAPI();
         refreshAdminDashboard();
@@ -10187,7 +10179,8 @@ async function approveResidentAccount(appId) {
             'danger'
         );
 
-        // Reload the pending list from MySQL.
+        // Retrieve and manage records through the Brgy360 backend API,
+        // which uses Supabase PostgreSQL as its database.
         await loadResidentApplicationsFromAPI();
         await loadGeographicBreakdownFromAPI();
         refreshAdminDashboard();

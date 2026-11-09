@@ -7,34 +7,33 @@ const { isAdmin } = require("../middleware/authMiddleware");
 
 // ==========================================
 // PUBLIC: Get all published announcements
-// Accessible to guests and logged-in residents
 // ==========================================
 router.get("/", async (req, res) => {
     try {
-        const [announcements] = await pool.query(
+        const result = await pool.query(
             `SELECT
-                    announcement_id,
-                    headline,
-                    category,
-                    target_audience,
-                    urgency,
-                    feed_summary,
-                    announcement_content,
-                    publication_status,
-                    published_at,
-                    created_at,
-                    updated_at
-                FROM announcements
-                WHERE publication_status = 'Published'
-                ORDER BY
-                    CASE WHEN urgency = 'Critical' THEN 0 ELSE 1 END,
-                    published_at DESC,
-                    announcement_id DESC`  
+                announcement_id,
+                headline,
+                category,
+                target_audience,
+                urgency,
+                feed_summary,
+                announcement_content,
+                publication_status,
+                published_at,
+                created_at,
+                updated_at
+             FROM announcements
+             WHERE publication_status = 'Published'
+             ORDER BY
+                CASE WHEN urgency = 'Critical' THEN 0 ELSE 1 END,
+                published_at DESC,
+                announcement_id DESC`
         );
 
         return res.status(200).json({
             success: true,
-            announcements
+            announcements: result.rows
         });
 
     } catch (error) {
@@ -47,13 +46,14 @@ router.get("/", async (req, res) => {
     }
 });
 
+
 // ==========================================
 // ADMIN: Get all announcements
 // Includes unpublished records
 // ==========================================
 router.get("/admin/all", isAdmin, async (req, res) => {
     try {
-        const [announcements] = await pool.query(
+        const result = await pool.query(
             `SELECT *
              FROM announcements
              ORDER BY created_at DESC, announcement_id DESC`
@@ -61,7 +61,7 @@ router.get("/admin/all", isAdmin, async (req, res) => {
 
         return res.status(200).json({
             success: true,
-            announcements
+            announcements: result.rows
         });
 
     } catch (error) {
@@ -73,6 +73,7 @@ router.get("/admin/all", isAdmin, async (req, res) => {
         });
     }
 });
+
 
 // ==========================================
 // ADMIN: Create announcement
@@ -111,7 +112,7 @@ router.post("/", isAdmin, async (req, res) => {
             ? new Date()
             : null;
 
-        const [result] = await pool.query(
+        const result = await pool.query(
             `INSERT INTO announcements (
                 headline,
                 category,
@@ -121,7 +122,8 @@ router.post("/", isAdmin, async (req, res) => {
                 announcement_content,
                 publication_status,
                 published_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+             ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+             RETURNING announcement_id`,
             [
                 String(headline).trim(),
                 String(category).trim(),
@@ -137,7 +139,7 @@ router.post("/", isAdmin, async (req, res) => {
         return res.status(201).json({
             success: true,
             message: "Announcement created successfully.",
-            announcement_id: result.insertId
+            announcement_id: result.rows[0].announcement_id
         });
 
     } catch (error) {
@@ -150,12 +152,20 @@ router.post("/", isAdmin, async (req, res) => {
     }
 });
 
+
 // ==========================================
 // ADMIN: Update announcement
 // ==========================================
 router.put("/:announcementId", isAdmin, async (req, res) => {
     try {
-        const { announcementId } = req.params;
+        const announcementId = Number(req.params.announcementId);
+
+        if (!Number.isInteger(announcementId) || announcementId <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid announcement ID."
+            });
+        }
 
         const {
             headline,
@@ -179,46 +189,50 @@ router.put("/:announcementId", isAdmin, async (req, res) => {
             });
         }
 
-        const [existing] = await pool.query(
+        const existingResult = await pool.query(
             `SELECT publication_status, published_at
              FROM announcements
-             WHERE announcement_id = ?`,
+             WHERE announcement_id = $1`,
             [announcementId]
         );
 
-        if (existing.length === 0) {
+        if (existingResult.rows.length === 0) {
             return res.status(404).json({
                 success: false,
                 message: "Announcement not found."
             });
         }
 
+        const existing = existingResult.rows[0];
         const allowedStatuses = ["Published", "Unpublished"];
 
         const status = allowedStatuses.includes(publication_status)
             ? publication_status
-            : existing[0].publication_status;
+            : existing.publication_status;
 
-        let publishedAt = existing[0].published_at;
+        let publishedAt = existing.published_at;
 
         if (status === "Unpublished") {
             publishedAt = null;
-        } else if (!publishedAt || existing[0].publication_status !== "Published") {
+        } else if (
+            !publishedAt ||
+            existing.publication_status !== "Published"
+        ) {
             publishedAt = new Date();
         }
 
         await pool.query(
             `UPDATE announcements
              SET
-                headline = ?,
-                category = ?,
-                target_audience = ?,
-                urgency = ?,
-                feed_summary = ?,
-                announcement_content = ?,
-                publication_status = ?,
-                published_at = ?
-             WHERE announcement_id = ?`,
+                headline = $1,
+                category = $2,
+                target_audience = $3,
+                urgency = $4,
+                feed_summary = $5,
+                announcement_content = $6,
+                publication_status = $7,
+                published_at = $8
+             WHERE announcement_id = $9`,
             [
                 String(headline).trim(),
                 String(category).trim(),
@@ -253,8 +267,15 @@ router.put("/:announcementId", isAdmin, async (req, res) => {
 // ==========================================
 router.patch("/:announcementId/status", isAdmin, async (req, res) => {
     try {
-        const { announcementId } = req.params;
+        const announcementId = Number(req.params.announcementId);
         const { publication_status, urgency } = req.body;
+
+        if (!Number.isInteger(announcementId) || announcementId <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid announcement ID."
+            });
+        }
 
         const allowedStatuses = ["Published", "Unpublished"];
         const allowedUrgencies = ["Critical", "Standard"];
@@ -269,21 +290,24 @@ router.patch("/:announcementId/status", isAdmin, async (req, res) => {
             });
         }
 
-        const [existing] = await pool.query(
-            `SELECT announcement_id, publication_status, urgency
+        const existingResult = await pool.query(
+            `SELECT
+                announcement_id,
+                publication_status,
+                urgency
              FROM announcements
-             WHERE announcement_id = ?`,
+             WHERE announcement_id = $1`,
             [announcementId]
         );
 
-        if (existing.length === 0) {
+        if (existingResult.rows.length === 0) {
             return res.status(404).json({
                 success: false,
                 message: "Announcement not found."
             });
         }
 
-        const current = existing[0];
+        const current = existingResult.rows[0];
 
         const nextStatus = allowedStatuses.includes(publication_status)
             ? publication_status
@@ -293,27 +317,41 @@ router.patch("/:announcementId/status", isAdmin, async (req, res) => {
             ? urgency
             : current.urgency;
 
-        let publishedAt = null;
-
-        if (nextStatus === "Published") {
-            publishedAt = current.publication_status === "Published"
-                ? undefined
-                : new Date();
-        }
-
-        if (publishedAt === undefined) {
+        if (
+            nextStatus === "Published" &&
+            current.publication_status === "Published"
+        ) {
             await pool.query(
                 `UPDATE announcements
-                 SET publication_status = ?, urgency = ?
-                 WHERE announcement_id = ?`,
-                [nextStatus, nextUrgency, announcementId]
+                 SET
+                    publication_status = $1,
+                    urgency = $2
+                 WHERE announcement_id = $3`,
+                [
+                    nextStatus,
+                    nextUrgency,
+                    announcementId
+                ]
             );
+
         } else {
+            const publishedAt = nextStatus === "Published"
+                ? new Date()
+                : null;
+
             await pool.query(
                 `UPDATE announcements
-                 SET publication_status = ?, urgency = ?, published_at = ?
-                 WHERE announcement_id = ?`,
-                [nextStatus, nextUrgency, publishedAt, announcementId]
+                 SET
+                    publication_status = $1,
+                    urgency = $2,
+                    published_at = $3
+                 WHERE announcement_id = $4`,
+                [
+                    nextStatus,
+                    nextUrgency,
+                    publishedAt,
+                    announcementId
+                ]
             );
         }
 
@@ -331,5 +369,6 @@ router.patch("/:announcementId/status", isAdmin, async (req, res) => {
         });
     }
 });
+
 
 module.exports = router;

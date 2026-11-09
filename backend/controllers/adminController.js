@@ -1,3 +1,4 @@
+
 const pool = require("../database/db");
 const crypto = require("crypto");
 const sendSetupEmail = require("../utils/sendSetupEmail");
@@ -8,36 +9,55 @@ const sendRejectionEmail = require("../utils/sendRejectionEmail");
 // 1. GET RESIDENTS PENDING VERIFICATION
 // ==========================================
 const getPendingResidents = async (req, res) => {
-try {
-const [residents] = await pool.query(
-"SELECT user_id, full_legal_name, gender, civil_status, date_of_birth, mobile_number, email, address, sitio_purok, id_type, id_card_number, id_file_path, residency_proof_type, residency_proof_path, verification_status FROM users WHERE verification_status = ? ORDER BY user_id DESC",
-["Pending"]
-);
+    try {
+        const result = await pool.query(
+            `SELECT
+                user_id,
+                full_legal_name,
+                gender,
+                civil_status,
+                date_of_birth,
+                mobile_number,
+                email,
+                address,
+                sitio_purok,
+                id_type,
+                id_card_number,
+                id_file_path,
+                residency_proof_type,
+                residency_proof_path,
+                verification_status
+             FROM users
+             WHERE verification_status = $1
+             ORDER BY user_id DESC`,
+            ["Pending"]
+        );
 
-    return res.status(200).json({
-        success: true,
-        count: residents.length,
-        residents
-    });
+        const residents = result.rows;
 
-} catch (error) {
-    console.error("Get pending residents error:", error);
+        return res.status(200).json({
+            success: true,
+            count: residents.length,
+            residents
+        });
 
-    return res.status(500).json({
-        success: false,
-        message: "Server error while retrieving pending residents."
-    });
-}
+    } catch (error) {
+        console.error("Get pending residents error:", error);
 
+        return res.status(500).json({
+            success: false,
+            message: "Server error while retrieving pending residents."
+        });
+    }
 };
 
-// ==========================================
-// GET ALL RESIDENTS FOR ADMIN VERIFICATION
-// ==========================================
 
+// ==========================================
+// 2. GET ALL RESIDENTS FOR ADMIN VERIFICATION
+// ==========================================
 const getAllResidents = async (req, res) => {
     try {
-        const [residents] = await pool.query(
+        const result = await pool.query(
             `SELECT
                 user_id,
                 full_legal_name,
@@ -56,8 +76,8 @@ const getAllResidents = async (req, res) => {
                 CASE
                     WHEN password_hash IS NOT NULL
                          AND password_hash <> ''
-                    THEN 1
-                    ELSE 0
+                    THEN TRUE
+                    ELSE FALSE
                 END AS has_password,
                 verification_status,
                 verification_notes,
@@ -65,6 +85,8 @@ const getAllResidents = async (req, res) => {
              FROM users
              ORDER BY user_id DESC`
         );
+
+        const residents = result.rows;
 
         return res.status(200).json({
             success: true,
@@ -82,20 +104,29 @@ const getAllResidents = async (req, res) => {
     }
 };
 
-// Get resident counts grouped by Sitio/Purok
+
+// ==========================================
+// 3. GET RESIDENT COUNTS GROUPED BY SITIO/PUROK
+// ==========================================
 const getGeographicBreakdown = async (req, res) => {
     try {
-        const [rows] = await pool.query(`
+        const result = await pool.query(`
             SELECT
                 sitio_purok,
                 COUNT(*) AS registered_residents,
-                SUM(verification_status = 'Verified') AS verified_residents,
-                SUM(verification_status = 'Pending') AS pending_verification
+                COUNT(*) FILTER (
+                    WHERE verification_status = 'Verified'
+                ) AS verified_residents,
+                COUNT(*) FILTER (
+                    WHERE verification_status = 'Pending'
+                ) AS pending_verification
             FROM users
             WHERE verification_status IN ('Verified', 'Pending')
             GROUP BY sitio_purok
             ORDER BY sitio_purok ASC
         `);
+
+        const rows = result.rows;
 
         const totalRegistered = rows.reduce(
             (total, row) => total + Number(row.registered_residents),
@@ -148,11 +179,10 @@ const getGeographicBreakdown = async (req, res) => {
     }
 };
 
-// ==========================================
-// 2. APPROVE OR REJECT A RESIDENT
-// ==========================================
 
-
+// ==========================================
+// 4. APPROVE OR REJECT A RESIDENT
+// ==========================================
 const updateResidentVerification = async (req, res) => {
     try {
         const { userId } = req.params;
@@ -165,7 +195,7 @@ const updateResidentVerification = async (req, res) => {
             });
         }
 
-        // A rejection must include a reason
+        // A rejection must include a reason.
         if (
             verification_status === "Rejected" &&
             (
@@ -179,34 +209,34 @@ const updateResidentVerification = async (req, res) => {
             });
         }
 
-        // Find the pending resident
-        const [residents] = await pool.query(
+        // Find the pending resident.
+        const residentResult = await pool.query(
             `SELECT
                 user_id,
                 full_legal_name,
                 email
              FROM users
-             WHERE user_id = ?
-             AND verification_status = 'Pending'`,
+             WHERE user_id = $1
+               AND verification_status = 'Pending'`,
             [userId]
         );
 
-        if (residents.length === 0) {
+        if (residentResult.rows.length === 0) {
             return res.status(404).json({
                 success: false,
                 message: "Pending resident not found."
             });
         }
 
-        const resident = residents[0];
+        const resident = residentResult.rows[0];
 
-        // Save the admin's decision
-        await pool.query(
+        // Save the admin's decision.
+        const updateResult = await pool.query(
             `UPDATE users
-             SET verification_status = ?,
-                 verification_notes = ?,
+             SET verification_status = $1,
+                 verification_notes = $2,
                  reviewed_at = NOW()
-             WHERE user_id = ?`,
+             WHERE user_id = $3`,
             [
                 verification_status,
                 verification_status === "Rejected"
@@ -216,7 +246,14 @@ const updateResidentVerification = async (req, res) => {
             ]
         );
 
-                // Create a notification for the resident's verification decision.
+        if (updateResult.rowCount !== 1) {
+            return res.status(404).json({
+                success: false,
+                message: "Resident verification could not be updated."
+            });
+        }
+
+        // Create a notification for the resident's verification decision.
         try {
             await pool.query(
                 `INSERT INTO notifications (
@@ -227,7 +264,7 @@ const updateResidentVerification = async (req, res) => {
                     message,
                     target_section,
                     target_record_id
-                ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                ) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
                 [
                     "resident",
                     resident.user_id,
@@ -250,8 +287,8 @@ const updateResidentVerification = async (req, res) => {
                 notificationError
             );
         }
-        
-        // Send the approval email
+
+        // Send the approval email.
         if (verification_status === "Verified") {
             await sendApprovalEmail(
                 resident.email,
@@ -259,7 +296,7 @@ const updateResidentVerification = async (req, res) => {
             );
         }
 
-        // Send the rejection email
+        // Send the rejection email.
         if (verification_status === "Rejected") {
             await sendRejectionEmail(
                 resident.email,
@@ -283,74 +320,13 @@ const updateResidentVerification = async (req, res) => {
     }
 };
 
+
 // ==========================================
-// 3. ADMIN PRE-REGISTERS A RESIDENT
+// 5. ADMIN PRE-REGISTERS A RESIDENT
 // ==========================================
 const createPreRegisteredResident = async (req, res) => {
-try {
-const {
-full_legal_name,
-gender,
-civil_status,
-date_of_birth,
-mobile_number,
-email,
-address,
-sitio_purok,
-id_type,
-id_card_number,
-residency_proof_type
-} = req.body;
-
-    const requiredFields = {
-        full_legal_name,
-        gender,
-        civil_status,
-        date_of_birth,
-        mobile_number,
-        email,
-        address,
-        sitio_purok
-    };
-
-    const missingFields = Object.entries(requiredFields)
-        .filter(([key, value]) =>
-            typeof value !== "string" || !value.trim()
-        )
-        .map(([key]) => key);
-
-    if (missingFields.length > 0) {
-        return res.status(400).json({
-            success: false,
-            message: "Please complete all required resident information.",
-            missingFields
-        });
-    }
-
-    const normalizedEmail = email.trim().toLowerCase();
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!emailRegex.test(normalizedEmail)) {
-        return res.status(400).json({
-            success: false,
-            message: "Please enter a valid email address."
-        });
-    }
-
-    const [existingUser] = await pool.query(
-        "SELECT user_id FROM users WHERE email = ? LIMIT 1",
-        [normalizedEmail]
-    );
-
-    if (existingUser.length > 0) {
-        return res.status(409).json({
-            success: false,
-            message: "This email address is already registered."
-        });
-    }
-
-    const [result] = await pool.query(
-        `INSERT INTO users (
+    try {
+        const {
             full_legal_name,
             gender,
             civil_status,
@@ -361,177 +337,241 @@ residency_proof_type
             sitio_purok,
             id_type,
             id_card_number,
-            id_file_path,
-            residency_proof_type,
-            residency_proof_path,
-            password_hash,
-            verification_status
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, NULL, NULL, 'Pending')`,
-        [
-            full_legal_name.trim(),
-            gender.trim(),
-            civil_status.trim(),
-            date_of_birth,
-            mobile_number.trim(),
-            normalizedEmail,
-            address.trim(),
-            sitio_purok.trim(),
-            typeof id_type === "string" ? id_type.trim() || null : null,
-            typeof id_card_number === "string" ? id_card_number.trim() || null : null,
-            typeof residency_proof_type === "string"
-                ? residency_proof_type.trim() || null
-                : null
-        ]
-    );
+            residency_proof_type
+        } = req.body;
 
-    return res.status(201).json({
-        success: true,
-        message: "Resident successfully pre-registered.",
-        user_id: result.insertId
-    });
-
-} catch (error) {
-    console.error("Pre-registration error:", error);
-
-    if (error.code === "ER_DUP_ENTRY") {
-        return res.status(409).json({
-            success: false,
-            message: "This email address is already registered."
-        });
-    }
-
-    return res.status(500).json({
-        success: false,
-        message: "Unable to pre-register resident."
-    });
-}
-
-};
-
-// ==========================================
-// 4. SEND ACCOUNT SETUP EMAIL
-// ==========================================
-const sendResidentSetupEmail = async (req, res) => {
-let userId;
-
-try {
-    userId = req.params.userId;
-
-    // Find the resident
-    const [residents] = await pool.query(
-        `SELECT
-            user_id,
+        const requiredFields = {
             full_legal_name,
+            gender,
+            civil_status,
+            date_of_birth,
+            mobile_number,
             email,
-            verification_status,
-            password_hash
-         FROM users
-         WHERE user_id = ?
-         LIMIT 1`,
-        [userId]
-    );
+            address,
+            sitio_purok
+        };
 
-    if (residents.length === 0) {
-        return res.status(404).json({
-            success: false,
-            message: "Resident not found."
+        const missingFields = Object.entries(requiredFields)
+            .filter(([key, value]) =>
+                typeof value !== "string" || !value.trim()
+            )
+            .map(([key]) => key);
+
+        if (missingFields.length > 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Please complete all required resident information.",
+                missingFields
+            });
+        }
+
+        const normalizedEmail = email.trim().toLowerCase();
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!emailRegex.test(normalizedEmail)) {
+            return res.status(400).json({
+                success: false,
+                message: "Please enter a valid email address."
+            });
+        }
+
+        const existingUserResult = await pool.query(
+            "SELECT user_id FROM users WHERE email = $1 LIMIT 1",
+            [normalizedEmail]
+        );
+
+        if (existingUserResult.rows.length > 0) {
+            return res.status(409).json({
+                success: false,
+                message: "This email address is already registered."
+            });
+        }
+
+        const insertResult = await pool.query(
+            `INSERT INTO users (
+                full_legal_name,
+                gender,
+                civil_status,
+                date_of_birth,
+                mobile_number,
+                email,
+                address,
+                sitio_purok,
+                id_type,
+                id_card_number,
+                id_file_path,
+                residency_proof_type,
+                residency_proof_path,
+                password_hash,
+                verification_status
+            ) VALUES (
+                $1, $2, $3, $4, $5, $6, $7,
+                $8, $9, $10, NULL, $11, NULL, NULL, 'Pending'
+            )
+            RETURNING user_id`,
+            [
+                full_legal_name.trim(),
+                gender.trim(),
+                civil_status.trim(),
+                date_of_birth,
+                mobile_number.trim(),
+                normalizedEmail,
+                address.trim(),
+                sitio_purok.trim(),
+                typeof id_type === "string" ? id_type.trim() || null : null,
+                typeof id_card_number === "string" ? id_card_number.trim() || null : null,
+                typeof residency_proof_type === "string"
+                    ? residency_proof_type.trim() || null
+                    : null
+            ]
+        );
+
+        return res.status(201).json({
+            success: true,
+            message: "Resident successfully pre-registered.",
+            user_id: insertResult.rows[0].user_id
         });
-    }
 
-    const resident = residents[0];
+    } catch (error) {
+        console.error("Pre-registration error:", error);
 
-    // Only approved residents can receive a setup link
-    if (resident.verification_status !== "Verified") {
-        return res.status(400).json({
-            success: false,
-            message: "Only approved residents can receive an account setup email."
-        });
-    }
+        if (error.code === "23505") {
+            return res.status(409).json({
+                success: false,
+                message: "This email address is already registered."
+            });
+        }
 
-    // Do not send another setup link if a password already exists
-    if (resident.password_hash) {
-        return res.status(400).json({
-            success: false,
-            message: "This resident has already set up their password."
-        });
-    }
-
-    // Check frontend URL configuration
-    const frontendUrl = process.env.FRONTEND_URL;
-
-    if (!frontendUrl) {
         return res.status(500).json({
             success: false,
-            message: "FRONTEND_URL is not configured in the backend environment."
+            message: "Unable to pre-register resident."
         });
     }
+};
 
-    // Generate a secure random token
-    const setupToken = crypto.randomBytes(32).toString("hex");
 
-    // Store only the SHA-256 hash of the token
-    const setupTokenHash = crypto
-        .createHash("sha256")
-        .update(setupToken)
-        .digest("hex");
+// ==========================================
+// 6. SEND ACCOUNT SETUP EMAIL
+// ==========================================
+const sendResidentSetupEmail = async (req, res) => {
+    const userId = req.params.userId;
 
-    // Token expires after 24 hours
-    await pool.query(
-        `UPDATE users
-        SET setup_token_hash = ?,
-            setup_token_expires_at = DATE_ADD(NOW(), INTERVAL 24 HOUR)
-        WHERE user_id = ?`,
-        [setupTokenHash, userId]
-    );
-
-    // Build the account setup link
-    const setupLink =
-        `${frontendUrl.replace(/\/$/, "")}/setup-account.html?token=${setupToken}`;
-
-    // Send the email
     try {
-        await sendSetupEmail(
-            resident.email,
-            resident.full_legal_name,
-            setupLink
-        );
-    } catch (emailError) {
-        // Invalidate the token if the email could not be sent
-        await pool.query(
-            `UPDATE users
-             SET setup_token_hash = NULL,
-                 setup_token_expires_at = NULL
-             WHERE user_id = ?`,
+        // Find the resident.
+        const residentResult = await pool.query(
+            `SELECT
+                user_id,
+                full_legal_name,
+                email,
+                verification_status,
+                password_hash
+             FROM users
+             WHERE user_id = $1
+             LIMIT 1`,
             [userId]
         );
 
-        throw emailError;
+        if (residentResult.rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "Resident not found."
+            });
+        }
+
+        const resident = residentResult.rows[0];
+
+        // Only approved residents can receive a setup link.
+        if (resident.verification_status !== "Verified") {
+            return res.status(400).json({
+                success: false,
+                message: "Only approved residents can receive an account setup email."
+            });
+        }
+
+        // Do not send another setup link if a password already exists.
+        if (resident.password_hash) {
+            return res.status(400).json({
+                success: false,
+                message: "This resident has already set up their password."
+            });
+        }
+
+        // Check frontend URL configuration.
+        const frontendUrl = process.env.FRONTEND_URL;
+
+        if (!frontendUrl) {
+            return res.status(500).json({
+                success: false,
+                message: "FRONTEND_URL is not configured in the backend environment."
+            });
+        }
+
+        // Generate a secure random token.
+        const setupToken = crypto.randomBytes(32).toString("hex");
+
+        // Store only the SHA-256 hash of the token.
+        const setupTokenHash = crypto
+            .createHash("sha256")
+            .update(setupToken)
+            .digest("hex");
+
+        // Token expires after 24 hours.
+        await pool.query(
+            `UPDATE users
+             SET setup_token_hash = $1,
+                 setup_token_expires_at = NOW() + INTERVAL '24 hours'
+             WHERE user_id = $2`,
+            [setupTokenHash, userId]
+        );
+
+        // Build the account setup link.
+        const setupLink =
+            `${frontendUrl.replace(/\/$/, "")}/setup-account.html?token=${setupToken}`;
+
+        // Send the email.
+        try {
+            await sendSetupEmail(
+                resident.email,
+                resident.full_legal_name,
+                setupLink
+            );
+        } catch (emailError) {
+            // Invalidate the token if the email could not be sent.
+            await pool.query(
+                `UPDATE users
+                 SET setup_token_hash = NULL,
+                     setup_token_expires_at = NULL
+                 WHERE user_id = $1`,
+                [userId]
+            );
+
+            throw emailError;
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Account setup email sent successfully."
+        });
+
+    } catch (error) {
+        console.error("Send resident setup email error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Unable to send the account setup email. Please try again."
+        });
     }
-
-    return res.status(200).json({
-        success: true,
-        message: "Account setup email sent successfully."
-    });
-
-} catch (error) {
-    console.error("Send resident setup email error:", error);
-
-    return res.status(500).json({
-        success: false,
-        message: "Unable to send the account setup email. Please try again."
-    });
-}
-
 };
+
 
 // ==========================================
 // EXPORT CONTROLLER FUNCTIONS
 // ==========================================
 module.exports = {
-getPendingResidents,
-getAllResidents,
-updateResidentVerification,
-createPreRegisteredResident,
-sendResidentSetupEmail,
-getGeographicBreakdown
+    getPendingResidents,
+    getAllResidents,
+    updateResidentVerification,
+    createPreRegisteredResident,
+    sendResidentSetupEmail,
+    getGeographicBreakdown
 };

@@ -1,16 +1,19 @@
-const session = require("express-session");
-const MySQLStore = require("express-mysql-session")(session);
 
+const session = require("express-session");
+const connectPgSimple = require("connect-pg-simple");
 const pool = require("../database/db");
 
-const sessionStore = new MySQLStore(
-    {
-        clearExpired: true,
-        checkExpirationInterval: 900000,
-        expiration: 86400000
-    },
-    pool
-);
+require("dotenv").config();
+
+const PostgreSQLStore = connectPgSimple(session);
+
+const sessionStore = new PostgreSQLStore({
+    pool,
+    tableName: "user_sessions",
+    createTableIfMissing: true,
+    pruneSessionInterval: 900,
+    ttl: 24 * 60 * 60
+});
 
 const sessionConfig = session({
     name: "brgy360.sid",

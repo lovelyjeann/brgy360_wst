@@ -1306,7 +1306,8 @@ function updateResidentNotificationCount(unreadCount) {
     }
 }
 
-// Render notifications from MySQL
+// Retrieve and manage resident data through the Brgy360 backend API.
+// Resident records are stored and managed in Supabase PostgreSQL.
 function renderNotifications() {
     if (!notifList) return;
 
@@ -2950,7 +2951,8 @@ setInterval(loadResidentNotifications, 30000);
         currentUser.mobile ||
         '';
 
-      // Send the concern to the backend and save it in MySQL
+      // Retrieve and manage resident data through the Brgy360 backend API.
+      // Resident records are stored and managed in Supabase PostgreSQL.
       try {
           // Get the selected photo
           const photoFile = modalConcernPhoto?.files?.[0] || null;
@@ -3002,7 +3004,8 @@ setInterval(loadResidentNotifications, 30000);
           throw new Error(result.message || 'Unable to submit your concern.');
         }
 
-        // Use the ticket reference returned by MySQL
+        // Retrieve and manage resident data through the Brgy360 backend API.
+        // Resident records are stored and managed in Supabase PostgreSQL.
         const ticketRef = result.ticket_ref;
         const concernId = result.concern_id;
 

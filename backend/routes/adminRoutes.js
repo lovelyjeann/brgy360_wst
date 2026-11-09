@@ -23,7 +23,7 @@ const sendPickupReadyEmail = require("../utils/sendPickupReadyEmail");
 // GET: Retrieve admin notifications
 router.get("/notifications", isAdmin, async (req, res) => {
     try {
-        const [notifications] = await pool.query(
+        const result = await pool.query(
             `SELECT
                 notification_id,
                 event_type,
@@ -39,8 +39,10 @@ router.get("/notifications", isAdmin, async (req, res) => {
              LIMIT 100`
         );
 
+        const notifications = result.rows;
+
         const unreadCount = notifications.filter(
-            notification => Number(notification.is_read) === 0
+            notification => !notification.is_read
         ).length;
 
         return res.status(200).json({
@@ -59,29 +61,30 @@ router.get("/notifications", isAdmin, async (req, res) => {
     }
 });
 
+
 // PATCH: Mark one admin notification as read
 router.patch("/notifications/:id/read", isAdmin, async (req, res) => {
     try {
         const notificationId = req.params.id;
 
-        const [result] = await pool.query(
+        const result = await pool.query(
             `UPDATE notifications
-             SET is_read = 1
-             WHERE notification_id = ?
-             AND recipient_type = 'admin'`,
+             SET is_read = TRUE
+             WHERE notification_id = $1
+               AND recipient_type = 'admin'`,
             [notificationId]
         );
 
-        if (result.affectedRows === 0) {
-            const [existing] = await pool.query(
+        if (result.rowCount === 0) {
+            const existingResult = await pool.query(
                 `SELECT notification_id
                  FROM notifications
-                 WHERE notification_id = ?
-                 AND recipient_type = 'admin'`,
+                 WHERE notification_id = $1
+                   AND recipient_type = 'admin'`,
                 [notificationId]
             );
 
-            if (existing.length === 0) {
+            if (existingResult.rows.length === 0) {
                 return res.status(404).json({
                     success: false,
                     message: "Admin notification not found."
@@ -104,14 +107,15 @@ router.patch("/notifications/:id/read", isAdmin, async (req, res) => {
     }
 });
 
+
 // PATCH: Mark all admin notifications as read
 router.patch("/notifications/read-all", isAdmin, async (req, res) => {
     try {
         await pool.query(
             `UPDATE notifications
-             SET is_read = 1
+             SET is_read = TRUE
              WHERE recipient_type = 'admin'
-             AND is_read = 0`
+               AND is_read = FALSE`
         );
 
         return res.status(200).json({
@@ -129,13 +133,22 @@ router.patch("/notifications/read-all", isAdmin, async (req, res) => {
     }
 });
 
-// Admin dashboard
+
+// ======================================================
+// ADMIN DASHBOARD
+// ======================================================
+
 router.get("/dashboard", isAdmin, (req, res) => {
     res.status(200).json({
         success: true,
         message: "Admin dashboard route is working."
     });
 });
+
+
+// ======================================================
+// RESIDENT MANAGEMENT
+// ======================================================
 
 // Get pending residents
 router.get("/residents/pending", isAdmin, getPendingResidents);
@@ -144,16 +157,32 @@ router.get("/residents/pending", isAdmin, getPendingResidents);
 router.get("/residents/all", isAdmin, getAllResidents);
 
 // Get geographic breakdown of residents
-router.get("/residents/geographic-breakdown", isAdmin, getGeographicBreakdown);
+router.get(
+    "/residents/geographic-breakdown",
+    isAdmin,
+    getGeographicBreakdown
+);
 
 // Pre-register a resident
-router.post("/residents/pre-register", isAdmin, createPreRegisteredResident);
+router.post(
+    "/residents/pre-register",
+    isAdmin,
+    createPreRegisteredResident
+);
 
 // Approve or reject a resident
-router.patch("/residents/:userId/verification", isAdmin, updateResidentVerification);
+router.patch(
+    "/residents/:userId/verification",
+    isAdmin,
+    updateResidentVerification
+);
 
 // Send account setup email to an approved resident
-router.post("/residents/:userId/send-setup-email", isAdmin, sendResidentSetupEmail);
+router.post(
+    "/residents/:userId/send-setup-email",
+    isAdmin,
+    sendResidentSetupEmail
+);
 
 
 // ======================================================
@@ -161,13 +190,11 @@ router.post("/residents/:userId/send-setup-email", isAdmin, sendResidentSetupEma
 // ======================================================
 
 // GET: Retrieve all service requests for admin
-
 router.get("/requests", isAdmin, async (req, res) => {
     try {
-        const [requests] = await pool.query(
+        const result = await pool.query(
             `SELECT
                 sr.request_id,
-                sr.user_id,
                 sr.user_id,
                 sr.document_type,
                 sr.purpose_category,
@@ -183,14 +210,14 @@ router.get("/requests", isAdmin, async (req, res) => {
                 u.mobile_number,
                 u.address,
                 u.date_of_birth
-            FROM service_requests sr
-            INNER JOIN users u ON sr.user_id = u.user_id
-            ORDER BY sr.created_at DESC`
+             FROM service_requests sr
+             INNER JOIN users u ON sr.user_id = u.user_id
+             ORDER BY sr.created_at DESC`
         );
 
         return res.status(200).json({
             success: true,
-            requests
+            requests: result.rows
         });
 
     } catch (error) {
@@ -202,6 +229,7 @@ router.get("/requests", isAdmin, async (req, res) => {
         });
     }
 });
+
 
 // PATCH: Update a service request status
 router.patch("/requests/:id/status", isAdmin, async (req, res) => {
@@ -224,27 +252,28 @@ router.patch("/requests/:id/status", isAdmin, async (req, res) => {
         }
 
         // Get the request and resident details before updating.
-        const [requests] = await pool.query(
+        const requestResult = await pool.query(
             `SELECT
                 sr.request_id,
+                sr.user_id,
                 sr.request_status,
                 sr.document_type,
                 u.full_legal_name,
                 u.email
              FROM service_requests sr
              INNER JOIN users u ON sr.user_id = u.user_id
-             WHERE sr.request_id = ?`,
+             WHERE sr.request_id = $1`,
             [requestId]
         );
 
-        if (requests.length === 0) {
+        if (requestResult.rows.length === 0) {
             return res.status(404).json({
                 success: false,
                 message: "Service request not found."
             });
         }
 
-        const request = requests[0];
+        const request = requestResult.rows[0];
 
         // Send an email only when the status changes to Ready for Pickup.
         const shouldSendPickupEmail =
@@ -252,30 +281,28 @@ router.patch("/requests/:id/status", isAdmin, async (req, res) => {
             request.request_status !== "Ready for Pickup";
 
         // Update the request status.
-        const [result] = await pool.query(
+        const updateResult = await pool.query(
             `UPDATE service_requests
              SET
-                request_status = ?,
+                request_status = $1,
                 ready_for_pickup_at = CASE
-                    WHEN ? = 'Ready for Pickup'
+                    WHEN $1 = 'Ready for Pickup'
                     THEN COALESCE(ready_for_pickup_at, NOW())
                     ELSE ready_for_pickup_at
                 END,
                 completed_at = CASE
-                    WHEN ? = 'Completed'
+                    WHEN $1 = 'Completed'
                     THEN COALESCE(completed_at, NOW())
                     ELSE completed_at
                 END
-             WHERE request_id = ?`,
+             WHERE request_id = $2`,
             [
-                request_status,
-                request_status,
                 request_status,
                 requestId
             ]
         );
 
-                if (result.affectedRows === 0) {
+        if (updateResult.rowCount === 0) {
             return res.status(404).json({
                 success: false,
                 message: "Service request not found."
@@ -296,7 +323,7 @@ router.patch("/requests/:id/status", isAdmin, async (req, res) => {
                         message,
                         target_section,
                         target_record_id
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                    ) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
                     [
                         "resident",
                         request.user_id,
@@ -337,7 +364,7 @@ router.patch("/requests/:id/status", isAdmin, async (req, res) => {
             }
         }
 
-        return res.json({
+        return res.status(200).json({
             success: true,
             message: "Request status updated successfully."
         });
@@ -351,5 +378,6 @@ router.patch("/requests/:id/status", isAdmin, async (req, res) => {
         });
     }
 });
+
 
 module.exports = router;

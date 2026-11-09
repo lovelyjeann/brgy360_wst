@@ -1,3 +1,4 @@
+
 const express = require("express");
 const router = express.Router();
 
@@ -5,7 +6,9 @@ const pool = require("../database/db");
 const sendConcernResolvedEmail = require("../utils/sendConcernResolvedEmail");
 const { isResident, isAdmin } = require("../middleware/authMiddleware");
 
-// Resident submits a concern
+// ======================================================
+// RESIDENT SUBMITS A CONCERN
+// ======================================================
 router.post("/", isResident, async (req, res) => {
     try {
         const {
@@ -21,7 +24,7 @@ router.post("/", isResident, async (req, res) => {
             photo_data
         } = req.body;
 
-        // Validate required concern details
+        // Validate required concern details.
         if (
             !concern_title ||
             !category ||
@@ -36,10 +39,10 @@ router.post("/", isResident, async (req, res) => {
             });
         }
 
-        // Get the resident ID from the logged-in session
         const userId = req.session.user.id;
 
-                const [result] = await pool.query(
+        // Insert concern into PostgreSQL.
+        const insertResult = await pool.query(
             `INSERT INTO concerns (
                 user_id,
                 reporter_name,
@@ -53,7 +56,11 @@ router.post("/", isResident, async (req, res) => {
                 photo_name,
                 photo_data,
                 concern_status
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            ) VALUES (
+                $1, $2, $3, $4, $5, $6,
+                $7, $8, $9, $10, $11, $12
+            )
+            RETURNING concern_id`,
             [
                 userId,
                 reporter_name || req.session.user.full_legal_name || null,
@@ -70,7 +77,9 @@ router.post("/", isResident, async (req, res) => {
             ]
         );
 
-        // Create an admin notification for the new resident concern.
+        const concernId = insertResult.rows[0].concern_id;
+
+        // Create an admin notification.
         try {
             const residentName =
                 req.session.user.full_legal_name || "A resident";
@@ -84,7 +93,7 @@ router.post("/", isResident, async (req, res) => {
                     message,
                     target_section,
                     target_record_id
-                ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                ) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
                 [
                     "admin",
                     null,
@@ -92,7 +101,7 @@ router.post("/", isResident, async (req, res) => {
                     "New Community Concern",
                     `${residentName} reported a concern: ${concern_title.trim()}.`,
                     "concerns",
-                    String(result.insertId)
+                    String(concernId)
                 ]
             );
         } catch (notificationError) {
@@ -102,7 +111,7 @@ router.post("/", isResident, async (req, res) => {
             );
         }
 
-                // Create a notification for the resident who submitted the concern.
+        // Create a notification for the resident.
         try {
             await pool.query(
                 `INSERT INTO notifications (
@@ -113,7 +122,7 @@ router.post("/", isResident, async (req, res) => {
                     message,
                     target_section,
                     target_record_id
-                ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                ) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
                 [
                     "resident",
                     userId,
@@ -121,7 +130,7 @@ router.post("/", isResident, async (req, res) => {
                     "Concern Submitted",
                     `Your concern "${concern_title.trim()}" has been submitted successfully and is now Pending.`,
                     "concerns",
-                    String(result.insertId)
+                    String(concernId)
                 ]
             );
         } catch (notificationError) {
@@ -134,8 +143,8 @@ router.post("/", isResident, async (req, res) => {
         return res.status(201).json({
             success: true,
             message: "Concern submitted successfully.",
-            concern_id: result.insertId,
-            ticket_ref: `TCK-${String(result.insertId).padStart(4, "0")}`
+            concern_id: concernId,
+            ticket_ref: `TCK-${String(concernId).padStart(4, "0")}`
         });
 
     } catch (error) {
@@ -148,7 +157,10 @@ router.post("/", isResident, async (req, res) => {
     }
 });
 
-// Admin logs a concern from a walk-in reporter
+
+// ======================================================
+// ADMIN LOGS A CONCERN FROM A WALK-IN REPORTER
+// ======================================================
 router.post("/walk-in", isAdmin, async (req, res) => {
     try {
         const {
@@ -162,7 +174,7 @@ router.post("/walk-in", isAdmin, async (req, res) => {
             reporter_contact
         } = req.body;
 
-        // Validate required fields
+        // Validate required fields.
         if (
             !concern_title ||
             !category ||
@@ -179,7 +191,7 @@ router.post("/walk-in", isAdmin, async (req, res) => {
             });
         }
 
-        const [result] = await pool.query(
+        const insertResult = await pool.query(
             `INSERT INTO concerns (
                 user_id,
                 reporter_name,
@@ -191,7 +203,11 @@ router.post("/walk-in", isAdmin, async (req, res) => {
                 exact_location,
                 detailed_description,
                 concern_status
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            ) VALUES (
+                $1, $2, $3, $4, $5,
+                $6, $7, $8, $9, $10
+            )
+            RETURNING concern_id`,
             [
                 null,
                 reporter_name.trim(),
@@ -206,10 +222,12 @@ router.post("/walk-in", isAdmin, async (req, res) => {
             ]
         );
 
+        const concernId = insertResult.rows[0].concern_id;
+
         return res.status(201).json({
             success: true,
             message: "Walk-in concern logged successfully.",
-            concern_id: result.insertId
+            concern_id: concernId
         });
 
     } catch (error) {
@@ -223,15 +241,16 @@ router.post("/walk-in", isAdmin, async (req, res) => {
 });
 
 
-// Resident retrieves their own concerns from the database
+// ======================================================
+// RESIDENT RETRIEVES THEIR OWN CONCERNS
+// ======================================================
 router.get("/my", isResident, async (req, res) => {
     try {
         const userId = req.session.user.id;
 
-        const [concerns] = await pool.query(
+        const result = await pool.query(
             `SELECT
                 c.concern_id,
-                c.user_id,
                 c.user_id,
                 c.reporter_name,
                 c.reporter_contact,
@@ -252,14 +271,14 @@ router.get("/my", isResident, async (req, res) => {
                 u.address
              FROM concerns c
              LEFT JOIN users u ON c.user_id = u.user_id
-             WHERE c.user_id = ?
+             WHERE c.user_id = $1
              ORDER BY c.date_submitted DESC, c.concern_id DESC`,
             [userId]
         );
 
         return res.status(200).json({
             success: true,
-            concerns
+            concerns: result.rows
         });
 
     } catch (error) {
@@ -272,13 +291,20 @@ router.get("/my", isResident, async (req, res) => {
     }
 });
 
-// Admin updates a concern's status
+
+// ======================================================
+// ADMIN UPDATES A CONCERN'S STATUS
+// ======================================================
 router.patch("/:id/status", isAdmin, async (req, res) => {
     try {
         const concernId = req.params.id;
         const { concern_status, resolution_notes } = req.body;
 
-        const allowedStatuses = ["Pending", "In Progress", "Resolved"];
+        const allowedStatuses = [
+            "Pending",
+            "In Progress",
+            "Resolved"
+        ];
 
         if (!allowedStatuses.includes(concern_status)) {
             return res.status(400).json({
@@ -287,8 +313,8 @@ router.patch("/:id/status", isAdmin, async (req, res) => {
             });
         }
 
-        // Get the concern and its owner's email before updating
-        const [concerns] = await pool.query(
+        // Get the concern and owner's email before updating.
+        const concernResult = await pool.query(
             `SELECT
                 c.concern_id,
                 c.user_id,
@@ -298,31 +324,37 @@ router.patch("/:id/status", isAdmin, async (req, res) => {
                 u.email
              FROM concerns c
              LEFT JOIN users u ON c.user_id = u.user_id
-             WHERE c.concern_id = ?`,
+             WHERE c.concern_id = $1`,
             [concernId]
         );
 
-        if (concerns.length === 0) {
+        if (concernResult.rows.length === 0) {
             return res.status(404).json({
                 success: false,
                 message: "Concern not found."
             });
         }
 
-        const concern = concerns[0];
-        const wasNotResolved = concern.concern_status !== "Resolved";
+        const concern = concernResult.rows[0];
 
-        // Update the concern
+        const wasNotResolved =
+            concern.concern_status !== "Resolved";
+
+        const statusChanged =
+            concern.concern_status !== concern_status;
+
+        // Update the concern.
         await pool.query(
             `UPDATE concerns
-             SET concern_status = ?,
-                 resolution_notes = ?,
+             SET concern_status = $1,
+                 resolution_notes = $2,
                  resolved_at = CASE
-                     WHEN ? = 'Resolved' THEN CURRENT_TIMESTAMP
+                     WHEN $3 = 'Resolved'
+                     THEN CURRENT_TIMESTAMP
                      ELSE NULL
                  END,
                  updated_at = CURRENT_TIMESTAMP
-             WHERE concern_id = ?`,
+             WHERE concern_id = $4`,
             [
                 concern_status,
                 resolution_notes || null,
@@ -331,9 +363,7 @@ router.patch("/:id/status", isAdmin, async (req, res) => {
             ]
         );
 
-                // Notify the resident when their concern status changes.
-        const statusChanged = concern.concern_status !== concern_status;
-
+        // Notify the resident when their concern status changes.
         if (concern.user_id && statusChanged) {
             try {
                 await pool.query(
@@ -345,7 +375,7 @@ router.patch("/:id/status", isAdmin, async (req, res) => {
                         message,
                         target_section,
                         target_record_id
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                    ) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
                     [
                         "resident",
                         concern.user_id,
@@ -368,7 +398,7 @@ router.patch("/:id/status", isAdmin, async (req, res) => {
             }
         }
 
-        // Send email only when the concern first becomes Resolved
+        // Send email only when the concern first becomes Resolved.
         if (concern_status === "Resolved" && wasNotResolved) {
             const recipientEmail = concern.email;
 
@@ -381,12 +411,21 @@ router.patch("/:id/status", isAdmin, async (req, res) => {
                         resolution_notes
                     );
 
-                    console.log("Resolution email sent to:", recipientEmail);
+                    console.log(
+                        "Resolution email sent to:",
+                        recipientEmail
+                    );
                 } catch (emailError) {
-                    console.error("Resolution email failed:", emailError);
+                    console.error(
+                        "Resolution email failed:",
+                        emailError
+                    );
                 }
             } else {
-                console.log("No resident email found for concern:", concernId);
+                console.log(
+                    "No resident email found for concern:",
+                    concernId
+                );
             }
         }
 
@@ -405,11 +444,14 @@ router.patch("/:id/status", isAdmin, async (req, res) => {
     }
 });
 
-// Admin retrieves all concerns from the database
+
+// ======================================================
+// ADMIN RETRIEVES ALL CONCERNS
+// ======================================================
 router.get("/", isAdmin, async (req, res) => {
     try {
-        const [concerns] = await pool.query(`
-            SELECT
+        const result = await pool.query(
+            `SELECT
                 c.concern_id,
                 c.user_id,
                 c.reporter_name,
@@ -431,15 +473,15 @@ router.get("/", isAdmin, async (req, res) => {
                 u.mobile_number,
                 u.email,
                 u.address
-            FROM concerns c
-            LEFT JOIN users u
+             FROM concerns c
+             LEFT JOIN users u
                 ON c.user_id = u.user_id
-            ORDER BY c.date_submitted DESC, c.concern_id DESC
-        `);
+             ORDER BY c.date_submitted DESC, c.concern_id DESC`
+        );
 
         return res.status(200).json({
             success: true,
-            concerns
+            concerns: result.rows
         });
 
     } catch (error) {
@@ -451,5 +493,6 @@ router.get("/", isAdmin, async (req, res) => {
         });
     }
 });
+
 
 module.exports = router;

@@ -580,7 +580,8 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
 
-      // Resident Login: authenticate using the backend and MySQL
+      // Retrieve public data through the Brgy360 backend API.
+      // Database operations are handled by the backend using Supabase PostgreSQL.
       console.log("Resident login code reached");
       try {
         const response = await fetch('http://localhost:5000/api/auth/login', {
@@ -3256,7 +3257,8 @@ if (chartCanvas && typeof Chart !== 'undefined') {
   initBudgetCharts();
   loadPublicBudgetFromDatabase();
 
-  // Refresh public budget data from MySQL when another tab broadcasts an update.
+  // Retrieve public data through the Brgy360 backend API.
+  // Database operations are handled by the backend using Supabase PostgreSQL.
   subscribeBudgetRecords(function () {
     loadPublicBudgetFromDatabase();
   });
@@ -3267,7 +3269,8 @@ if (chartCanvas && typeof Chart !== 'undefined') {
 let announcements = [];
 let currentOpenAnnouncementId = null;
 
-// Convert a MySQL announcement record into the format used by the public cards.
+// Retrieve public data through the Brgy360 backend API.
+// Database operations are handled by the backend using Supabase PostgreSQL.
 function normalizePublicAnnouncement(row) {
   const publishedDate = row.published_at || row.created_at;
   const dateObject = publishedDate ? new Date(publishedDate) : null;
@@ -3304,7 +3307,8 @@ function normalizePublicAnnouncement(row) {
   };
 }
 
-// Load published announcements directly from the MySQL API.
+// Retrieve public data through the Brgy360 backend API.
+// Database operations are handled by the backend using Supabase PostgreSQL.
 async function loadPublicAnnouncements() {
   if (!announcementsCardsFeed) return;
 
@@ -3713,7 +3717,8 @@ async function loadPublicAnnouncements() {
     });
   }
 
-    // Load published announcements from the MySQL database.
+    // Retrieve public data through the Brgy360 backend API.
+    // Database operations are handled by the backend using Supabase PostgreSQL.
     loadPublicAnnouncements();
 
   // Initial render of announcements feed

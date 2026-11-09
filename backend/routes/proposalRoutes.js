@@ -1,15 +1,19 @@
 
 const express = require("express");
 const router = express.Router();
+
 const pool = require("../database/db");
 const upload = require("../middleware/uploadMiddleware");
-const { isResident } = require("../middleware/authMiddleware");
+const { isResident, isAdmin } = require("../middleware/authMiddleware");
+
 const {
     sendProposalApprovalEmail,
     sendProposalRejectionEmail
 } = require("../utils/sendProposalEmail");
 
-// Normalize Philippine mobile numbers.
+// ======================================================
+// NORMALIZE PHILIPPINE MOBILE NUMBERS
+// ======================================================
 function normalizePhoneNumber(phone) {
     if (!phone) return "";
 
@@ -27,12 +31,14 @@ function normalizePhoneNumber(phone) {
 }
 
 
-// Retrieve proposals belonging to the logged-in resident.
+// ======================================================
+// RESIDENT: RETRIEVE THEIR OWN PROPOSALS
+// ======================================================
 router.get("/mine", isResident, async (req, res) => {
     try {
         const userId = req.session.user.id;
 
-        const [proposals] = await pool.query(
+        const result = await pool.query(
             `SELECT
                 p.proposal_id,
                 p.user_id,
@@ -55,12 +61,12 @@ router.get("/mine", isResident, async (req, res) => {
              FROM project_proposals p
              LEFT JOIN users u
                 ON p.user_id = u.user_id
-             WHERE p.user_id = ?
+             WHERE p.user_id = $1
              ORDER BY p.submitted_at DESC, p.proposal_id DESC`,
             [userId]
         );
 
-        const formattedProposals = proposals.map(proposal => ({
+        const formattedProposals = result.rows.map(proposal => ({
             ...proposal,
             tracking_code: `PROP-${proposal.fiscal_year}-${String(proposal.proposal_id).padStart(4, "0")}`,
             proponent:
@@ -85,10 +91,13 @@ router.get("/mine", isResident, async (req, res) => {
     }
 });
 
-// Retrieve all proposals for the Admin dashboard.
-router.get("/admin/all", require("../middleware/authMiddleware").isAdmin, async (req, res) => {
+
+// ======================================================
+// ADMIN: RETRIEVE ALL PROPOSALS
+// ======================================================
+router.get("/admin/all", isAdmin, async (req, res) => {
     try {
-        const [proposals] = await pool.query(
+        const result = await pool.query(
             `SELECT
                 p.proposal_id,
                 p.user_id,
@@ -110,14 +119,18 @@ router.get("/admin/all", require("../middleware/authMiddleware").isAdmin, async 
                 u.full_legal_name AS resident_full_name,
                 u.email AS resident_email
              FROM project_proposals p
-             LEFT JOIN users u ON p.user_id = u.user_id
+             LEFT JOIN users u
+                ON p.user_id = u.user_id
              ORDER BY p.submitted_at DESC, p.proposal_id DESC`
         );
 
-        const formattedProposals = proposals.map(proposal => ({
+        const formattedProposals = result.rows.map(proposal => ({
             ...proposal,
             tracking_code: `PROP-${proposal.fiscal_year}-${String(proposal.proposal_id).padStart(4, "0")}`,
-            proponent: proposal.guest_full_name || proposal.resident_full_name || "Community Resident",
+            proponent:
+                proposal.guest_full_name ||
+                proposal.resident_full_name ||
+                "Community Resident",
             email: proposal.guest_email || proposal.resident_email || ""
         }));
 
@@ -136,11 +149,13 @@ router.get("/admin/all", require("../middleware/authMiddleware").isAdmin, async 
     }
 });
 
-// Update a proposal's status (Admin only).
 
+// ======================================================
+// ADMIN: UPDATE A PROPOSAL'S STATUS
+// ======================================================
 router.put(
     "/admin/:proposalId/status",
-    require("../middleware/authMiddleware").isAdmin,
+    isAdmin,
     async (req, res) => {
         try {
             const proposalId = Number(req.params.proposalId);
@@ -180,7 +195,7 @@ router.put(
             }
 
             // Retrieve proposal and submitter information.
-            const [rows] = await pool.query(
+            const proposalResult = await pool.query(
                 `SELECT
                     p.proposal_id,
                     p.user_id,
@@ -190,22 +205,21 @@ router.put(
                     p.guest_email,
                     u.full_legal_name AS resident_full_name,
                     u.email AS resident_email
-                FROM project_proposals p
-                LEFT JOIN users u
+                 FROM project_proposals p
+                 LEFT JOIN users u
                     ON p.user_id = u.user_id
-                WHERE p.proposal_id = ?
-                LIMIT 1`,
+                 WHERE p.proposal_id = $1`,
                 [proposalId]
             );
 
-            if (rows.length === 0) {
+            if (proposalResult.rows.length === 0) {
                 return res.status(404).json({
                     success: false,
                     message: "Proposal not found."
                 });
             }
 
-            const proposal = rows[0];
+            const proposal = proposalResult.rows[0];
             const previousStatus = proposal.proposal_status;
 
             // Identify the recipient.
@@ -217,21 +231,21 @@ router.put(
                 proposal.resident_full_name ||
                 "Community Resident";
 
-            // Update proposal in MySQL.
+            // Update proposal in PostgreSQL.
             await pool.query(
                 `UPDATE project_proposals
                  SET
-                    proposal_status = ?,
+                    proposal_status = $1,
                     council_review_notes = CASE
-                        WHEN ? = 'Rejected' THEN ?
-                        WHEN ? = 'Approved' THEN NULL
+                        WHEN $2 = 'Rejected' THEN $3
+                        WHEN $4 = 'Approved' THEN NULL
                         ELSE council_review_notes
                     END,
                     reviewed_at = CASE
-                        WHEN ? = 'Pending' THEN NULL
+                        WHEN $5 = 'Pending' THEN NULL
                         ELSE NOW()
                     END
-                 WHERE proposal_id = ?`,
+                 WHERE proposal_id = $6`,
                 [
                     status,
                     status,
@@ -242,7 +256,7 @@ router.put(
                 ]
             );
 
-            // Notify the resident when the proposal is approved or rejected.
+            // Notify the resident when their proposal is approved or rejected.
             const shouldNotifyResident =
                 proposal.user_id &&
                 previousStatus !== status &&
@@ -259,7 +273,7 @@ router.put(
                             message,
                             target_section,
                             target_record_id
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                        ) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
                         [
                             "resident",
                             proposal.user_id,
@@ -282,40 +296,9 @@ router.put(
                         notificationError
                     );
                 }
-
-                        // Create a notification for the resident who submitted the proposal.
-        if (isLoggedInResident && userId) {
-            try {
-                await pool.query(
-                    `INSERT INTO notifications (
-                        recipient_type,
-                        user_id,
-                        event_type,
-                        title,
-                        message,
-                        target_section,
-                        target_record_id
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-                    [
-                        "resident",
-                        userId,
-                        "proposal_submitted",
-                        "Project Proposal Submitted",
-                        `Your project proposal "${projectTitle.trim()}" has been submitted successfully and is now Pending.`,
-                        "proposals",
-                        String(result.insertId)
-                    ]
-                );
-            } catch (notificationError) {
-                console.error(
-                    "Failed to create resident proposal notification:",
-                    notificationError
-                );
-            }
-        }
             }
 
-            // Send notification only when entering Approved or Rejected.
+            // Send email only when entering Approved or Rejected.
             let emailSent = false;
             let emailError = null;
 
@@ -325,7 +308,8 @@ router.put(
 
             if (shouldSendEmail) {
                 if (!recipientEmail) {
-                    emailError = "The submitter has no registered email address.";
+                    emailError =
+                        "The submitter has no registered email address.";
                 } else {
                     try {
                         if (status === "Approved") {
@@ -375,7 +359,55 @@ router.put(
     }
 );
 
-// Submit a project proposal (guest or logged-in resident).
+// ======================================================
+// ADMIN: DELETE A PROJECT PROPOSAL
+// ======================================================
+router.delete("/admin/:proposalId", isAdmin, async (req, res) => {
+    try {
+        const proposalId = Number(req.params.proposalId);
+
+        // Validate proposal ID.
+        if (!Number.isInteger(proposalId) || proposalId <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid proposal ID."
+            });
+        }
+
+        // Delete the proposal from PostgreSQL.
+        const result = await pool.query(
+            `DELETE FROM project_proposals
+             WHERE proposal_id = $1
+             RETURNING proposal_id`,
+            [proposalId]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "Proposal not found."
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Project proposal deleted successfully.",
+            proposalId: result.rows[0].proposal_id
+        });
+
+    } catch (error) {
+        console.error("Delete project proposal error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Unable to delete the project proposal."
+        });
+    }
+});
+
+// ======================================================
+// SUBMIT A PROJECT PROPOSAL (GUEST OR RESIDENT)
+// ======================================================
 router.post("/", upload.single("supportingDocument"), async (req, res) => {
     try {
         const {
@@ -413,15 +445,14 @@ router.post("/", upload.single("supportingDocument"), async (req, res) => {
                 });
             }
 
-            const [users] = await pool.query(
+            const residentResult = await pool.query(
                 `SELECT user_id
                  FROM users
-                 WHERE user_id = ?
-                 LIMIT 1`,
+                 WHERE user_id = $1`,
                 [req.session.user.id]
             );
 
-            residentAccount = users[0];
+            residentAccount = residentResult.rows[0];
 
             if (!residentAccount) {
                 return res.status(401).json({
@@ -454,6 +485,7 @@ router.post("/", upload.single("supportingDocument"), async (req, res) => {
 
         if (isLoggedInResident) {
             userId = residentAccount.user_id;
+
         } else {
             guestFullName = String(req.body.fullName || "").trim();
             guestEmail = String(req.body.email || "").trim();
@@ -515,8 +547,8 @@ router.post("/", upload.single("supportingDocument"), async (req, res) => {
 
         const fiscalYear = new Date().getFullYear();
 
-        // Insert proposal into MySQL.
-        const [result] = await pool.query(
+        // Insert proposal into PostgreSQL.
+        const insertResult = await pool.query(
             `INSERT INTO project_proposals (
                 user_id,
                 project_title,
@@ -531,7 +563,11 @@ router.post("/", upload.single("supportingDocument"), async (req, res) => {
                 supporting_documents_path,
                 fiscal_year,
                 proposal_status
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            ) VALUES (
+                $1, $2, $3, $4, $5, $6, $7,
+                $8, $9, $10, $11, $12, $13
+            )
+            RETURNING proposal_id`,
             [
                 userId,
                 projectTitle.trim(),
@@ -549,20 +585,21 @@ router.post("/", upload.single("supportingDocument"), async (req, res) => {
             ]
         );
 
+        const proposalId = insertResult.rows[0].proposal_id;
+
         // Determine the proposal submitter's name.
         let submitterName = guestFullName;
 
         if (isLoggedInResident) {
-            const [residentRows] = await pool.query(
+            const residentResult = await pool.query(
                 `SELECT full_legal_name
                  FROM users
-                 WHERE user_id = ?
-                 LIMIT 1`,
+                 WHERE user_id = $1`,
                 [userId]
             );
 
             submitterName =
-                residentRows[0]?.full_legal_name || "A resident";
+                residentResult.rows[0]?.full_legal_name || "A resident";
         }
 
         // Create an admin notification for the new proposal.
@@ -576,7 +613,7 @@ router.post("/", upload.single("supportingDocument"), async (req, res) => {
                     message,
                     target_section,
                     target_record_id
-                ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                ) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
                 [
                     "admin",
                     null,
@@ -584,7 +621,7 @@ router.post("/", upload.single("supportingDocument"), async (req, res) => {
                     "New Project Proposal",
                     `${submitterName} submitted a project proposal: ${projectTitle.trim()}.`,
                     "proposals",
-                    String(result.insertId)
+                    String(proposalId)
                 ]
             );
         } catch (notificationError) {
@@ -594,11 +631,42 @@ router.post("/", upload.single("supportingDocument"), async (req, res) => {
             );
         }
 
+        // Create a notification for the resident who submitted the proposal.
+        if (isLoggedInResident && userId) {
+            try {
+                await pool.query(
+                    `INSERT INTO notifications (
+                        recipient_type,
+                        user_id,
+                        event_type,
+                        title,
+                        message,
+                        target_section,
+                        target_record_id
+                    ) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+                    [
+                        "resident",
+                        userId,
+                        "proposal_submitted",
+                        "Project Proposal Submitted",
+                        `Your project proposal "${projectTitle.trim()}" has been submitted successfully and is now Pending.`,
+                        "proposals",
+                        String(proposalId)
+                    ]
+                );
+            } catch (notificationError) {
+                console.error(
+                    "Failed to create resident proposal notification:",
+                    notificationError
+                );
+            }
+        }
+
         return res.status(201).json({
             success: true,
             message: "Your project proposal was submitted successfully.",
-            proposalId: result.insertId,
-            trackingCode: `PROP-${fiscalYear}-${String(result.insertId).padStart(4, "0")}`
+            proposalId,
+            trackingCode: `PROP-${fiscalYear}-${String(proposalId).padStart(4, "0")}`
         });
 
     } catch (error) {
@@ -610,5 +678,6 @@ router.post("/", upload.single("supportingDocument"), async (req, res) => {
         });
     }
 });
+
 
 module.exports = router;

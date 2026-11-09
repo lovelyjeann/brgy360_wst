@@ -5,10 +5,12 @@ const router = express.Router();
 const pool = require("../database/db");
 const { isAuthenticated, isAdmin } = require("../middleware/authMiddleware");
 
-// Public: Get projects for visitors without an account
+// ======================================================
+// PUBLIC: GET PROJECTS FOR VISITORS
+// ======================================================
 router.get("/public", async (req, res) => {
     try {
-        const [projects] = await pool.query(
+        const result = await pool.query(
             `SELECT
                 project_id,
                 project_title,
@@ -24,7 +26,7 @@ router.get("/public", async (req, res) => {
 
         return res.status(200).json({
             success: true,
-            projects
+            projects: result.rows
         });
 
     } catch (error) {
@@ -37,10 +39,13 @@ router.get("/public", async (req, res) => {
     }
 });
 
-// Get all projects
+
+// ======================================================
+// GET ALL PROJECTS
+// ======================================================
 router.get("/", isAuthenticated, async (req, res) => {
     try {
-        const [projects] = await pool.query(
+        const result = await pool.query(
             `SELECT
                 project_id,
                 project_title,
@@ -59,7 +64,7 @@ router.get("/", isAuthenticated, async (req, res) => {
 
         return res.status(200).json({
             success: true,
-            projects
+            projects: result.rows
         });
 
     } catch (error) {
@@ -73,7 +78,9 @@ router.get("/", isAuthenticated, async (req, res) => {
 });
 
 
-// Admin creates a new project
+// ======================================================
+// ADMIN CREATES A NEW PROJECT
+// ======================================================
 router.post("/", isAdmin, async (req, res) => {
     try {
         const {
@@ -87,7 +94,7 @@ router.post("/", isAdmin, async (req, res) => {
             project_status
         } = req.body;
 
-        // Validate required fields
+        // Validate required fields.
         if (
             !project_title ||
             !location_purok ||
@@ -114,7 +121,11 @@ router.post("/", isAdmin, async (req, res) => {
             });
         }
 
-        if (!Number.isFinite(progress) || progress < 0 || progress > 100) {
+        if (
+            !Number.isFinite(progress) ||
+            progress < 0 ||
+            progress > 100
+        ) {
             return res.status(400).json({
                 success: false,
                 message: "Progress must be between 0 and 100."
@@ -128,8 +139,11 @@ router.post("/", isAdmin, async (req, res) => {
             "delayed"
         ];
 
-        const normalizedInitialStatus = String(initial_status).trim().toLowerCase();
-        const normalizedProjectStatus = String(project_status).trim().toLowerCase();
+        const normalizedInitialStatus =
+            String(initial_status).trim().toLowerCase();
+
+        const normalizedProjectStatus =
+            String(project_status).trim().toLowerCase();
 
         if (
             !allowedStatuses.includes(normalizedInitialStatus) ||
@@ -144,7 +158,7 @@ router.post("/", isAdmin, async (req, res) => {
         const formatStatus = status =>
             status.charAt(0).toUpperCase() + status.slice(1);
 
-        const [result] = await pool.query(
+        const result = await pool.query(
             `INSERT INTO projects (
                 project_title,
                 location_purok,
@@ -154,7 +168,8 @@ router.post("/", isAdmin, async (req, res) => {
                 project_scope,
                 target_beneficiaries,
                 project_status
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+             ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+             RETURNING project_id`,
             [
                 String(project_title).trim(),
                 String(location_purok).trim(),
@@ -170,7 +185,7 @@ router.post("/", isAdmin, async (req, res) => {
         return res.status(201).json({
             success: true,
             message: "Project created successfully.",
-            project_id: result.insertId
+            project_id: result.rows[0].project_id
         });
 
     } catch (error) {
@@ -183,7 +198,10 @@ router.post("/", isAdmin, async (req, res) => {
     }
 });
 
-// Admin updates project progress and status
+
+// ======================================================
+// ADMIN UPDATES PROJECT PROGRESS AND STATUS
+// ======================================================
 router.put("/:id", isAdmin, async (req, res) => {
     try {
         const projectId = Number(req.params.id);
@@ -217,7 +235,8 @@ router.put("/:id", isAdmin, async (req, res) => {
             "delayed"
         ];
 
-        const normalizedStatus = String(project_status || "").trim().toLowerCase();
+        const normalizedStatus =
+            String(project_status || "").trim().toLowerCase();
 
         if (!allowedStatuses.includes(normalizedStatus)) {
             return res.status(400).json({
@@ -229,11 +248,11 @@ router.put("/:id", isAdmin, async (req, res) => {
         const formatStatus = status =>
             status.charAt(0).toUpperCase() + status.slice(1);
 
-        const [result] = await pool.query(
+        const result = await pool.query(
             `UPDATE projects
-             SET progress_percentage = ?,
-                 project_status = ?
-             WHERE project_id = ?`,
+             SET progress_percentage = $1,
+                 project_status = $2
+             WHERE project_id = $3`,
             [
                 progress,
                 formatStatus(normalizedStatus),
@@ -241,7 +260,7 @@ router.put("/:id", isAdmin, async (req, res) => {
             ]
         );
 
-        if (result.affectedRows === 0) {
+        if (result.rowCount === 0) {
             return res.status(404).json({
                 success: false,
                 message: "Project not found."
