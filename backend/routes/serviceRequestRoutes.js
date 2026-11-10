@@ -8,6 +8,7 @@ const { isResident } = require("../middleware/authMiddleware");
 // ======================================================
 // GET: RETRIEVE SERVICE REQUESTS FOR LOGGED-IN RESIDENT
 // ======================================================
+
 router.get("/", isResident, async (req, res) => {
     try {
         const userId = req.session.user.id;
@@ -51,8 +52,9 @@ router.get("/", isResident, async (req, res) => {
 
 
 // ======================================================
-// POST: CREATE A SERVICE REQUEST FOR LOGGED-IN RESIDENT
+// POST: CREATE A SERVICE REQUEST
 // ======================================================
+
 router.post("/", isResident, async (req, res) => {
     try {
         const userId = req.session.user.id;
@@ -64,11 +66,14 @@ router.post("/", isResident, async (req, res) => {
             supporting_document_path
         } = req.body;
 
-        // Validate required fields.
+        // Validate required fields
         if (
-            !document_type?.trim() ||
-            !purpose_category?.trim() ||
-            !specific_details?.trim()
+            typeof document_type !== "string" ||
+            typeof purpose_category !== "string" ||
+            typeof specific_details !== "string" ||
+            !document_type.trim() ||
+            !purpose_category.trim() ||
+            !specific_details.trim()
         ) {
             return res.status(400).json({
                 success: false,
@@ -76,7 +81,7 @@ router.post("/", isResident, async (req, res) => {
             });
         }
 
-        // Insert service request into PostgreSQL.
+        // Insert service request
         const insertResult = await pool.query(
             `INSERT INTO service_requests (
                 user_id,
@@ -85,7 +90,8 @@ router.post("/", isResident, async (req, res) => {
                 specific_details,
                 supporting_document_path,
                 request_status
-            ) VALUES ($1, $2, $3, $4, $5, $6)
+            )
+            VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING request_id`,
             [
                 userId,
@@ -99,7 +105,7 @@ router.post("/", isResident, async (req, res) => {
 
         const requestId = insertResult.rows[0].request_id;
 
-        // Retrieve the resident's name.
+        // Retrieve resident name
         const residentResult = await pool.query(
             `SELECT full_legal_name
              FROM users
@@ -107,12 +113,14 @@ router.post("/", isResident, async (req, res) => {
             [userId]
         );
 
-        const residentName =
-            residentResult.rows.length > 0
-                ? residentResult.rows[0].full_legal_name
-                : "A resident";
+        const residentName = residentResult.rows.length > 0
+            ? residentResult.rows[0].full_legal_name
+            : "A resident";
 
-        // Create an admin notification.
+        // ==================================================
+        // ADMIN NOTIFICATION
+        // ==================================================
+
         try {
             await pool.query(
                 `INSERT INTO notifications (
@@ -123,7 +131,8 @@ router.post("/", isResident, async (req, res) => {
                     message,
                     target_section,
                     target_record_id
-                ) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+                )
+                VALUES ($1, $2, $3, $4, $5, $6, $7)`,
                 [
                     "admin",
                     null,
@@ -134,14 +143,18 @@ router.post("/", isResident, async (req, res) => {
                     String(requestId)
                 ]
             );
+
         } catch (notificationError) {
             console.error(
-                "Failed to create service request notification:",
+                "Admin notification error:",
                 notificationError
             );
         }
 
-        // Create a notification for the resident.
+        // ==================================================
+        // RESIDENT NOTIFICATION
+        // ==================================================
+
         try {
             await pool.query(
                 `INSERT INTO notifications (
@@ -152,7 +165,8 @@ router.post("/", isResident, async (req, res) => {
                     message,
                     target_section,
                     target_record_id
-                ) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+                )
+                VALUES ($1, $2, $3, $4, $5, $6, $7)`,
                 [
                     "resident",
                     userId,
@@ -163,9 +177,10 @@ router.post("/", isResident, async (req, res) => {
                     String(requestId)
                 ]
             );
+
         } catch (notificationError) {
             console.error(
-                "Failed to create resident service request notification:",
+                "Resident notification error:",
                 notificationError
             );
         }
@@ -199,22 +214,32 @@ router.post("/", isResident, async (req, res) => {
 // ======================================================
 // PATCH: CANCEL A SERVICE REQUEST
 // ======================================================
+
 router.patch("/:requestId/cancel", isResident, async (req, res) => {
     try {
         const userId = req.session.user.id;
-        const requestId = req.params.requestId;
+        const requestId = Number(req.params.requestId);
+
+        if (!Number.isInteger(requestId) || requestId <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid service request ID."
+            });
+        }
 
         const result = await pool.query(
             `UPDATE service_requests
-             SET request_status = 'Cancelled',
-                 updated_at = CURRENT_TIMESTAMP
+             SET
+                request_status = 'Cancelled',
+                updated_at = CURRENT_TIMESTAMP
              WHERE request_id = $1
                AND user_id = $2
                AND request_status NOT IN (
                    'Ready for Pickup',
                    'Completed',
                    'Cancelled'
-               )`,
+               )
+             RETURNING request_id, request_status`,
             [requestId, userId]
         );
 
@@ -227,7 +252,8 @@ router.patch("/:requestId/cancel", isResident, async (req, res) => {
 
         return res.status(200).json({
             success: true,
-            message: "Service request cancelled successfully."
+            message: "Service request cancelled successfully.",
+            request: result.rows[0]
         });
 
     } catch (error) {
@@ -239,6 +265,5 @@ router.patch("/:requestId/cancel", isResident, async (req, res) => {
         });
     }
 });
-
 
 module.exports = router;

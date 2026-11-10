@@ -1,7 +1,85 @@
 
+const express = require("express");
+const router = express.Router();
+
 const pool = require("../database/db");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
+const fs = require("fs/promises");
+
+// ==========================================
+// HELPER: REMOVE UPLOADED FILES
+// ==========================================
+async function removeUploadedFiles(req) {
+    try {
+        const uploadedFiles = Object.values(req.files || {}).flat();
+
+        await Promise.all(
+            uploadedFiles.map(async (file) => {
+                if (file && file.path) {
+                    try {
+                        await fs.unlink(file.path);
+                    } catch (error) {
+                        if (error.code !== "ENOENT") {
+                            console.error("File cleanup error:", error.message);
+                        }
+                    }
+                }
+            })
+        );
+    } catch (error) {
+        console.error("Upload cleanup error:", error.message);
+    }
+}
+
+// ==========================================
+// HELPER: VALIDATE EMAIL
+// ==========================================
+function isValidEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+// ==========================================
+// HELPER: CREATE LOGIN SESSION
+// ==========================================
+function createLoginSession(req, res, user, successMessage) {
+    if (!req.session) {
+        return res.status(500).json({
+            success: false,
+            message: "Login session is unavailable."
+        });
+    }
+
+    req.session.regenerate((error) => {
+        if (error) {
+            console.error("Session regeneration error:", error.message);
+
+            return res.status(500).json({
+                success: false,
+                message: "Could not create login session."
+            });
+        }
+
+        req.session.user = user;
+
+        req.session.save((saveError) => {
+            if (saveError) {
+                console.error("Session save error:", saveError.message);
+
+                return res.status(500).json({
+                    success: false,
+                    message: "Could not save login session."
+                });
+            }
+
+            return res.status(200).json({
+                success: true,
+                message: successMessage,
+                user: req.session.user
+            });
+        });
+    });
+}
 
 // ==========================================
 // 1. RESIDENT REGISTRATION
@@ -20,68 +98,106 @@ const registerResident = async (req, res) => {
             password,
             id_type,
             residency_proof_type
-        } = req.body;
+        } = req.body || {};
+
+        const requiredFields = [
+            full_legal_name,
+            gender,
+            civil_status,
+            date_of_birth,
+            mobile_number,
+            email,
+            address,
+            sitio_purok,
+            password
+        ];
 
         if (
-            !full_legal_name ||
-            !gender ||
-            !civil_status ||
-            !date_of_birth ||
-            !mobile_number ||
-            !email ||
-            !address ||
-            !sitio_purok ||
-            !password
+            requiredFields.some(
+                (value) =>
+                    typeof value !== "string" || !value.trim()
+            )
         ) {
+            await removeUploadedFiles(req);
+
             return res.status(400).json({
                 success: false,
                 message: "Please complete all required fields."
             });
         }
 
-        if (typeof password !== "string" || password.length < 8) {
+        const normalizedEmail = email.trim().toLowerCase();
+
+        if (!isValidEmail(normalizedEmail)) {
+            await removeUploadedFiles(req);
+
+            return res.status(400).json({
+                success: false,
+                message: "Please enter a valid email address."
+            });
+        }
+
+        if (password.length < 8) {
+            await removeUploadedFiles(req);
+
             return res.status(400).json({
                 success: false,
                 message: "Password must contain at least 8 characters."
             });
         }
 
-        if (!req.files || !req.files.id_document || !req.files.id_document[0]) {
+        if (
+            !req.files ||
+            !req.files.id_document ||
+            !req.files.id_document[0]
+        ) {
+            await removeUploadedFiles(req);
+
             return res.status(400).json({
                 success: false,
                 message: "Please upload a valid ID document."
             });
         }
 
-        const id_file_path =
-            `/uploads/${req.files.id_document[0].filename}`;
+        const idFile = req.files.id_document[0];
 
-        const residency_proof_path =
+        const id_file_path = `/uploads/${idFile.filename}`;
+
+        const residencyFile =
             req.files.residency_proof_document &&
             req.files.residency_proof_document[0]
-                ? `/uploads/${req.files.residency_proof_document[0].filename}`
+                ? req.files.residency_proof_document[0]
                 : null;
 
-        const proofType =
-            residency_proof_type || "No Proof of Residency";
+        const residency_proof_path = residencyFile
+            ? `/uploads/${residencyFile.filename}`
+            : null;
 
-        const normalizedEmail = email.trim().toLowerCase();
+        const proofType =
+            typeof residency_proof_type === "string" &&
+            residency_proof_type.trim()
+                ? residency_proof_type.trim()
+                : "No Proof of Residency";
 
         const existingUserResult = await pool.query(
-            "SELECT user_id FROM users WHERE email = $1",
+            `SELECT user_id
+             FROM users
+             WHERE LOWER(BTRIM(email)) = $1
+             LIMIT 1`,
             [normalizedEmail]
         );
 
         if (existingUserResult.rows.length > 0) {
+            await removeUploadedFiles(req);
+
             return res.status(409).json({
                 success: false,
                 message: "An account with this email already exists."
             });
         }
 
-        const password_hash = await bcrypt.hash(password, 10);
+        const passwordHash = await bcrypt.hash(password, 10);
 
-        // Save the new resident in PostgreSQL.
         const insertResult = await pool.query(
             `INSERT INTO users (
                 full_legal_name,
@@ -98,31 +214,32 @@ const registerResident = async (req, res) => {
                 residency_proof_path,
                 password_hash,
                 verification_status
-            ) VALUES (
+            )
+            VALUES (
                 $1, $2, $3, $4, $5, $6, $7,
                 $8, $9, $10, $11, $12, $13, 'Pending'
             )
             RETURNING user_id`,
             [
-                full_legal_name,
-                gender,
-                civil_status,
+                full_legal_name.trim(),
+                gender.trim(),
+                civil_status.trim(),
                 date_of_birth,
-                mobile_number,
+                mobile_number.trim(),
                 normalizedEmail,
-                address,
-                sitio_purok,
-                id_type || null,
+                address.trim(),
+                sitio_purok.trim(),
+                id_type ? id_type.trim() : null,
                 id_file_path,
                 proofType,
                 residency_proof_path,
-                password_hash
+                passwordHash
             ]
         );
 
         const newUserId = insertResult.rows[0].user_id;
 
-        // Create an admin notification for the new registration.
+        // Notify administrators about the new registration.
         try {
             await pool.query(
                 `INSERT INTO notifications (
@@ -133,31 +250,35 @@ const registerResident = async (req, res) => {
                     message,
                     target_section,
                     target_record_id
-                ) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+                )
+                VALUES ($1, $2, $3, $4, $5, $6, $7)`,
                 [
                     "admin",
                     null,
                     "new_registration",
                     "New Resident Registration",
-                    `${full_legal_name} has submitted a resident registration and is awaiting verification.`,
+                    `${full_legal_name.trim()} has submitted a resident registration and is awaiting verification.`,
                     "residents",
                     String(newUserId)
                 ]
             );
         } catch (notificationError) {
             console.error(
-                "Failed to create registration notification:",
-                notificationError
+                "Registration notification error:",
+                notificationError.message
             );
         }
 
         return res.status(201).json({
             success: true,
-            message: "Registration submitted successfully. Your account is pending verification."
+            message:
+                "Registration submitted successfully. Your account is pending verification."
         });
 
     } catch (error) {
-        console.error("Registration error:", error.message);
+        await removeUploadedFiles(req);
+
+        console.error("Registration error:", error);
 
         if (error.code === "23505") {
             return res.status(409).json({
@@ -173,24 +294,38 @@ const registerResident = async (req, res) => {
     }
 };
 
-
 // ==========================================
 // 2. RESIDENT LOGIN
 // ==========================================
 const loginResident = async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { email, password } = req.body || {};
 
-        if (!email || !password) {
+        if (
+            typeof email !== "string" ||
+            typeof password !== "string" ||
+            !email.trim() ||
+            !password
+        ) {
             return res.status(400).json({
                 success: false,
                 message: "Email and password are required."
             });
         }
 
+        const normalizedEmail = email.trim().toLowerCase();
+
         const userResult = await pool.query(
-            "SELECT * FROM users WHERE email = $1",
-            [email.trim().toLowerCase()]
+            `SELECT
+                user_id,
+                full_legal_name,
+                email,
+                password_hash,
+                verification_status
+             FROM users
+             WHERE LOWER(BTRIM(email)) = $1
+             LIMIT 1`,
+            [normalizedEmail]
         );
 
         if (userResult.rows.length === 0) {
@@ -212,7 +347,8 @@ const loginResident = async (req, res) => {
         if (!user.password_hash) {
             return res.status(403).json({
                 success: false,
-                message: "Please complete your account setup using the link sent to your email."
+                message:
+                    "Please complete your account setup using the link sent to your email."
             });
         }
 
@@ -228,43 +364,20 @@ const loginResident = async (req, res) => {
             });
         }
 
-        req.session.regenerate((error) => {
-            if (error) {
-                console.error("Session regeneration error:", error.message);
-
-                return res.status(500).json({
-                    success: false,
-                    message: "Could not create login session."
-                });
-            }
-
-            req.session.user = {
+        return createLoginSession(
+            req,
+            res,
+            {
                 id: user.user_id,
                 email: user.email,
                 role: "resident",
                 full_legal_name: user.full_legal_name
-            };
-
-            req.session.save((saveError) => {
-                if (saveError) {
-                    console.error("Session save error:", saveError.message);
-
-                    return res.status(500).json({
-                        success: false,
-                        message: "Could not save login session."
-                    });
-                }
-
-                return res.status(200).json({
-                    success: true,
-                    message: "Login successful.",
-                    user: req.session.user
-                });
-            });
-        });
+            },
+            "Login successful."
+        );
 
     } catch (error) {
-        console.error("Resident login error:", error.message);
+        console.error("Resident login error:", error);
 
         return res.status(500).json({
             success: false,
@@ -273,19 +386,22 @@ const loginResident = async (req, res) => {
     }
 };
 
-
 // ==========================================
 // 3. SET UP RESIDENT PASSWORD
 // ==========================================
 const setupResidentPassword = async (req, res) => {
     try {
-        const { token, password, confirmPassword } = req.body || {};
+        const {
+            token,
+            password,
+            confirmPassword
+        } = req.body || {};
 
         if (
             typeof token !== "string" ||
             typeof password !== "string" ||
             typeof confirmPassword !== "string" ||
-            !token ||
+            !token.trim() ||
             !password ||
             !confirmPassword
         ) {
@@ -309,13 +425,12 @@ const setupResidentPassword = async (req, res) => {
             });
         }
 
-        // Hash the token received from the email link.
         const tokenHash = crypto
             .createHash("sha256")
-            .update(token)
+            .update(token.trim())
             .digest("hex");
 
-        // Find an approved resident with a valid, unused token.
+        // Check whether the setup token is valid.
         const residentResult = await pool.query(
             `SELECT user_id
              FROM users
@@ -330,16 +445,15 @@ const setupResidentPassword = async (req, res) => {
         if (residentResult.rows.length === 0) {
             return res.status(400).json({
                 success: false,
-                message: "This setup link is invalid, expired, or has already been used. Please contact your barangay administrator."
+                message:
+                    "This setup link is invalid, expired, or has already been used. Please contact your barangay administrator."
             });
         }
 
         const userId = residentResult.rows[0].user_id;
-
-        // Hash the resident's new password.
         const passwordHash = await bcrypt.hash(password, 10);
 
-        // Save password and invalidate the setup token.
+        // Conditional update ensures the token cannot be reused.
         const updateResult = await pool.query(
             `UPDATE users
              SET password_hash = $1,
@@ -350,20 +464,23 @@ const setupResidentPassword = async (req, res) => {
                AND setup_token_hash = $3
                AND setup_token_expires_at > NOW()
                AND verification_status = 'Verified'
-               AND password_hash IS NULL`,
+               AND password_hash IS NULL
+             RETURNING user_id`,
             [passwordHash, userId, tokenHash]
         );
 
         if (updateResult.rowCount !== 1) {
             return res.status(400).json({
                 success: false,
-                message: "This setup link is invalid, expired, or has already been used."
+                message:
+                    "This setup link is invalid, expired, or has already been used."
             });
         }
 
         return res.status(200).json({
             success: true,
-            message: "Your password has been created successfully. You can now log in to Brgy360."
+            message:
+                "Your password has been created successfully. You can now log in to Brgy360."
         });
 
     } catch (error) {
@@ -375,7 +492,6 @@ const setupResidentPassword = async (req, res) => {
         });
     }
 };
-
 
 // ==========================================
 // 4. GET CURRENT LOGGED-IN USER
@@ -395,7 +511,7 @@ const getCurrentUser = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("Get current user error:", error.message);
+        console.error("Get current user error:", error);
 
         return res.status(500).json({
             success: false,
@@ -403,7 +519,6 @@ const getCurrentUser = async (req, res) => {
         });
     }
 };
-
 
 // ==========================================
 // 5. ADMIN LOGIN
@@ -427,14 +542,15 @@ const loginAdmin = async (req, res) => {
         const normalizedEmail = email.trim().toLowerCase();
 
         const adminResult = await pool.query(
-            `SELECT admin_id, email, password_hash
+            `SELECT
+                admin_id,
+                email,
+                password_hash
              FROM admins
-             WHERE LOWER(BTRIM(email)) = $1`,
+             WHERE LOWER(BTRIM(email)) = $1
+             LIMIT 1`,
             [normalizedEmail]
         );
-
-        console.log("ADMIN LOGIN EMAIL:", normalizedEmail);
-        console.log("ADMIN ACCOUNT FOUND:", adminResult.rows.length > 0);
 
         if (adminResult.rows.length === 0) {
             return res.status(401).json({
@@ -462,8 +578,6 @@ const loginAdmin = async (req, res) => {
             admin.password_hash
         );
 
-        console.log("ADMIN PASSWORD MATCH:", isPasswordValid);
-
         if (!isPasswordValid) {
             return res.status(401).json({
                 success: false,
@@ -471,54 +585,19 @@ const loginAdmin = async (req, res) => {
             });
         }
 
-        if (!req.session) {
-            console.error("Admin login failed: session is unavailable.");
-
-            return res.status(500).json({
-                success: false,
-                message: "Login session is unavailable."
-            });
-        }
-
-        req.session.regenerate((error) => {
-            if (error) {
-                console.error("Admin session error:", error.message);
-
-                return res.status(500).json({
-                    success: false,
-                    message: "Could not create login session."
-                });
-            }
-
-            req.session.user = {
+        return createLoginSession(
+            req,
+            res,
+            {
                 id: admin.admin_id,
                 email: admin.email,
                 role: "admin"
-            };
-
-            req.session.save((saveError) => {
-                if (saveError) {
-                    console.error(
-                        "Admin session save error:",
-                        saveError.message
-                    );
-
-                    return res.status(500).json({
-                        success: false,
-                        message: "Could not save login session."
-                    });
-                }
-
-                return res.status(200).json({
-                    success: true,
-                    message: "Admin login successful.",
-                    user: req.session.user
-                });
-            });
-        });
+            },
+            "Admin login successful."
+        );
 
     } catch (error) {
-        console.error("Admin login error:", error.message);
+        console.error("Admin login error:", error);
 
         return res.status(500).json({
             success: false,
@@ -527,9 +606,8 @@ const loginAdmin = async (req, res) => {
     }
 };
 
-
 // ==========================================
-// CHECK IF RESIDENT EMAIL IS ALREADY USED
+// 6. CHECK RESIDENT EMAIL AVAILABILITY
 // ==========================================
 const checkResidentEmail = async (req, res) => {
     try {
@@ -544,27 +622,33 @@ const checkResidentEmail = async (req, res) => {
 
         const normalizedEmail = email.trim().toLowerCase();
 
-        const existingUserResult = await pool.query(
-            "SELECT user_id FROM users WHERE email = $1",
-            [normalizedEmail]
-        );
-
-        if (existingUserResult.rows.length > 0) {
-            return res.status(200).json({
-                success: true,
-                available: false,
-                message: "An account with this email already exists."
+        if (!isValidEmail(normalizedEmail)) {
+            return res.status(400).json({
+                success: false,
+                message: "Please enter a valid email address."
             });
         }
 
+        const existingUserResult = await pool.query(
+            `SELECT user_id
+             FROM users
+             WHERE LOWER(BTRIM(email)) = $1
+             LIMIT 1`,
+            [normalizedEmail]
+        );
+
+        const available = existingUserResult.rows.length === 0;
+
         return res.status(200).json({
             success: true,
-            available: true,
-            message: "Email is available."
+            available,
+            message: available
+                ? "Email is available."
+                : "An account with this email already exists."
         });
 
     } catch (error) {
-        console.error("Email availability check error:", error.message);
+        console.error("Email availability check error:", error);
 
         return res.status(500).json({
             success: false,
@@ -572,7 +656,6 @@ const checkResidentEmail = async (req, res) => {
         });
     }
 };
-
 
 // ==========================================
 // EXPORT CONTROLLER FUNCTIONS

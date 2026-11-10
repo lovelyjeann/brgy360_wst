@@ -5,6 +5,21 @@ const router = express.Router();
 const pool = require("../database/db");
 const { isAuthenticated, isAdmin } = require("../middleware/authMiddleware");
 
+const ALLOWED_STATUSES = [
+    "Planning",
+    "Ongoing",
+    "Completed",
+    "Delayed"
+];
+
+function normalizeStatus(status) {
+    const normalized = String(status || "").trim().toLowerCase();
+
+    return ALLOWED_STATUSES.find(
+        allowed => allowed.toLowerCase() === normalized
+    ) || null;
+}
+
 // ======================================================
 // PUBLIC: GET PROJECTS FOR VISITORS
 // ======================================================
@@ -19,7 +34,8 @@ router.get("/public", async (req, res) => {
                 progress_percentage,
                 project_scope,
                 project_status,
-                created_at
+                created_at,
+                updated_at
              FROM projects
              ORDER BY created_at DESC, project_id DESC`
         );
@@ -28,7 +44,6 @@ router.get("/public", async (req, res) => {
             success: true,
             projects: result.rows
         });
-
     } catch (error) {
         console.error("Get public projects error:", error);
 
@@ -38,7 +53,6 @@ router.get("/public", async (req, res) => {
         });
     }
 });
-
 
 // ======================================================
 // GET ALL PROJECTS
@@ -66,7 +80,6 @@ router.get("/", isAuthenticated, async (req, res) => {
             success: true,
             projects: result.rows
         });
-
     } catch (error) {
         console.error("Get projects error:", error);
 
@@ -77,9 +90,8 @@ router.get("/", isAuthenticated, async (req, res) => {
     }
 });
 
-
 // ======================================================
-// ADMIN CREATES A NEW PROJECT
+// ADMIN: CREATE PROJECT
 // ======================================================
 router.post("/", isAdmin, async (req, res) => {
     try {
@@ -94,7 +106,6 @@ router.post("/", isAdmin, async (req, res) => {
             project_status
         } = req.body;
 
-        // Validate required fields.
         if (
             !project_title ||
             !location_purok ||
@@ -121,42 +132,22 @@ router.post("/", isAdmin, async (req, res) => {
             });
         }
 
-        if (
-            !Number.isFinite(progress) ||
-            progress < 0 ||
-            progress > 100
-        ) {
+        if (!Number.isFinite(progress) || progress < 0 || progress > 100) {
             return res.status(400).json({
                 success: false,
                 message: "Progress must be between 0 and 100."
             });
         }
 
-        const allowedStatuses = [
-            "planning",
-            "ongoing",
-            "completed",
-            "delayed"
-        ];
+        const normalizedInitialStatus = normalizeStatus(initial_status);
+        const normalizedProjectStatus = normalizeStatus(project_status);
 
-        const normalizedInitialStatus =
-            String(initial_status).trim().toLowerCase();
-
-        const normalizedProjectStatus =
-            String(project_status).trim().toLowerCase();
-
-        if (
-            !allowedStatuses.includes(normalizedInitialStatus) ||
-            !allowedStatuses.includes(normalizedProjectStatus)
-        ) {
+        if (!normalizedInitialStatus || !normalizedProjectStatus) {
             return res.status(400).json({
                 success: false,
                 message: "Invalid project status."
             });
         }
-
-        const formatStatus = status =>
-            status.charAt(0).toUpperCase() + status.slice(1);
 
         const result = await pool.query(
             `INSERT INTO projects (
@@ -168,24 +159,25 @@ router.post("/", isAdmin, async (req, res) => {
                 project_scope,
                 target_beneficiaries,
                 project_status
-             ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-             RETURNING project_id`,
+            )
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+            RETURNING *`,
             [
                 String(project_title).trim(),
                 String(location_purok).trim(),
                 budget,
-                formatStatus(normalizedInitialStatus),
+                normalizedInitialStatus,
                 progress,
                 String(project_scope).trim(),
                 String(target_beneficiaries).trim(),
-                formatStatus(normalizedProjectStatus)
+                normalizedProjectStatus
             ]
         );
 
         return res.status(201).json({
             success: true,
             message: "Project created successfully.",
-            project_id: result.rows[0].project_id
+            project: result.rows[0]
         });
 
     } catch (error) {
@@ -198,14 +190,17 @@ router.post("/", isAdmin, async (req, res) => {
     }
 });
 
-
 // ======================================================
-// ADMIN UPDATES PROJECT PROGRESS AND STATUS
+// ADMIN: UPDATE PROJECT PROGRESS AND STATUS
 // ======================================================
 router.put("/:id", isAdmin, async (req, res) => {
     try {
         const projectId = Number(req.params.id);
-        const { progress_percentage, project_status } = req.body;
+
+        const {
+            progress_percentage,
+            project_status
+        } = req.body;
 
         if (!Number.isInteger(projectId) || projectId <= 0) {
             return res.status(400).json({
@@ -214,48 +209,55 @@ router.put("/:id", isAdmin, async (req, res) => {
             });
         }
 
-        const progress = Number(progress_percentage);
-
         if (
             progress_percentage === undefined ||
-            !Number.isFinite(progress) ||
-            progress < 0 ||
-            progress > 100
+            project_status === undefined
         ) {
+            return res.status(400).json({
+                success: false,
+                message: "Progress percentage and project status are required."
+            });
+        }
+
+        const progress = Number(progress_percentage);
+        const normalizedStatus = normalizeStatus(project_status);
+
+        if (!Number.isFinite(progress) || progress < 0 || progress > 100) {
             return res.status(400).json({
                 success: false,
                 message: "Progress must be between 0 and 100."
             });
         }
 
-        const allowedStatuses = [
-            "planning",
-            "ongoing",
-            "completed",
-            "delayed"
-        ];
-
-        const normalizedStatus =
-            String(project_status || "").trim().toLowerCase();
-
-        if (!allowedStatuses.includes(normalizedStatus)) {
+        if (!normalizedStatus) {
             return res.status(400).json({
                 success: false,
                 message: "Invalid project status."
             });
         }
 
-        const formatStatus = status =>
-            status.charAt(0).toUpperCase() + status.slice(1);
-
         const result = await pool.query(
             `UPDATE projects
-             SET progress_percentage = $1,
-                 project_status = $2
-             WHERE project_id = $3`,
+             SET
+                progress_percentage = $1,
+                project_status = $2,
+                updated_at = CURRENT_TIMESTAMP
+             WHERE project_id = $3
+             RETURNING
+                project_id,
+                project_title,
+                location_purok,
+                allocated_budget,
+                initial_status,
+                progress_percentage,
+                project_scope,
+                target_beneficiaries,
+                project_status,
+                created_at,
+                updated_at`,
             [
                 progress,
-                formatStatus(normalizedStatus),
+                normalizedStatus,
                 projectId
             ]
         );
@@ -269,7 +271,8 @@ router.put("/:id", isAdmin, async (req, res) => {
 
         return res.status(200).json({
             success: true,
-            message: "Project updated successfully."
+            message: "Project status and progress updated successfully.",
+            project: result.rows[0]
         });
 
     } catch (error) {
@@ -281,6 +284,5 @@ router.put("/:id", isAdmin, async (req, res) => {
         });
     }
 });
-
 
 module.exports = router;
