@@ -27,6 +27,14 @@ import {
   generateNextBudgetId,
   distributeTargetAmountAcrossRecords
 } from './budget-store.js';
+import {
+  loadOfficials,
+  loadOfficialsFromAPI,
+  updateOfficial,
+  resetOfficialsToDefault,
+  subscribeOfficials,
+  escapeOfficialHtml
+} from './officials-store.js';
 
 /**
  * Brgy360 - Admin Analytics & Governance Console
@@ -68,17 +76,22 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // Logout Handlers
     async function handleAdminLogout() {
-      try {
-        await fetch(`${ADMIN_API_BASE}/auth/logout`, {
-          method: 'POST',
-          credentials: 'include'
-        });
-      } catch (error) {
-        console.error('Admin logout error:', error);
-      } finally {
-        window.location.href = 'index.html';
-      }
-    }
+  try {
+    await fetch(`${ADMIN_API_BASE}/auth/logout`, {
+      method: 'POST',
+      credentials: 'include'
+    });
+  } catch (error) {
+    console.error('Admin logout error:', error);
+  } finally {
+    // Clear the saved browser session so the home page resets to "Login / Register"
+    localStorage.removeItem('brgy360_session');
+    localStorage.removeItem('currentUserRole');
+    localStorage.removeItem('brgy360_user');
+    sessionStorage.clear();
+    window.location.href = 'index.html';
+  }
+}
 
   const btnAdminLogout = document.getElementById('btnAdminLogout');
   if (btnAdminLogout) {
@@ -95,430 +108,7 @@ document.addEventListener('DOMContentLoaded', async function () {
   // ==============================================================
 
   // Initial Service Requests Dataset (Enriched with full Barangay Pallocan Kanluran fields)
-  const INITIAL_SERVICE_REQUESTS = [
-    {
-      id: 'REQ-2026-08492',
-      resident: 'Juan M. Dela Cruz',
-      fullName: 'Juan M. Dela Cruz',
-      age: '34',
-      address: '042 Sitio Ibaba Main Road',
-      sitio: 'Sitio Ibaba',
-      purokSitio: 'Sitio Ibaba',
-      docType: 'Barangay Clearance',
-      documentType: 'Barangay Clearance',
-      purpose: 'Local Employment Application with Pilipinas Shell Batangas',
-      dateFiled: '2026-10-11',
-      date: 'October 11, 2026',
-      status: 'Ready for Pickup',
-      residencySince: 'March 2012',
-      businessName: 'Dela Cruz Enterprises',
-      businessAddress: '042 Sitio Ibaba Main Road, Barangay Pallocan Kanluran',
-      natureOfBusiness: 'Retail of Consumer Goods',
-      businessType: 'Sole Proprietorship',
-      numberOfEmployees: '2',
-      contact: '0917 123 4567',
-      idOnRecord: 'PhilID ****-****-8492'
-    },
-    {
-      id: 'REQ-2026-08491',
-      resident: 'Maria Santos Alcantara',
-      fullName: 'Maria Santos Alcantara',
-      age: '28',
-      address: 'Block 3 Lot 8, Villa Celina',
-      sitio: 'Sitio Santolan',
-      purokSitio: 'Sitio Santolan',
-      docType: 'Certificate of Indigency',
-      documentType: 'Certificate of Indigency',
-      purpose: 'CHED Tertiary Education Subsidy & Tuition Waiver',
-      dateFiled: '2026-10-11',
-      date: 'October 11, 2026',
-      status: 'In Review',
-      residencySince: 'August 2015',
-      businessName: 'Alcantara Handicrafts',
-      businessAddress: 'Block 3 Lot 8, Sitio Santolan, Barangay Pallocan Kanluran',
-      natureOfBusiness: 'Home Crafts & Sewing',
-      businessType: 'Sole Proprietorship',
-      numberOfEmployees: '1',
-      contact: '0918 345 6789',
-      idOnRecord: 'COMELEC Voter Cert 0142B'
-    },
-    {
-      id: 'REQ-2026-08490',
-      resident: 'Rogelio B. Mendoza',
-      fullName: 'Rogelio B. Mendoza',
-      age: '45',
-      address: '088 Crossing Ilaya',
-      sitio: 'Sitio Ilaya',
-      purokSitio: 'Sitio Ilaya',
-      docType: 'Certificate of Residency',
-      documentType: 'Certificate of Residency',
-      purpose: 'Pag-IBIG Housing Loan Prerequisite & Title Verification',
-      dateFiled: '2026-10-11',
-      date: 'October 11, 2026',
-      status: 'In Review',
-      residencySince: 'June 2008',
-      businessName: 'Mendoza Vulcanizing Services',
-      businessAddress: '088 Crossing Ilaya, Barangay Pallocan Kanluran',
-      natureOfBusiness: 'Automotive Tire Care',
-      businessType: 'Sole Proprietorship',
-      numberOfEmployees: '3',
-      contact: '0920 876 5432',
-      idOnRecord: 'Barangay ID #PK-2024-118'
-    },
-    {
-      id: 'REQ-2026-08489',
-      resident: 'Carmela D. Hernandez',
-      fullName: 'Carmela D. Hernandez',
-      age: '41',
-      address: '15 Riverside Drive',
-      sitio: 'Tierra Verde',
-      purokSitio: 'Tierra Verde',
-      docType: 'Barangay Business Clearance',
-      documentType: 'Barangay Business Clearance',
-      purpose: 'Barangay Business Clearance Renewal for 2026',
-      dateFiled: '2026-10-10',
-      date: 'October 10, 2026',
-      status: 'Ready for Pickup',
-      residencySince: 'January 2010',
-      businessName: 'Hernandez Sari-Sari Store & Carinderia',
-      businessAddress: '15 Riverside Drive, Tierra Verde, Barangay Pallocan Kanluran',
-      natureOfBusiness: 'Retail Food Commodities & Eatery',
-      businessType: 'Sole Proprietorship',
-      numberOfEmployees: '3',
-      contact: '0915 222 3344',
-      idOnRecord: 'Cedula CTC #0849102'
-    },
-    {
-      id: 'REQ-2026-08488',
-      resident: 'Jayson Mark Reyes',
-      fullName: 'Jayson Mark Reyes',
-      age: '21',
-      address: '023 Alley 4, Sitio Gitna',
-      sitio: 'Sitio Gitna',
-      purokSitio: 'Sitio Gitna',
-      docType: 'Certification for First-Time Job Seeker',
-      documentType: 'Certification for First-Time Job Seeker',
-      purpose: 'BPO Customer Support Trainee (RA 11261 First-Time Jobseekers Assistance Act)',
-      dateFiled: '2026-10-10',
-      date: 'October 10, 2026',
-      status: 'In Review',
-      residencySince: 'May 2005',
-      businessName: 'N/A (Jobseeker)',
-      businessAddress: '023 Alley 4, Sitio Gitna, Barangay Pallocan Kanluran',
-      natureOfBusiness: 'N/A',
-      businessType: 'N/A',
-      numberOfEmployees: '0',
-      contact: '0927 444 8899',
-      idOnRecord: 'PhilID ****-****-3310'
-    },
-    {
-      id: 'REQ-2026-08487',
-      resident: 'Lourdes P. Castillo',
-      fullName: 'Lourdes P. Castillo',
-      age: '52',
-      address: 'Lot 14 Block 7, Tierra Verde',
-      sitio: 'Tierra Verde',
-      purokSitio: 'Tierra Verde',
-      docType: 'Barangay Clearance',
-      documentType: 'Barangay Clearance',
-      purpose: 'Philippine Postal ID Renewal & DFA Authentication',
-      dateFiled: '2026-10-10',
-      date: 'October 10, 2026',
-      status: 'Ready for Pickup',
-      residencySince: 'November 2003',
-      businessName: 'Castillo General Services',
-      businessAddress: 'Lot 14 Block 7, Tierra Verde, Barangay Pallocan Kanluran',
-      natureOfBusiness: 'Logistics Consultation',
-      businessType: 'Sole Proprietorship',
-      numberOfEmployees: '2',
-      contact: '0919 777 1212',
-      idOnRecord: 'Driver\'s License N02-18-9901'
-    },
-    {
-      id: 'REQ-2026-08486',
-      resident: 'Arnel G. Dimaculangan',
-      fullName: 'Arnel G. Dimaculangan',
-      age: '66',
-      address: '071 San Isidro St.',
-      sitio: 'Sitio Ibaba',
-      purokSitio: 'Sitio Ibaba',
-      docType: 'Certificate of Indigency',
-      documentType: 'Certificate of Indigency',
-      purpose: 'Batangas Medical Center Dialysis Assistance & Financial Aid',
-      dateFiled: '2026-10-09',
-      date: 'October 09, 2026',
-      status: 'In Review',
-      residencySince: 'April 1980',
-      businessName: 'N/A',
-      businessAddress: '071 San Isidro St., Sitio Ibaba, Barangay Pallocan Kanluran',
-      natureOfBusiness: 'N/A',
-      businessType: 'N/A',
-      numberOfEmployees: '0',
-      contact: '0908 555 4321',
-      idOnRecord: 'Senior Citizen ID #PK-SR-042'
-    },
-    {
-      id: 'REQ-2026-08485',
-      resident: 'Bernadette V. Gomez',
-      fullName: 'Bernadette V. Gomez',
-      age: '38',
-      address: '112 Sampaguita Alley',
-      sitio: 'Sitio Santolan',
-      purokSitio: 'Sitio Santolan',
-      docType: 'Certificate of Indigency',
-      documentType: 'Certificate of Indigency',
-      purpose: 'DSWD AICS Educational Grant Assistance',
-      dateFiled: '2026-10-09',
-      date: 'October 09, 2026',
-      status: 'In Review',
-      residencySince: 'February 2014',
-      businessName: 'N/A',
-      businessAddress: '112 Sampaguita Alley, Sitio Santolan, Barangay Pallocan Kanluran',
-      natureOfBusiness: 'N/A',
-      businessType: 'N/A',
-      numberOfEmployees: '0',
-      contact: '0917 888 9012',
-      idOnRecord: 'Voter\'s ID 0144A'
-    },
-    {
-      id: 'REQ-2026-08484',
-      resident: 'Danilo E. Perez',
-      fullName: 'Danilo E. Perez',
-      age: '49',
-      address: 'Phase 2 Block 5, Potenciana Village',
-      sitio: 'Potenciana Village',
-      purokSitio: 'Potenciana Village',
-      docType: 'Barangay Clearance',
-      documentType: 'Barangay Clearance',
-      purpose: 'Bank Account Opening (OFW Allottee Savings Account)',
-      dateFiled: '2026-10-09',
-      date: 'October 09, 2026',
-      status: 'Ready for Pickup',
-      residencySince: 'September 2006',
-      businessName: 'Perez Transport Services',
-      businessAddress: 'Phase 2 Block 5, Potenciana Village, Barangay Pallocan Kanluran',
-      natureOfBusiness: 'Passenger Transport',
-      businessType: 'Sole Proprietorship',
-      numberOfEmployees: '4',
-      contact: '0922 111 6543',
-      idOnRecord: 'UMID SSS ID 03-889102-1'
-    },
-    {
-      id: 'REQ-2026-08483',
-      resident: 'Corazon T. Marasigan',
-      fullName: 'Corazon T. Marasigan',
-      age: '58',
-      address: '28 Embankment Way',
-      sitio: 'Sitio Ibaba',
-      purokSitio: 'Sitio Ibaba',
-      docType: 'Certificate of Residency',
-      documentType: 'Certificate of Residency',
-      purpose: 'Meralco Electric Service Connection & Meter Relocation',
-      dateFiled: '2026-10-08',
-      date: 'October 08, 2026',
-      status: 'In Review',
-      residencySince: 'July 1999',
-      businessName: 'Marasigan Rice Supply',
-      businessAddress: '28 Embankment Way, Sitio Ibaba, Barangay Pallocan Kanluran',
-      natureOfBusiness: 'Grain & Rice Trading',
-      businessType: 'Sole Proprietorship',
-      numberOfEmployees: '2',
-      contact: '0916 333 7890',
-      idOnRecord: 'Barangay ID #PK-2025-442'
-    },
-    {
-      id: 'REQ-2026-08482',
-      resident: 'Kevin Paul Ramos',
-      fullName: 'Kevin Paul Ramos',
-      age: '33',
-      address: '019 Commercial Strip, G.C Berberabe',
-      sitio: 'G.C Berberabe',
-      purokSitio: 'G.C Berberabe',
-      docType: 'Barangay Business Clearance',
-      documentType: 'Barangay Business Clearance',
-      purpose: 'Barangay Business Clearance Application for Auto Repair Shop',
-      dateFiled: '2026-10-08',
-      date: 'October 08, 2026',
-      status: 'In Review',
-      residencySince: 'September 2017',
-      businessName: 'Apex Motor Works & Vulcanizing Shop',
-      businessAddress: '019 Commercial Strip, G.C Berberabe, Barangay Pallocan Kanluran',
-      natureOfBusiness: 'Automotive Mechanical & Electrical Repair',
-      businessType: 'Sole Proprietorship',
-      numberOfEmployees: '5',
-      contact: '0929 444 0987',
-      idOnRecord: 'DTI Registration 2026-092'
-    },
-    {
-      id: 'REQ-2026-08481',
-      resident: 'Elena S. Villanueva',
-      fullName: 'Elena S. Villanueva',
-      age: '61',
-      address: '055 Creekview Path',
-      sitio: 'Sitio Santolan',
-      purokSitio: 'Sitio Santolan',
-      docType: 'Certificate of Indigency',
-      documentType: 'Certificate of Indigency',
-      purpose: 'Hospitalization Guarantee Letter with City Health Office',
-      dateFiled: '2026-10-08',
-      date: 'October 08, 2026',
-      status: 'In Review',
-      residencySince: 'October 1995',
-      businessName: 'N/A',
-      businessAddress: '055 Creekview Path, Sitio Santolan, Barangay Pallocan Kanluran',
-      natureOfBusiness: 'N/A',
-      businessType: 'N/A',
-      numberOfEmployees: '0',
-      contact: '0918 666 5432',
-      idOnRecord: 'PhilID ****-****-7104'
-    },
-    {
-      id: 'REQ-2026-08480',
-      resident: 'Nestor C. Macalalad',
-      fullName: 'Nestor C. Macalalad',
-      age: '47',
-      address: '034 Calicanto Road',
-      sitio: 'Sitio Ilaya',
-      purokSitio: 'Sitio Ilaya',
-      docType: 'Barangay Clearance',
-      documentType: 'Barangay Clearance',
-      purpose: 'Tricycle Operator Permit & TODA Franchise Renewal',
-      dateFiled: '2026-10-07',
-      date: 'October 07, 2026',
-      status: 'Ready for Pickup',
-      residencySince: 'December 2004',
-      businessName: 'Macalalad TODA Fleet Unit',
-      businessAddress: '034 Calicanto Road, Sitio Ilaya, Barangay Pallocan Kanluran',
-      natureOfBusiness: 'Transport Public Utility',
-      businessType: 'Sole Proprietorship',
-      numberOfEmployees: '1',
-      contact: '0920 333 8811',
-      idOnRecord: 'Driver\'s License Professional'
-    },
-    {
-      id: 'REQ-2026-08479',
-      resident: 'Rosario M. Javier',
-      fullName: 'Rosario M. Javier',
-      age: '30',
-      address: '018 Sitio Gitna Center',
-      sitio: 'Sitio Gitna',
-      purokSitio: 'Sitio Gitna',
-      docType: 'Barangay Clearance',
-      documentType: 'Barangay Clearance',
-      purpose: 'Passport Application at DFA Consular Office Lipa',
-      dateFiled: '2026-10-07',
-      date: 'October 07, 2026',
-      status: 'In Review',
-      residencySince: 'May 2016',
-      businessName: 'Javier Online Boutique',
-      businessAddress: '018 Sitio Gitna Center, Barangay Pallocan Kanluran',
-      natureOfBusiness: 'E-commerce Apparel',
-      businessType: 'Sole Proprietorship',
-      numberOfEmployees: '2',
-      contact: '0917 555 7722',
-      idOnRecord: 'PhilID ****-****-9011'
-    },
-    {
-      id: 'REQ-2026-08478',
-      resident: 'Gilbert R. Tolentino',
-      fullName: 'Gilbert R. Tolentino',
-      age: '20',
-      address: '099 San Juan St.',
-      sitio: 'Sitio Ibaba',
-      purokSitio: 'Sitio Ibaba',
-      docType: 'Certification for First-Time Job Seeker',
-      documentType: 'Certification for First-Time Job Seeker',
-      purpose: 'Supermarket Inventory Assistant Application (RA 11261)',
-      dateFiled: '2026-10-07',
-      date: 'October 07, 2026',
-      status: 'In Review',
-      residencySince: 'March 2006',
-      businessName: 'N/A (Jobseeker)',
-      businessAddress: '099 San Juan St., Sitio Ibaba, Barangay Pallocan Kanluran',
-      natureOfBusiness: 'N/A',
-      businessType: 'N/A',
-      numberOfEmployees: '0',
-      contact: '0928 999 1234',
-      idOnRecord: 'School ID BSU 2026'
-    },
-    {
-      id: 'REQ-2026-08477',
-      resident: 'Patricia A. Dimaano',
-      fullName: 'Patricia A. Dimaano',
-      age: '24',
-      address: 'Block 2 Lot 15, Tierra Verde',
-      sitio: 'Tierra Verde',
-      purokSitio: 'Tierra Verde',
-      docType: 'Certificate of Residency',
-      documentType: 'Certificate of Residency',
-      purpose: 'School Transfer Credentials & Scholarship Application',
-      dateFiled: '2026-10-06',
-      date: 'October 06, 2026',
-      status: 'Ready for Pickup',
-      residencySince: 'August 2011',
-      businessName: 'Dimaano Tutoring Services',
-      businessAddress: 'Block 2 Lot 15, Tierra Verde, Barangay Pallocan Kanluran',
-      natureOfBusiness: 'Educational Services',
-      businessType: 'Sole Proprietorship',
-      numberOfEmployees: '1',
-      contact: '0915 777 4321',
-      idOnRecord: 'Voter\'s Certificate'
-    },
-    {
-      id: 'REQ-2026-08476',
-      resident: 'Eduardo F. Cueto',
-      fullName: 'Eduardo F. Cueto',
-      age: '54',
-      address: '081 Riverside Bridge',
-      sitio: 'Sitio Santolan',
-      purokSitio: 'Sitio Santolan',
-      docType: 'Certificate of Indigency',
-      documentType: 'Certificate of Indigency',
-      purpose: 'DSWD 4Ps Re-Certification & Household Profiling',
-      dateFiled: '2026-10-06',
-      date: 'October 06, 2026',
-      status: 'In Review',
-      residencySince: 'January 1993',
-      businessName: 'N/A',
-      businessAddress: '081 Riverside Bridge, Sitio Santolan, Barangay Pallocan Kanluran',
-      natureOfBusiness: 'N/A',
-      businessType: 'N/A',
-      numberOfEmployees: '0',
-      contact: '0921 444 6578',
-      idOnRecord: '4Ps Card Household 0842'
-    },
-    {
-      id: 'REQ-2026-08475',
-      resident: 'Kristine Joy Montalbo',
-      fullName: 'Kristine Joy Montalbo',
-      age: '26',
-      address: '045 Crossing Ilaya',
-      sitio: 'Sitio Ilaya',
-      purokSitio: 'Sitio Ilaya',
-      docType: 'Barangay Clearance',
-      documentType: 'Barangay Clearance',
-      purpose: 'Call Center Agent Job Placement & NBI Clearance Requirement',
-      dateFiled: '2026-10-06',
-      date: 'October 06, 2026',
-      status: 'In Review',
-      residencySince: 'February 2013',
-      businessName: 'Montalbo Baked Treats',
-      businessAddress: '045 Crossing Ilaya, Barangay Pallocan Kanluran',
-      natureOfBusiness: 'Pastry Production & Retail',
-      businessType: 'Sole Proprietorship',
-      numberOfEmployees: '2',
-      contact: '0919 222 9988',
-      idOnRecord: 'PhilID ****-****-4215'
-    }
-  ];
-
-  function isJuanSeedRequestId(idOrRef) {
-    return ['REQ-2026-08492', 'BRGY-84291', 'BRGY-81409', 'BRGY-79104'].includes(String(idOrRef || '').trim());
-  }
-
-  const SEED_SERVICE_REQUEST_MAP = new Map(
-    INITIAL_SERVICE_REQUESTS.map(item => [item.id, item])
-  );
+  const INITIAL_SERVICE_REQUESTS = [];
 
   
 function normalizeServiceRequest(r) {
@@ -685,148 +275,7 @@ function normalizeServiceRequest(r) {
   }
 }
 
-  const SHARED_DEFAULT_CONCERNS = [
-    {
-      ref: 'TCK-4021',
-      id: 'TCK-4021',
-      title: 'Flickering Streetlight Creating Nighttime Blind Spot',
-      category: 'Infrastructure',
-      urgency: 'Standard',
-      sitio: 'Sitio Ibaba',
-      landmark: 'Main Road Pedestrian Walkway',
-      location: 'Sitio Ibaba — Main Road Pedestrian Walkway',
-      dateFiled: '2026-10-14',
-      status: 'In Progress',
-      currentStage: 2,
-      desc: 'Streetlight has been flickering and completely goes dark after 8:00 PM. Creates a blind spot for pedestrians and students walking home at night.',
-      reporter: 'Juan Dela Cruz',
-      userEmail: 'juan.delacruz@example.com',
-      userMobile: '0917 123 4567',
-      userAddress: '142 Pallocan Blvd, Barangay Pallocan West',
-      residentId: 'PW-2026-08492',
-      resolutionNote: 'Inspected by BPSO Night Patrol on Oct 15. Coordinated with City Engineering Public Lighting Office for LED fixture replacement.'
-    },
-    {
-      ref: 'TCK-4018',
-      id: 'TCK-4018',
-      title: 'Heavy Siltation and Plastic Clog Blocking Culvert Outflow',
-      category: 'Infrastructure',
-      urgency: 'Urgent',
-      sitio: 'Sitio Ibaba',
-      landmark: 'Culvert Outflow Channel',
-      location: 'Sitio Ibaba — Culvert Outflow Channel',
-      dateFiled: '2026-10-15',
-      status: 'Pending',
-      currentStage: 1,
-      desc: 'Drainage culvert outflow is heavily clogged with silt and plastic debris, causing rapid street ponding whenever heavy rain falls.',
-      reporter: 'Clarisse Anne Villanueva',
-      userEmail: 'clarisse.villanueva@gmail.com',
-      userMobile: '0917 554 8219',
-      userAddress: '082 Sitio Ibaba Road, Barangay Pallocan West',
-      residentId: 'PW-2026-08510',
-      resolutionNote: ''
-    },
-    {
-      ref: 'TCK-4015',
-      id: 'TCK-4015',
-      title: 'Low-Hanging Power Cable Across Basketball Court Access Road',
-      category: 'Public Utility',
-      urgency: 'Urgent',
-      sitio: 'Tierra Verde',
-      landmark: 'Near Covered Court Gate',
-      location: 'Tierra Verde — Near Covered Court Gate',
-      dateFiled: '2026-10-13',
-      status: 'In Progress',
-      currentStage: 2,
-      desc: 'Secondary utility line sagging approximately 2.1 meters above the road, posing a hazard to delivery vans and pedestrians.',
-      reporter: 'Eduardo Castillo Jr.',
-      userEmail: 'eddie.castillo.ph@yahoo.com',
-      userMobile: '0920 891 2345',
-      userAddress: 'Block 14 Lot 6, Tierra Verde, Barangay Pallocan West',
-      residentId: 'PW-2026-08514',
-      resolutionNote: 'Cordoned off by BPSO Tanod Patrol. Utility emergency crew dispatched for cable re-tensioning.'
-    },
-    {
-      ref: 'TCK-4009',
-      id: 'TCK-4009',
-      title: 'Uncollected Domestic Waste Bags Along Interior Easement',
-      category: 'Sanitation',
-      urgency: 'Standard',
-      sitio: 'Sitio Santolan',
-      landmark: 'Villa Celina Corner',
-      location: 'Sitio Santolan — Villa Celina Corner',
-      dateFiled: '2026-10-11',
-      status: 'Pending',
-      currentStage: 1,
-      desc: 'Several sacks of household waste missed during Tuesday collection are attracting stray animals along the corner walkway.',
-      reporter: 'Maria Santos Alcantara',
-      userEmail: 'maria.alcantara@gmail.com',
-      userMobile: '0918 345 6789',
-      userAddress: 'Block 3 Lot 8, Villa Celina, Barangay Pallocan West',
-      residentId: 'PW-2026-08502',
-      resolutionNote: ''
-    },
-    {
-      ref: 'TCK-3994',
-      id: 'TCK-3994',
-      title: 'Late-Night Karaoke Exceeding 10:00 PM Quiet Hours Ordinance',
-      category: 'Noise Disturbance',
-      urgency: 'Standard',
-      sitio: 'Sitio Ilaya',
-      landmark: 'Crossing Ilaya Interior',
-      location: 'Sitio Ilaya — Crossing Ilaya Interior',
-      dateFiled: '2026-10-08',
-      status: 'Resolved',
-      currentStage: 3,
-      desc: 'Loud outdoor amplifier operating past midnight on weeknights, disturbing elderly residents and students.',
-      reporter: 'Mark Anthony Balmes',
-      userEmail: 'mark.balmes@outlook.com',
-      userMobile: '0927 348 9120',
-      userAddress: '105 Crossing Ilaya Road, Barangay Pallocan West',
-      residentId: 'PW-2026-08521',
-      resolutionNote: 'BPSO Night Patrol visited the household and reminded the owner of Barangay Curfew & Quiet Hours Ordinance. Full compliance achieved.'
-    },
-    {
-      ref: 'TCK-3890',
-      id: 'TCK-3890',
-      title: 'Garden Waste and Branch Trimmings Obstructing Sidewalk',
-      category: 'Sanitation',
-      urgency: 'Standard',
-      sitio: 'Sitio Santolan',
-      landmark: 'Main Sidewalk Strip',
-      location: 'Sitio Santolan — Main Sidewalk Strip',
-      dateFiled: '2026-09-22',
-      status: 'Resolved',
-      currentStage: 3,
-      desc: 'Piles of branch trimmings and garden waste left on sidewalk obstructing pedestrian pathway.',
-      reporter: 'Juan Dela Cruz',
-      userEmail: 'juan.delacruz@example.com',
-      userMobile: '0917 123 4567',
-      userAddress: '142 Pallocan Blvd, Barangay Pallocan West',
-      residentId: 'PW-2026-08492',
-      resolutionNote: 'Barangay Green Waste collection truck dispatched on Sep 23, 10:30 AM. Area cleared and sidewalk swept.'
-    },
-    {
-      ref: 'TCK-3412',
-      id: 'TCK-3412',
-      title: 'Unleashed Stray Dogs Near Elementary School Walkway',
-      category: 'Public Safety',
-      urgency: 'Urgent',
-      sitio: 'Sitio Ilaya',
-      landmark: 'Near Pallocan West Elementary Gate',
-      location: 'Sitio Ilaya — Near Pallocan West Elementary Gate',
-      dateFiled: '2026-09-08',
-      status: 'Resolved',
-      currentStage: 3,
-      desc: 'Unleashed aggressive dogs barking and chasing students walking to Pallocan West Elementary.',
-      reporter: 'Juan Dela Cruz',
-      userEmail: 'juan.delacruz@example.com',
-      userMobile: '0917 123 4567',
-      userAddress: '142 Pallocan Blvd, Barangay Pallocan West',
-      residentId: 'PW-2026-08492',
-      resolutionNote: 'Joint operation by Barangay Tanod and City Veterinary Office on Sep 9. Dog owners notified and safety patrol stationed during school hours.'
-    }
-  ];
+  const SHARED_DEFAULT_CONCERNS = [];
 
   function normalizeSitioName(val) {
     const canonical = [
@@ -889,7 +338,6 @@ function normalizeServiceRequest(r) {
     const location = item.location || (landmark ? `${sitio} — ${landmark}` : sitio);
     const desc = item.desc || item.submittedDetails || item.notes || item.summary || '';
     const title = item.title || item.summary || (desc ? (desc.length > 64 ? desc.slice(0, 61) + '...' : desc) : `${category} Concern`);
-    const isJuanLegacy = ['TCK-4021', 'TCK-3890', 'TCK-3412'].includes(ref);
     const dateFiled = item.dateFiled
     ? String(item.dateFiled).slice(0, 10)
     : item.dateLogged
@@ -914,10 +362,10 @@ function normalizeServiceRequest(r) {
       sitio: sitio,
       landmark: landmark,
       location: location,
-      reporter: item.reporter || (isJuanLegacy ? 'Juan Dela Cruz' : 'Verified Resident'),
-      userEmail: item.userEmail || (isJuanLegacy ? 'juan.delacruz@example.com' : ''),
-      userMobile: item.userMobile || (isJuanLegacy ? '0917 123 4567' : ''),
-      userAddress: item.userAddress || (isJuanLegacy ? '142 Pallocan Blvd, Barangay Pallocan West' : (sitio + ', Barangay Pallocan West')),
+      reporter: item.reporter || 'Verified Resident',
+      userEmail: item.userEmail || '',
+      userMobile: item.userMobile || '',
+      userAddress: item.userAddress || (sitio + ', Barangay Pallocan West'),
       residentId: item.residentId || '',
       photoData: item.photoData || null,
       resolutionNote: resolutionNote,
@@ -982,176 +430,7 @@ function normalizeServiceRequest(r) {
     }
   }
 
-  // Proposals Dataset (Citizen Community Initiatives - 12 Total across 4 Statuses)
-  const DEFAULT_CITIZEN_PROPOSALS = [
-    // 1. PENDING (4 items)
-    {
-      id: 'PROP-2026-001',
-      title: 'Solar Streetlight Installation - Sitio Gitna',
-      category: 'Infrastructure',
-      year: '2026',
-      location: 'Sitio Gitna',
-      sitio: 'Sitio Gitna',
-      proponent: 'Juan Dela Cruz',
-      date: 'Oct 12, 2026',
-      budget: '₱150,000.00',
-      status: 'Pending',
-      description: 'Installation of 12 standalone high-efficiency solar LED pole lights along the dark road curves of Sitio Gitna to curb nighttime road hazards and vehicle accidents.'
-    },
-    {
-      id: 'PROP-2026-002',
-      title: 'Community Garden Development & Urban Farming Hub',
-      category: 'Environment',
-      year: '2026',
-      location: 'Sitio Ibaba',
-      sitio: 'Sitio Ibaba',
-      proponent: 'Maria Santos · Women’s Club',
-      date: 'Oct 13, 2026',
-      budget: '₱95,000.00',
-      status: 'Pending',
-      description: 'Establishment of communal raised garden beds, organic composting sheds, and a drip irrigation system to supply low-income families with fresh vegetables and herbs.'
-    },
-    {
-      id: 'PROP-2026-003',
-      title: 'Elderly Community Wellness & Blood Pressure Kiosk',
-      category: 'Health',
-      year: '2026',
-      location: 'Tierra Verde',
-      sitio: 'Tierra Verde',
-      proponent: 'Senior Citizens Association',
-      date: 'Oct 10, 2026',
-      budget: '₱70,000.00',
-      status: 'Pending',
-      description: 'Dedicated automated digital blood pressure checking station, glucose monitoring strips, and resting lounge with shaded benches for senior citizens.'
-    },
-    {
-      id: 'PROP-2026-004',
-      title: 'Pedestrian Speed Bump & Zebra Crossing at Elementary School',
-      category: 'Public Safety',
-      year: '2026',
-      location: 'Sitio Ilaya',
-      sitio: 'Sitio Ilaya',
-      proponent: 'PTA Pres. Ricardo Ramos',
-      date: 'Oct 14, 2026',
-      budget: '₱45,000.00',
-      status: 'Pending',
-      description: 'Installation of two heavy-duty rubber speed tables, high-visibility thermal plastic pedestrian crossings, and school-zone LED warning flashing beacons.'
-    },
-
-    // 2. UNDER REVIEW (2 items)
-    {
-      id: 'PROP-2026-005',
-      title: 'Barangay Materials Recovery Facility (MRF) Expansion',
-      category: 'Environment',
-      year: '2026',
-      location: 'Sitio Ibaba',
-      sitio: 'Sitio Ibaba',
-      proponent: 'Ibaba Homeowners Civic Action',
-      date: 'Oct 08, 2026',
-      budget: '₱85,000.00',
-      status: 'Under Review',
-      description: 'Construction of dedicated segregation bays and high-capacity shredder for organic household waste to support barangay urban gardening compost operations.'
-    },
-    {
-      id: 'PROP-2026-006',
-      title: 'Youth Sports Center Covered Court Roof Restoration',
-      category: 'Sports & Youth',
-      year: '2026',
-      location: 'Sitio Santolan',
-      sitio: 'Sitio Santolan',
-      proponent: 'SK Council Pallocan West',
-      date: 'Oct 04, 2026',
-      budget: '₱110,000.00',
-      status: 'Under Review',
-      description: 'Repair and replacement of corrugated metal roofing sheets damaged by monsoon winds, alongside water-resistant sports floor sealant.'
-    },
-
-    // 3. APPROVED (5 items)
-    {
-      id: 'PROP-2026-007',
-      title: 'Solar LED Lighting Installation along River Embankment',
-      category: 'Infrastructure',
-      year: '2026',
-      location: 'Tierra Verde',
-      sitio: 'Tierra Verde',
-      proponent: 'Engr. Marco Villanueva',
-      date: 'Sep 28, 2026',
-      budget: '₱120,000.00',
-      status: 'Approved',
-      description: 'Installation of 18 high-lumen solar streetlights along the 650-meter unlit pathway beside the creek to deter nighttime illegal dumping and enhance pedestrian safety.'
-    },
-    {
-      id: 'PROP-2026-008',
-      title: 'CCTV Surveillance Expansion for Crime Prevention',
-      category: 'Public Safety',
-      year: '2026',
-      location: 'Potenciana Village',
-      sitio: 'Potenciana Village',
-      proponent: 'BPSO Tanod Executive Committee',
-      date: 'Sep 15, 2026',
-      budget: '₱180,000.00',
-      status: 'Approved',
-      description: 'Deploying 8 weather-sealed 4K optical zoom IP cameras interconnected to the Barangay Hall Command Center for real-time traffic and perimeter monitoring.'
-    },
-    {
-      id: 'PROP-2026-009',
-      title: 'Drainage Desilting & Reinforced Concrete Cover Replacement',
-      category: 'Infrastructure',
-      year: '2026',
-      location: 'G.C Berberabe',
-      sitio: 'G.C Berberabe',
-      proponent: 'Pallocan Merchants Guild',
-      date: 'Sep 20, 2026',
-      budget: '₱135,000.00',
-      status: 'Approved',
-      description: 'Deep mechanical desilting of 400 meters of clogged subterranean canals and replacing fractured curb covers with heavy-duty steel-reinforced grates.'
-    },
-    {
-      id: 'PROP-2026-010',
-      title: 'Community Disaster Siren & Early Flood Alert Station',
-      category: 'Public Safety',
-      year: '2026',
-      location: 'Sitio Santolan',
-      sitio: 'Sitio Santolan',
-      proponent: 'BDRRMC Volunteer Corps',
-      date: 'Sep 10, 2026',
-      budget: '₱90,000.00',
-      status: 'Approved',
-      description: 'Automated acoustic early warning siren linked to ultrasonic water level sensors with SMS broadcasting alerts during flash flood risks.'
-    },
-    {
-      id: 'PROP-2026-011',
-      title: 'Portable Emergency First-Aid & Oxygen Outreach Kit',
-      category: 'Health',
-      year: '2026',
-      location: 'Sitio Ilaya',
-      sitio: 'Sitio Ilaya',
-      proponent: 'Dr. Angela Perez & BHWs',
-      date: 'Sep 05, 2026',
-      budget: '₱65,000.00',
-      status: 'Approved',
-      description: 'Procurement of 3 mobile emergency responder trauma backpacks equipped with portable O2 tanks, pulse oximeters, and automated external defibrillator (AED).'
-    },
-
-    // 4. REJECTED (1 item)
-    {
-      id: 'PROP-2026-012',
-      title: 'Commercial Billboard Structure at Public Plaza Entrance',
-      category: 'Infrastructure',
-      year: '2026',
-      location: 'G.C Berberabe',
-      sitio: 'G.C Berberabe',
-      proponent: 'PrimeAds Media Group',
-      date: 'Sep 02, 2026',
-      budget: '₱250,000.00',
-      status: 'Rejected',
-      description: 'Proposed 20-foot commercial billboard framework along the plaza frontage; rejected by Barangay Council due to zoning ordinance and public sightline restrictions.'
-    }
-  ];
-
-  const SEED_PROPOSAL_MAP = new Map(
-    DEFAULT_CITIZEN_PROPOSALS.map(item => [item.id, item])
-  );
+  const DEFAULT_CITIZEN_PROPOSALS = [];
 
   function normalizeProposalRecord(p) {
     if (!p) return null;
@@ -1161,17 +440,6 @@ function normalizeServiceRequest(r) {
         ('PROP-2026-' + Math.floor(100 + Math.random() * 900));
 
     const ref = p.ref || p.tracking_code || p.id || id;
-
-    const seedMatch =
-        SEED_PROPOSAL_MAP.get(id) ||
-        SEED_PROPOSAL_MAP.get(ref) ||
-        null;
-
-    const isJuanProposal =
-        id === 'PROP-8421' ||
-        ref === 'PROP-8421' ||
-        id === 'PROP-2026-001' ||
-        ref === 'PROP-2026-001';
 
     const title =
         p.title ||
@@ -1195,33 +463,21 @@ function normalizeServiceRequest(r) {
         p.location ||
         location;
 
-    const proponent = seedMatch
-        ? seedMatch.proponent
-        : (
-            p.proponent ||
-            p.guest_full_name ||
-            p.resident_full_name ||
-            (p.user ? (p.user.name || p.user.fullName) : '') ||
-            (isJuanProposal ? 'Juan Dela Cruz' : 'Community Resident')
-        );
+    const proponent =
+        p.proponent ||
+        p.guest_full_name ||
+        p.resident_full_name ||
+        (p.user ? (p.user.name || p.user.fullName) : '') ||
+        'Community Resident';
 
-    const email = isJuanProposal
-        ? 'juan@gmail.com'
-        : (
-            p.email ||
-            p.guest_email ||
-            p.resident_email ||
-            p.userEmail ||
-            ''
-        );
+    const email =
+        p.email ||
+        p.guest_email ||
+        p.resident_email ||
+        p.userEmail ||
+        '';
 
-    const residentId = isJuanProposal
-        ? 'PW-2026-08492'
-        : (
-            seedMatch
-                ? `PW-PROP-SEED-${seedMatch.id.slice(-3)}`
-                : (p.residentId || '')
-        );
+    const residentId = p.residentId || '';
 
     // Get the submission date from either frontend or database fields.
     const submittedAt =
@@ -1367,68 +623,127 @@ function normalizeServiceRequest(r) {
 
   
 function loadCitizenProposals() {
-    // Proposal records must come from the backend API.
-    // Do not load old MySQL cache or seeded sample proposals.
+    try {
+        const raw = localStorage.getItem('brgy360_proposals');
+        if (raw) {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+                return parsed.map(normalizeProposalRecord);
+            }
+        }
+    } catch (e) {
+        console.warn('Error reading proposals from localStorage:', e);
+    }
     return [];
+}
+
+function saveCitizenProposals() {
+    try {
+        localStorage.setItem('brgy360_proposals', JSON.stringify(citizenProposals));
+        window.dispatchEvent(new Event('storage'));
+        window.dispatchEvent(new CustomEvent('brgy360_proposals_changed', { detail: citizenProposals }));
+    } catch (e) {
+        console.warn('Error saving citizenProposals to localStorage:', e);
+    }
 }
 
   let citizenProposals = loadCitizenProposals();
 
   async function loadCitizenProposalsFromDatabase() {
     try {
-        const response = await fetch('http://localhost:5000/api/proposals/admin/all', {
+        // Try admin route first; if 404 or fails, fall back to /api/proposals
+        let response = await fetch('http://localhost:5000/api/proposals/admin/all', {
             method: 'GET',
             credentials: 'include'
         });
 
+        if (response.status === 404) {
+            response = await fetch('http://localhost:5000/api/proposals', {
+                method: 'GET',
+                credentials: 'include'
+            });
+        }
+
+        if (!response.ok) {
+            throw new Error(`Server returned HTTP ${response.status}`);
+        }
+
         const data = await response.json();
 
-        if (!response.ok || !data.success) {
+        // Extract raw proposal records from flexible backend JSON shapes
+        let rawList = [];
+        if (Array.isArray(data)) {
+            rawList = data;
+        } else if (Array.isArray(data.proposals)) {
+            rawList = data.proposals;
+        } else if (Array.isArray(data.data)) {
+            rawList = data.data;
+        } else if (data.success === false) {
             throw new Error(data.message || 'Failed to load proposals.');
         }
 
-        citizenProposals = (data.proposals || []).map(p => normalizeProposalRecord({
-            ...p,
+        if (rawList.length > 0) {
+            citizenProposals = rawList.map(p => normalizeProposalRecord({
+                ...p,
 
-            // Map database fields to the fields expected by the Admin UI
-            id: p.tracking_code,
-            ref: p.tracking_code,
-            proposalId: p.proposal_id,
-            title: p.project_title,
-            category: p.sector_category,
-            year: String(p.fiscal_year),
-            location: p.location_sitio,
-            sitio: p.location_sitio,
-            proponent: p.proponent,
-            email: p.email,
-            dateFiled: p.submitted_at,
-            date: p.submitted_at
-                ? new Date(p.submitted_at).toLocaleDateString('en-PH', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric'
-                })
-                : '',
-            budget: p.estimated_budget,
-            timeline: p.proposed_target_timeline,
-            status: p.proposal_status,
-            description: p.rationale_community_impact,
-            rationale: p.rationale_community_impact,
-            councilNotes: p.council_review_notes,
-            councilNote: p.council_review_notes,
-            supportingDocument: p.supporting_documents_path
-        }));
+                // Map database fields (supporting both snake_case and camelCase schemas)
+                id: p.tracking_code || p.trackingCode || p.ref || p.id || (p.proposal_id ? `PR-${p.proposal_id}` : ''),
+                ref: p.tracking_code || p.trackingCode || p.ref || p.id || (p.proposal_id ? `PR-${p.proposal_id}` : ''),
+                proposalId: p.proposal_id || p.proposalId || p.id,
+                title: p.project_title || p.projectTitle || p.title,
+                category: p.sector_category || p.sectorCategory || p.category,
+                year: String(p.fiscal_year || p.fiscalYear || p.year || new Date().getFullYear()),
+                location: p.location_sitio || p.locationSitio || p.sitio || p.location,
+                sitio: p.location_sitio || p.locationSitio || p.sitio || p.location,
+                proponent: p.proponent || p.proponent_name || p.proponentName || p.fullName || p.resident,
+                email: p.email || p.userEmail,
+                dateFiled: p.submitted_at || p.submittedAt || p.created_at || p.dateFiled || p.date,
+                date: (p.submitted_at || p.submittedAt || p.created_at)
+                    ? new Date(p.submitted_at || p.submittedAt || p.created_at).toLocaleDateString('en-PH', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                    })
+                    : (p.date || ''),
+                budget: p.estimated_budget ?? p.estimatedBudget ?? p.budget ?? 0,
+                timeline: p.proposed_target_timeline || p.proposedTimeline || p.timeline || '',
+                status: p.proposal_status || p.proposalStatus || p.status || 'Pending',
+                description: p.rationale_community_impact || p.rationale || p.description || '',
+                rationale: p.rationale_community_impact || p.rationale || p.description || '',
+                councilNotes: p.council_review_notes || p.councilReviewNotes || p.councilNotes || p.councilNote || '',
+                councilNote: p.council_review_notes || p.councilReviewNotes || p.councilNote || p.councilNotes || '',
+                supportingDocument: p.supporting_documents_path || p.supportingDocumentsPath || p.supportingDocument || ''
+            }));
 
-        renderProposalsGrid();
+            // Sync successfully retrieved proposals to localStorage for instant hydration
+            try {
+                localStorage.setItem('brgy360_proposals', JSON.stringify(citizenProposals));
+            } catch (e) {}
 
-        console.log('Admin proposals loaded from database:', citizenProposals);
+            renderProposalsGrid();
+            console.log('Admin proposals loaded from database:', citizenProposals);
+        } else {
+            // Backend returned empty list; fallback to local storage if present
+            const local = loadCitizenProposals();
+            if (local.length > 0 && citizenProposals.length === 0) {
+                citizenProposals = local;
+                renderProposalsGrid();
+            }
+        }
 
     } catch (error) {
         console.error('Error loading Admin proposals:', error);
-        showAdminToast(
-            'Unable to load proposals from the database.',
-            'error'
-        );
+        // Fallback to localStorage proposals so proposals submitted locally are not lost
+        const local = loadCitizenProposals();
+        if (local.length > 0) {
+            citizenProposals = local;
+            renderProposalsGrid();
+        } else {
+            showAdminToast(
+                'Unable to load proposals from the database.',
+                'error'
+            );
+        }
     }
 }
 
@@ -1445,80 +760,7 @@ function loadCitizenProposals() {
     return 'planning';
   }
 
-  const DEFAULT_CAPITAL_PROJECTS = [
-    {
-      code: 'PRJ-2026-01',
-      title: 'E-Library & Free WiFi Tech Hub Refurbishment',
-      description: 'Refurbishment of the Barangay Hall 2nd Floor into a high-speed digital study center with computer terminals and free internet for students.',
-      location: 'Sitio Gitna',
-      timeline: '2025-01-10 – 2025-08-15',
-      year: '2025',
-      budget: '₱420,000.00',
-      progress: 100,
-      status: 'completed',
-      contractor: 'Batangas IT Systems Corp'
-    },
-    {
-      code: 'PRJ-2026-02',
-      title: 'Drainage Culvert Modernization Phase 1',
-      description: 'Reinforcement and modernization of the main drainage culvert along Sitio Ibaba to prevent street flooding and storm runoff bottlenecks.',
-      location: 'Sitio Ibaba',
-      timeline: '2025-06-01 – 2025-11-30',
-      year: '2025',
-      budget: '₱350,000.00',
-      progress: 100,
-      status: 'completed',
-      contractor: 'Solid Ground Infra Builders'
-    },
-    {
-      code: 'PRJ-2026-03',
-      title: 'Solar Powered Public Streetlighting (Phase 2)',
-      description: 'Installation of standalone solar-powered LED streetlights across dark zones in Sitio Ilaya to bolster nighttime pedestrian and road safety.',
-      location: 'Sitio Ilaya',
-      timeline: '2026-02-15 – 2026-11-20',
-      year: '2026',
-      budget: '₱285,000.00',
-      progress: 68,
-      status: 'ongoing',
-      contractor: 'SunPower Philippines Co'
-    },
-    {
-      code: 'PRJ-2026-04',
-      title: 'Barangay Disaster Operations Command Center (BDRRMC)',
-      description: 'Establishment of an all-weather emergency operations and dispatch command center equipped with early-warning monitoring systems.',
-      location: 'Potenciana Village',
-      timeline: '2026-04-01 – 2026-12-15',
-      year: '2026',
-      budget: '₱410,000.00',
-      progress: 42,
-      status: 'ongoing',
-      contractor: 'Metropolitan Tech Infrastructure'
-    },
-    {
-      code: 'PRJ-2026-05',
-      title: 'Sitio Santolan Pedestrian Footbridge Elevation',
-      description: 'Structural elevation and steel handrail reinforcement of the Sitio Santolan pedestrian footbridge for safe all-season creek crossing.',
-      location: 'Sitio Santolan',
-      timeline: '2026-11-01 – 2027-02-28',
-      year: '2026',
-      budget: '₱180,000.00',
-      progress: 10,
-      status: 'planning',
-      contractor: 'DPWH Batangas 1st District DEO'
-    },
-    {
-      code: 'PRJ-2026-06',
-      title: 'CCTV High-Definition Security Grid Expansion (16 Cams)',
-      description: 'Deployment of 16 high-definition security cameras across major intersections, commercial strips, and barangay entry checkpoints.',
-      location: 'G.C Berberabe',
-      timeline: '2026-03-01 – 2026-10-31',
-      year: '2026',
-      budget: '₱170,000.00',
-      progress: 35,
-      status: 'delayed',
-      contractor: 'FiberNet Security Solutions'
-    }
-  ];
+  const DEFAULT_CAPITAL_PROJECTS = [];
 
   function normalizeProjectRecord(project) {
     const matchedDefault = DEFAULT_CAPITAL_PROJECTS.find(d => d.code === project?.code);
@@ -1645,54 +887,54 @@ async function loadAdminBudgetRecordsFromDatabase() {
     '2026': {
       budgetCategory: {
         labels: ['Administration', 'Health', 'Social Services', 'Infrastructure'],
-        budget: [260000, 420000, 245000, 1260000],
-        actual: [187000, 300000, 146000, 785000]
+        budget: [0, 0, 0, 0],
+        actual: [0, 0, 0, 0]
       },
       quarterly: {
         labels: ['Q1', 'Q2', 'Q3', 'Q4'],
-        budget: [685000, 650000, 390000, 470000],
-        actual: [660000, 548000, 210000, 0]
+        budget: [0, 0, 0, 0],
+        actual: [0, 0, 0, 0]
       },
       projectStatus: {
         labels: ['Ongoing', 'Completed', 'Delayed', 'Planning'],
-        data: [2, 2, 1, 1],
+        data: [0, 0, 0, 0],
         colors: ['#2563eb', '#10b981', '#e11d48', '#94a3b8']
       },
       requestType: {
         labels: ['Barangay Clearance', 'Certificate of Indigency', 'Certificate of Residency', 'Business Clearance', 'First-Time Jobseeker'],
-        data: [6, 5, 3, 2, 2],
+        data: [0, 0, 0, 0, 0],
         colors: ['#0b1e36', '#2563eb', '#0284c7', '#d97706', '#10b981']
       },
       concerns: {
         labels: ['Infrastructure', 'Sanitation', 'Safety', 'Noise', 'Utilities'],
-        data: [4, 4, 3, 2, 1],
+        data: [0, 0, 0, 0, 0],
         color: '#e11d48'
       }
     },
     '2025': {
       budgetCategory: {
         labels: ['Administration', 'Health', 'Social Services', 'Infrastructure'],
-        budget: [220000, 380000, 210000, 1150000],
-        actual: [218000, 375000, 205000, 1120000]
+        budget: [0, 0, 0, 0],
+        actual: [0, 0, 0, 0]
       },
       quarterly: {
         labels: ['Q1', 'Q2', 'Q3', 'Q4'],
-        budget: [490000, 490000, 490000, 490000],
-        actual: [485000, 480000, 482000, 471000]
+        budget: [0, 0, 0, 0],
+        actual: [0, 0, 0, 0]
       },
       projectStatus: {
         labels: ['Ongoing', 'Completed', 'Delayed', 'Planning'],
-        data: [0, 4, 0, 0],
+        data: [0, 0, 0, 0],
         colors: ['#2563eb', '#10b981', '#e11d48', '#94a3b8']
       },
       requestType: {
         labels: ['Barangay Clearance', 'Certificate of Indigency', 'Certificate of Residency', 'Business Clearance', 'First-Time Jobseeker'],
-        data: [5, 4, 3, 2, 1],
+        data: [0, 0, 0, 0, 0],
         colors: ['#0b1e36', '#2563eb', '#0284c7', '#d97706', '#10b981']
       },
       concerns: {
         labels: ['Infrastructure', 'Sanitation', 'Safety', 'Noise', 'Utilities'],
-        data: [4, 3, 2, 1, 1],
+        data: [0, 0, 0, 0, 0],
         color: '#e11d48'
       }
     }
@@ -1908,11 +1150,12 @@ async function loadAdminBudgetRecordsFromDatabase() {
     projects: 'Projects Portfolio',
     announcements: 'Announcements & Advisories',
     budget: 'Budget & Fiscal Allocation',
-    demographics: 'Resident Verification'
+    demographics: 'Resident Verification',
+    officials: 'Barangay Officials'
   };
 
   function switchView(viewId) {
-    if (viewId === 'predictive' || viewId === 'officials' || viewId === 'settings') {
+    if (viewId === 'predictive' || viewId === 'settings') {
       switchView('overview');
       return;
     }
@@ -1944,12 +1187,13 @@ async function loadAdminBudgetRecordsFromDatabase() {
     if (viewId === 'projects') renderProjectsTable();
     if (viewId === 'announcements') loadAnnouncementsFromBackend();
     if (viewId === 'budget') renderAdminBudgetTable();
-    if (viewId === 'demographics') renderResidentVerificationTable();
-
     if (viewId === 'demographics') {
-    renderResidentVerificationTable();
-    loadGeographicBreakdownFromAPI();
-}
+      renderResidentVerificationTable();
+      loadGeographicBreakdownFromAPI();
+    }
+    if (viewId === 'officials') {
+      renderAdminOfficialsView();
+    }
 
     // Close mobile drawer if open
     closeMobileSidebar();
@@ -2325,7 +1569,7 @@ async function loadAdminBudgetRecordsFromDatabase() {
     const ctx = document.getElementById('docVolumeChart');
     if (!ctx || typeof Chart === 'undefined') return;
 
-    const dataYTD = [142, 98, 115, 64, 45];
+    const dataYTD = [0, 0, 0, 0, 0];
     const categories = ['Barangay Clearance', 'Cert of Residency', 'Cert of Indigency', 'Business Permit', 'Jobseeker Waiver'];
 
     docVolumeChart = new Chart(ctx, {
@@ -2391,9 +1635,9 @@ async function loadAdminBudgetRecordsFromDatabase() {
         filterBtns.forEach(b => b.classList.remove('active'));
         this.classList.add('active');
         const period = this.getAttribute('data-period');
-        let newData = [142, 98, 115, 64, 45];
-        if (period === 'q3') newData = [48, 31, 39, 18, 16];
-        if (period === 'q4') newData = [24, 16, 22, 11, 8];
+        let newData = [0, 0, 0, 0, 0];
+        if (period === 'q3') newData = [0, 0, 0, 0, 0];
+        if (period === 'q4') newData = [0, 0, 0, 0, 0];
         docVolumeChart.data.datasets[0].data = newData;
         docVolumeChart.update();
       });
@@ -2410,7 +1654,7 @@ async function loadAdminBudgetRecordsFromDatabase() {
       data: {
         labels: ['Infrastructure', 'Sanitation', 'Public Safety', 'Noise', 'Utilities'],
         datasets: [{
-          data: [35, 25, 20, 12, 8],
+          data: [0, 0, 0, 0, 0],
           backgroundColor: [
             '#dc2626', // Infrastructure (35%)
             '#d97706', // Sanitation (25%)
@@ -3982,10 +3226,7 @@ function calculateAge(dateOfBirth) {
   function pushScopedUserNotification(targetEmail, notifEntry) {
     try {
       const cleanEmail = String(targetEmail || '').trim().toLowerCase();
-      const isJuan = cleanEmail === 'juan@gmail.com' || cleanEmail === 'juan.delacruz@example.com';
-      const storageKey = isJuan
-        ? 'brgy360_notifs'
-        : (cleanEmail ? `brgy360_notifs_${cleanEmail}` : null);
+      const storageKey = cleanEmail ? `brgy360_notifs_${cleanEmail}` : null;
       if (!storageKey) return;
 
       const rawNotifs = localStorage.getItem(storageKey);
@@ -4061,6 +3302,7 @@ function calculateAge(dateOfBirth) {
     renderRequestsTable();
     renderOverviewQueue();
     updateRequestsCounter(serviceRequests.length);
+    persistServiceRequests();
 
     if (newStatus === 'Ready for Pickup') {
       showAdminToast(
@@ -4083,7 +3325,11 @@ function calculateAge(dateOfBirth) {
     }
 
   } catch (error) {
-    console.error('Error updating service request status:', error);
+    console.error('Error updating service request status:', error, {
+      requestId: req?.requestId,
+      attemptedStatus: newStatus,
+      endpoint: `${ADMIN_API_BASE}/admin/requests/${req?.requestId}/status`
+    });
 
     showAdminToast(
       'Status Update Failed',
@@ -5716,8 +4962,7 @@ function syncAllStoresFromStorage(changedKey) {
       const loc = normalizeSitioName(locEl?.value || 'Sitio Ibaba');
       const reporterName = (repEl?.value || '').trim();
       const reporterContact = (contactEl?.value || '').trim();
-      const scope = (scopeEl?.value || '').trim();
-      const beneficiaries = (beneficiariesEl?.value || '').trim();
+      const desc = (descEl?.value || '').trim();
 
       // Reset prior errors
       const titleErr = document.getElementById('newIncTitleError');
@@ -6344,7 +5589,7 @@ function syncAllStoresFromStorage(changedKey) {
   }
 
   // Review & Decision Modal Logic
-  window.openReviewProposalModal = function(id) {
+  function openReviewProposalModal(id) {
     const prop = citizenProposals.find(p => p.id === id || p.ref === id);
     if (!prop) return;
 
@@ -6439,7 +5684,8 @@ function syncAllStoresFromStorage(changedKey) {
         if (modal) modal.classList.remove('active');
       };
     }
-  };
+  }
+  window.openReviewProposalModal = openReviewProposalModal;
 
   const btnClosePropModal = document.getElementById('btnClosePropModal');
   if (btnClosePropModal) {
@@ -6453,16 +5699,17 @@ function syncAllStoresFromStorage(changedKey) {
     if (e.key === 'brgy360_proposals' || !e.key) {
       citizenProposals = loadCitizenProposals();
       renderProposalsGrid();
+      loadCitizenProposalsFromDatabase();
     }
     if (e.key === 'brgy360_capital_projects') {
-      capitalProjects = loadCapitalProjects();
-      renderProjectsTable();
+      loadProjectsFromDatabase();
     }
   });
 
   window.addEventListener('brgy360_proposals_changed', function() {
     citizenProposals = loadCitizenProposals();
     renderProposalsGrid();
+    loadCitizenProposalsFromDatabase();
   });
 
   // Submit New Proposal Modal Triggers & Form Submission
@@ -7184,12 +6431,43 @@ function normalizeAnnouncementFromDatabase(row) {
     window.setAnnouncementStatus(id, nextStatus);
   };
 
-  // Backward-compatible status toggle.
-  window.toggleAnnouncementStatus = function(id) {
+  // Toggle Critical Priority / Emergency Advisory status
+  window.toggleAnnouncementPriority = async function(id) {
     const ann = announcementsList.find(a => String(a.id) === String(id));
     if (!ann) return;
 
-    window.setAnnouncementStatus(id, nextStatus);
+    const nextCritical = !ann.isCritical;
+    ann.isCritical = nextCritical;
+    ann.isEmergency = nextCritical;
+    ann.urgency = nextCritical ? 'Critical' : 'Standard';
+
+    try {
+      saveAnnouncements(announcementsList);
+    } catch (e) {
+      console.warn('LocalStorage announcement sync error:', e);
+    }
+
+    renderAnnouncementsTable();
+
+    try {
+      await fetch(`${ADMIN_API_BASE}/announcements/${encodeURIComponent(id)}/priority`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          is_critical: nextCritical,
+          urgency: nextCritical ? 'Critical' : 'Standard'
+        })
+      });
+    } catch (error) {
+      console.warn('Backend announcement priority update optional sync:', error);
+    }
+
+    showAdminToast(
+      nextCritical ? '🚨 Marked as Critical Priority' : 'Standard Priority Restored',
+      `"${ann.title}" is now ${nextCritical ? 'flagged with Critical Advisory badge and prioritized.' : 'marked as standard priority.'}`,
+      nextCritical ? 'warning' : 'info'
+    );
   };
 
   // Event Listeners for Proposals Filters
@@ -7509,7 +6787,7 @@ function normalizeAnnouncementFromDatabase(row) {
           const summaryChanged = rawSummary !== initialSummary;
           const wasAutoDerived = annSummaryInput?.dataset.wasAutoDerived === 'true';
 
-          const finalHtmlContent = contentChanged ? plainTextToHtml(rawContent) : prev.content;
+          const finalHtmlContent = rawContent;
           let finalSummary = rawSummary;
           if (!rawSummary || (contentChanged && !summaryChanged && wasAutoDerived)) {
             finalSummary = deriveSummaryFromText(rawContent);
@@ -7566,7 +6844,7 @@ function normalizeAnnouncementFromDatabase(row) {
             target_audience: aud,
             urgency: isCritical ? 'Critical' : 'Standard',
             feed_summary: rawSummary || deriveSummaryFromText(rawContent),
-            announcement_content: plainTextToHtml(rawContent),
+            announcement_content: rawContent,
             publication_status: status === 'Active' ? 'Published' : 'Unpublished',
             published_at: status === 'Active' ? datePublished : null
           })
@@ -10841,7 +10119,11 @@ document.getElementById('preRegisterForm')?.addEventListener('submit', function 
     if (btnExport) btnExport.addEventListener('click', exportResidentRegistryCsv);
   }
 
-  // Initial render of all sub-tables
+// Barangay Officials filter and search state
+let officialsFilterMode = 'all';
+let officialsSearchQuery = '';
+
+// Initial render of all sub-tables
 renderProposalsTable();
 loadProjectsFromDatabase();
 loadAnnouncementsFromBackend();
@@ -10898,6 +10180,492 @@ refreshAdminDashboard(getActiveDashboardYear());
   window.openResidentReviewModal = openResidentReviewModal;
   window.approveResidentAccount = approveResidentAccount;
   window.openResidentRejectModal = openResidentRejectModal;
+
+  // ==============================================================
+  // BARANGAY OFFICIALS ROSTER & COUNCIL MANAGEMENT
+  // ==============================================================
+
+  function renderAdminOfficialsView() {
+    const officials = loadOfficials();
+    const tableBody = document.getElementById('officialsTableBody');
+    const emptyState = document.getElementById('officialsEmptyState');
+    const countIndicator = document.getElementById('officialsCountIndicator');
+
+    // 1. Compute summary counters
+    const total = officials.length;
+    const leaders = officials.filter(o => o.isLeader || o.position === 'Punong Barangay');
+    const councilors = officials.filter(o => o.position === 'Sangguniang Barangay Member');
+    const appointive = officials.filter(o => o.position === 'Brgy. Secretary' || o.position === 'Brgy. Treasurer');
+
+    // Update KPI Card values
+    const kpiValTotal = document.getElementById('kpiValTotalOfficials');
+    const kpiValLeader = document.getElementById('kpiValLeaderCount');
+    const kpiSubLeader = document.getElementById('kpiSubLeaderName');
+    const kpiValCouncilors = document.getElementById('kpiValCouncilorsCount');
+    const kpiValAppointive = document.getElementById('kpiValAppointiveCount');
+
+    if (kpiValTotal) kpiValTotal.textContent = total;
+    if (kpiValLeader) kpiValLeader.textContent = leaders.length;
+    if (kpiSubLeader) kpiSubLeader.textContent = leaders.length > 0 ? ('Hon. ' + leaders[0].name) : 'Vacant';
+    if (kpiValCouncilors) kpiValCouncilors.textContent = councilors.length;
+    if (kpiValAppointive) kpiValAppointive.textContent = appointive.length;
+
+    // Update filter pill counts
+    const pillAll = document.getElementById('officialPillCountAll');
+    const pillCouncilor = document.getElementById('officialPillCountCouncilor');
+    const pillLeader = document.getElementById('officialPillCountLeader');
+    const pillAppointive = document.getElementById('officialPillCountAppointive');
+
+    if (pillAll) pillAll.textContent = total;
+    if (pillCouncilor) pillCouncilor.textContent = councilors.length;
+    if (pillLeader) pillLeader.textContent = leaders.length;
+    if (pillAppointive) pillAppointive.textContent = appointive.length;
+
+    // 2. Apply filtering & administrative hierarchy sorting (Captain -> Councilors -> Secretary & Treasurer last)
+    const getAdminOfficialRank = (o) => {
+      const pos = (o.position || '').toLowerCase();
+      if (o.isLeader || pos.includes('punong barangay') || pos.includes('captain')) return 1;
+      if (pos.includes('secretary')) return 3;
+      if (pos.includes('treasurer')) return 4;
+      return 2; // Sangguniang Barangay Members / Councilors
+    };
+
+    const orderedOfficials = [...officials].sort((a, b) => {
+      const rankDiff = getAdminOfficialRank(a) - getAdminOfficialRank(b);
+      if (rankDiff !== 0) return rankDiff;
+      return (Number(a.id) || 0) - (Number(b.id) || 0);
+    });
+
+    const q = officialsSearchQuery.trim().toLowerCase();
+    const filtered = orderedOfficials.filter(official => {
+      // Pill category filter
+      if (officialsFilterMode === 'councilor' && official.position !== 'Sangguniang Barangay Member') {
+        return false;
+      }
+      if (officialsFilterMode === 'leader' && !(official.isLeader || official.position === 'Punong Barangay')) {
+        return false;
+      }
+      if (officialsFilterMode === 'appointive' && !(official.position === 'Brgy. Secretary' || official.position === 'Brgy. Treasurer')) {
+        return false;
+      }
+
+      // Search query filter
+      if (q) {
+        const matchName = (official.name || '').toLowerCase().includes(q);
+        const matchPos = (official.position || '').toLowerCase().includes(q);
+        const matchRole = (official.role || '').toLowerCase().includes(q);
+        const matchContact = (official.contact || '').toLowerCase().includes(q);
+        const matchSched = (official.schedule || '').toLowerCase().includes(q);
+        if (!matchName && !matchPos && !matchRole && !matchContact && !matchSched) {
+          return false;
+        }
+      }
+      return true;
+    });
+
+    // 3. Render table rows
+    if (!tableBody) return;
+
+    if (filtered.length === 0) {
+      tableBody.innerHTML = '';
+      if (emptyState) emptyState.style.display = 'block';
+      if (countIndicator) {
+        countIndicator.innerHTML = `Showing <strong>0</strong> of <strong>${total}</strong> officials`;
+      }
+      return;
+    }
+
+    if (emptyState) emptyState.style.display = 'none';
+
+    tableBody.innerHTML = filtered.map(official => {
+      const isLeader = Boolean(official.isLeader || official.position === 'Punong Barangay');
+      const initials = (official.name || 'Official')
+        .split(' ')
+        .filter(Boolean)
+        .slice(0, 2)
+        .map(w => w[0].toUpperCase())
+        .join('');
+
+      const cleanPhone = (official.contact || '').replace(/\s+/g, '');
+
+      // Status pill badge
+      let statusBadge = '';
+      if (official.status === 'Term Completed') {
+        statusBadge = `<span class="badge-status yellow" style="font-size: 10px; margin-left: 6px;">Term Done</span>`;
+      } else if (official.status === 'On Leave') {
+        statusBadge = `<span class="badge-status warning" style="font-size: 10px; margin-left: 6px;">On Leave</span>`;
+      } else {
+        statusBadge = `<span class="badge-status green" style="font-size: 10px; margin-left: 6px;">Active</span>`;
+      }
+
+      // Position pill styling
+      let posColor = '#2563eb';
+      let posBg = '#eff6ff';
+      let posBorder = '#bfdbfe';
+      if (isLeader) {
+        posColor = '#0d47a1';
+        posBg = '#e0f2fe';
+        posBorder = '#7dd3fc';
+      } else if (official.position === 'Brgy. Secretary' || official.position === 'Brgy. Treasurer') {
+        posColor = '#b45309';
+        posBg = '#fef3c7';
+        posBorder = '#fde68a';
+      }
+
+      return `
+        <tr>
+          <td>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div style="width: 36px; height: 36px; border-radius: 50%; background: ${isLeader ? 'linear-gradient(135deg, #0d47a1 0%, #1e40af 100%)' : '#e2e8f0'}; color: ${isLeader ? '#fff' : '#1e293b'}; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; flex-shrink: 0; border: 1.5px solid ${isLeader ? '#f59e0b' : '#cbd5e1'};">
+                ${isLeader ? '★' : initials}
+              </div>
+              <div>
+                <div style="font-weight: 700; color: #0f172a; font-size: 13.5px; display: flex; align-items: center; flex-wrap: wrap; gap: 4px;">
+                  <span>${escapeOfficialHtml(official.name)}</span>
+                  ${statusBadge}
+                </div>
+                <div style="font-size: 11px; color: #64748b;">ID #${official.id} · Term: ${escapeOfficialHtml(official.term || 'Active')}</div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <span style="display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; background: ${posBg}; color: ${posColor}; border: 1px solid ${posBorder};">
+              ${escapeOfficialHtml(official.position)}
+            </span>
+          </td>
+          <td style="color: #334155; font-size: 12px; line-height: 1.4;">
+            ${escapeOfficialHtml(official.role || 'General Council Duties')}
+          </td>
+          <td>
+            <a href="tel:${escapeOfficialHtml(cleanPhone)}" style="color: #0d47a1; font-weight: 600; text-decoration: none; font-size: 12px; display: inline-flex; align-items: center; gap: 4px;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+              </svg>
+              <span>${escapeOfficialHtml(official.contact || 'None')}</span>
+            </a>
+          </td>
+          <td style="color: #475569; font-size: 12px;">
+            <div style="display: inline-flex; align-items: center; gap: 4px;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+              <span>${escapeOfficialHtml(official.schedule || 'Regular Office Hours')}</span>
+            </div>
+          </td>
+          <td style="text-align: center;">
+            <button type="button" class="btn-res-action secondary" data-official-id="${official.id}" style="padding: 5px 12px; font-size: 12px; display: inline-flex; align-items: center; gap: 4px; border-radius: 6px;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 20h9"></path>
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+              </svg>
+              <span>Edit</span>
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    // Handle Edit button clicks using event delegation
+tableBody.onclick = function (event) {
+  const editButton = event.target.closest('button[data-official-id]');
+
+  if (!editButton) return;
+
+  event.preventDefault();
+  event.stopPropagation();
+
+  const id = editButton.getAttribute('data-official-id');
+  openEditOfficialModal(id);
+};
+
+    if (countIndicator) {
+      countIndicator.innerHTML = `Showing <strong>${filtered.length}</strong> of <strong>${total}</strong> officials`;
+    }
+  }
+
+  function openEditOfficialModal(id) {
+    const officials = loadOfficials();
+    const official = officials.find(o => Number(o.id) === Number(id));
+    if (!official) {
+      showAdminToast('Official Not Found', 'Could not locate official record to edit.', 'warning');
+      return;
+    }
+
+    const modal = document.getElementById('editOfficialModal');
+    if (!modal) return;
+
+    document.getElementById('editOfficialId').value = official.id;
+    document.getElementById('editOfficialName').value = official.name || '';
+    document.getElementById('editOfficialPosition').value = official.position || 'Sangguniang Barangay Member';
+    document.getElementById('editOfficialStatus').value = official.status || 'Active';
+    document.getElementById('editOfficialRole').value = official.role || '';
+    document.getElementById('editOfficialContact').value = official.contact || '';
+    document.getElementById('editOfficialSchedule').value = official.schedule || '';
+
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeEditOfficialModal() {
+    const modal = document.getElementById('editOfficialModal');
+    if (!modal) return;
+    modal.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  
+  async function saveOfficialFromModal() {
+  const id = document.getElementById('editOfficialId')?.value;
+  const nameInput = document.getElementById('editOfficialName');
+  const name = nameInput?.value?.trim();
+  const position = document.getElementById('editOfficialPosition')?.value;
+  const status = document.getElementById('editOfficialStatus')?.value || 'Active';
+  const role = document.getElementById('editOfficialRole')?.value?.trim();
+  const contact = document.getElementById('editOfficialContact')?.value?.trim();
+  const schedule = document.getElementById('editOfficialSchedule')?.value?.trim();
+
+  if (!name) {
+    if (nameInput) {
+      nameInput.focus();
+      nameInput.style.borderColor = '#ef4444';
+    }
+
+    showAdminToast(
+      'Name Required',
+      'Please provide the official’s legal name.',
+      'warning'
+    );
+    return;
+  }
+
+  const currentOfficial = loadOfficials().find(
+    official => Number(official.id) === Number(id)
+  );
+
+  if (!currentOfficial) {
+    showAdminToast(
+      'Official Not Found',
+      'Could not locate the official record.',
+      'warning'
+    );
+    return;
+  }
+
+  const isLeader = position === 'Punong Barangay';
+
+  const btnSave = document.getElementById('btnSaveOfficialChanges');
+
+  try {
+    if (btnSave) {
+      btnSave.disabled = true;
+      btnSave.textContent = 'Saving...';
+    }
+
+    await updateOfficial(id, {
+      name,
+      position,
+      term: currentOfficial.term || '',
+      status,
+      role: role || 'General Council Duties',
+      contact: contact || 'None',
+      schedule: schedule || 'Regular Office Hours',
+      isLeader,
+      gridClass: currentOfficial.gridClass,
+      displayOrder: currentOfficial.displayOrder
+    });
+
+    closeEditOfficialModal();
+    renderAdminOfficialsView();
+
+    showAdminToast(
+      'Barangay Official Updated',
+      `Successfully updated record for "${escapeOfficialHtml(name)}".`,
+      'success'
+    );
+
+  } catch (error) {
+    console.error('Official update error:', error);
+
+    showAdminToast(
+      'Update Failed',
+      error.message || 'Could not save official details.',
+      'danger'
+    );
+
+  } finally {
+    if (btnSave) {
+      btnSave.disabled = false;
+      btnSave.textContent = 'Save Changes';
+    }
+  }
+}
+
+  async function initOfficialsModule() {
+    // Search input
+    const searchInput = document.getElementById('officialsSearchInput');
+    const clearBtn = document.getElementById('btnClearOfficialsSearch');
+    if (searchInput) {
+      searchInput.addEventListener('input', function () {
+        officialsSearchQuery = this.value;
+        if (clearBtn) clearBtn.style.display = officialsSearchQuery ? 'inline-block' : 'none';
+        renderAdminOfficialsView();
+      });
+    }
+
+    if (clearBtn) {
+      clearBtn.addEventListener('click', function () {
+        if (searchInput) searchInput.value = '';
+        officialsSearchQuery = '';
+        this.style.display = 'none';
+        renderAdminOfficialsView();
+      });
+    }
+
+    // Filter pills
+    const pillContainer = document.getElementById('officialsFilterPills');
+    if (pillContainer) {
+      const pills = pillContainer.querySelectorAll('button[data-official-filter]');
+      pills.forEach(pill => {
+        pill.addEventListener('click', function () {
+          pills.forEach(p => p.classList.remove('active'));
+          this.classList.add('active');
+          officialsFilterMode = this.getAttribute('data-official-filter') || 'all';
+          renderAdminOfficialsView();
+        });
+      });
+    }
+
+    // Reset filters button
+    const btnResetFilters = document.getElementById('btnResetOfficialsFilters');
+    if (btnResetFilters) {
+      btnResetFilters.addEventListener('click', function () {
+        officialsSearchQuery = '';
+        officialsFilterMode = 'all';
+        if (searchInput) searchInput.value = '';
+        if (clearBtn) clearBtn.style.display = 'none';
+        const pills = pillContainer?.querySelectorAll('button[data-official-filter]');
+        pills?.forEach(p => p.classList.toggle('active', p.getAttribute('data-official-filter') === 'all'));
+        renderAdminOfficialsView();
+      });
+    }
+    
+    // Reset roster to default in PostgreSQL
+    const btnResetRoster = document.getElementById('btnResetOfficialsRoster');
+
+    if (btnResetRoster) {
+      btnResetRoster.addEventListener('click', async function () {
+        if (!confirm('Are you sure you want to reset all Barangay Officials to the original default roster?')) {
+          return;
+        }
+
+        try {
+          btnResetRoster.disabled = true;
+
+          await resetOfficialsToDefault();
+
+          renderAdminOfficialsView();
+
+          showAdminToast(
+            'Roster Reset',
+            'Barangay Officials roster has been restored to default.',
+            'info'
+          );
+
+        } catch (error) {
+          console.error('Officials roster reset failed:', error);
+
+          showAdminToast(
+            'Reset Failed',
+            error.message || 'Could not restore the default roster.',
+            'danger'
+          );
+
+        } finally {
+          btnResetRoster.disabled = false;
+        }
+      });
+    }
+
+    // Modal buttons
+    const btnCloseModal = document.getElementById('btnCloseEditOfficialModal');
+    const btnCancelModal = document.getElementById('btnCancelEditOfficial');
+    const btnSaveModal = document.getElementById('btnSaveOfficialChanges');
+    const modalOverlay = document.getElementById('editOfficialModal');
+
+    if (btnCloseModal) btnCloseModal.addEventListener('click', closeEditOfficialModal);
+    if (btnCancelModal) btnCancelModal.addEventListener('click', closeEditOfficialModal);
+    if (btnSaveModal) btnSaveModal.addEventListener('click', saveOfficialFromModal);
+
+    if (modalOverlay) {
+      modalOverlay.addEventListener('click', function (e) {
+        if (e.target === modalOverlay) closeEditOfficialModal();
+      });
+    }
+
+    // Update the Admin Console header with the current Barangay Secretary.
+    function syncAdminSecretaryName() {
+    const secretary = loadOfficials().find(official =>
+      String(official.position || '').toLowerCase().includes('secretary')
+    );
+
+    if (!secretary) return;
+
+    // Top-right header name
+    const headerName = document.querySelector(
+      '.topbar-user-badge .user-name-tag'
+    );
+
+    // Sidebar profile name above Public Home
+    const sidebarName = document.querySelector(
+      '.sidebar-footer .profile-name'
+    );
+
+    if (headerName) {
+      headerName.textContent = secretary.name;
+    }
+
+    if (sidebarName) {
+      sidebarName.textContent = secretary.name;
+      sidebarName.title = secretary.name;
+    }
+  }
+
+// Subscribe to external store changes.
+subscribeOfficials(() => {
+  renderAdminOfficialsView();
+  syncAdminSecretaryName();
+});
+
+    // Make functions accessible globally
+    window.renderAdminOfficialsView = renderAdminOfficialsView;
+    window.openEditOfficialModal = openEditOfficialModal;
+    window.closeEditOfficialModal = closeEditOfficialModal;
+
+    // Load Barangay Officials from PostgreSQL before rendering.
+    try {
+      await loadOfficialsFromAPI();
+
+      renderAdminOfficialsView();
+
+      syncAdminSecretaryName();
+
+      console.log('Barangay Officials loaded from PostgreSQL:', loadOfficials());
+
+    } catch (error) {
+      console.error('Failed to load Barangay Officials from PostgreSQL:', error);
+
+      renderAdminOfficialsView();
+
+      showAdminToast(
+        'Officials Loading Failed',
+        error.message || 'Could not load Barangay Officials from the database.',
+        'danger'
+      );
+    }
+  }
+
+  initOfficialsModule();
 
   // ==============================================================
   // 13. UTILITY HELPERS

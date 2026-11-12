@@ -6,26 +6,6 @@
 (function () {
   'use strict';
 
-  // Hardcoded Pre-Configured Credentials
-  const PRECONFIGURED_ACCOUNTS = {
-    admin: {
-      email: 'admin@brgy360.gov.ph',
-      password: 'AdminPassword360!',
-      role: 'admin',
-      name: 'Ma. Victoria M. Marasigan',
-      title: 'Barangay Secretary (Admin)',
-      targetUrl: 'admin.html'
-    },
-    resident: {
-      email: 'juan@gmail.com',
-      password: 'UserPassword360!',
-      role: 'resident',
-      name: 'Juan Dela Cruz',
-      title: 'Verified Resident (Sitio Ibaba)',
-      targetUrl: 'user.html'
-    }
-  };
-
   /**
    * Check route protection on page load
    */
@@ -56,58 +36,26 @@
     const cleanEmail = (email || '').trim().toLowerCase();
     const cleanPass = (password || '').trim();
 
-    const adminPwd = localStorage.getItem('brgy360_pwd_admin@brgy360.gov.ph') || PRECONFIGURED_ACCOUNTS.admin.password;
-    if (cleanEmail === PRECONFIGURED_ACCOUNTS.admin.email.toLowerCase() && cleanPass === adminPwd) {
-      localStorage.setItem('currentUserRole', 'admin');
-      localStorage.setItem('brgy360_session', JSON.stringify({
-        role: 'admin',
-        email: PRECONFIGURED_ACCOUNTS.admin.email,
-        name: PRECONFIGURED_ACCOUNTS.admin.name,
-        loginTime: new Date().toISOString()
-      }));
-      return { success: true, role: 'admin', redirect: 'admin.html', user: PRECONFIGURED_ACCOUNTS.admin };
-    }
-
     // Resident authentication (supporting changed passwords and registered users)
     try {
       const storedUsers = JSON.parse(localStorage.getItem('brgy360_residents_db') || '[]');
       let found = storedUsers.find(u => u.email && u.email.trim().toLowerCase() === cleanEmail);
-      const isJuan = (cleanEmail === 'juan@gmail.com' || cleanEmail === 'juan.delacruz@example.com');
-      if (!found && isJuan) {
-        found = storedUsers.find(u => u.email && (u.email.trim().toLowerCase() === 'juan@gmail.com' || u.email.trim().toLowerCase() === 'juan.delacruz@example.com'));
-      }
 
       // Determine expected password for this resident
       let expectedPass = localStorage.getItem('brgy360_pwd_' + cleanEmail);
-      if (!expectedPass && isJuan) {
-        expectedPass = localStorage.getItem('brgy360_pwd_juan@gmail.com') || localStorage.getItem('brgy360_pwd_juan.delacruz@example.com');
-      }
       if (!expectedPass && found && found.password) {
         expectedPass = found.password;
       }
       if (!expectedPass) {
         try {
           const storedU = JSON.parse(localStorage.getItem('brgy360_user') || '{}');
-          if (storedU && storedU.password && (storedU.email?.toLowerCase() === cleanEmail || (isJuan && (storedU.email?.toLowerCase() === 'juan@gmail.com' || storedU.email?.toLowerCase() === 'juan.delacruz@example.com')))) {
+          if (storedU && storedU.password && storedU.email?.toLowerCase() === cleanEmail) {
             expectedPass = storedU.password;
           }
         } catch (e) {}
       }
-      if (!expectedPass && isJuan) {
-        expectedPass = PRECONFIGURED_ACCOUNTS.resident.password;
-      }
 
-      if (expectedPass && cleanPass === expectedPass) {
-        if (!found) {
-          found = {
-            ...PRECONFIGURED_ACCOUNTS.resident,
-            email: cleanEmail,
-            password: cleanPass,
-            status: 'Verified',
-            verified: true
-          };
-        }
-
+      if (found && expectedPass && cleanPass === expectedPass) {
         // Enforce admin verification prerequisite
         if (found.status === 'Pending' || found.verified === false) {
           return {
@@ -194,7 +142,6 @@
 
   // Export to window
   window.Brgy360Auth = {
-    accounts: PRECONFIGURED_ACCOUNTS,
     authenticate: authenticate,
     logout: logout,
     guardRoute: guardRoute,

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Resident Portal | Brgy360 - Barangay Pallocan West</title>
   <meta name="description" content="Brgy360 Resident Portal - Access municipal services, track document requests, report concerns, and propose community projects.">
-  
+
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
 
@@ -138,7 +138,7 @@
 
   <!-- PORTAL WRAPPER (SIDEBAR + MAIN CONTENT) -->
   <div class="user-portal-container">
-    
+
     <!-- MOBILE BACKDROP OVERLAY -->
     <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
@@ -263,7 +263,7 @@
       <!-- TAB 1: DASHBOARD HOME (#user-dashboard)   -->
       <!-- ========================================== -->
       <section class="user-tab-panel active" id="user-dashboard">
-        
+
         <!-- Welcome Banner Card -->
         <div class="dash-welcome-card">
           <div class="welcome-text-wrap">
@@ -310,10 +310,8 @@
               </div>
             </div>
             <div class="kpi-card-body">
-              <div class="kpi-number" id="kpiActiveRequests">2</div>
+              <div class="kpi-number" id="kpiActiveRequests">0</div>
               <div class="kpi-status-sub">
-                <span class="status-pill status-ready">1 Ready for Pickup</span>
-                <span class="status-pill status-in-review">1 In Review</span>
               </div>
             </div>
             <div class="kpi-card-footer">
@@ -334,10 +332,8 @@
               </div>
             </div>
             <div class="kpi-card-body">
-              <div class="kpi-number" id="kpiTotalConcerns">3</div>
+              <div class="kpi-number" id="kpiTotalConcerns">0</div>
               <div class="kpi-status-sub" id="kpiConcernsStatusSub">
-                <span class="status-pill status-resolved">2 Resolved</span>
-                <span class="status-pill status-in-review">1 In Progress</span>
               </div>
             </div>
             <div class="kpi-card-footer">
@@ -356,9 +352,8 @@
               </div>
             </div>
             <div class="kpi-card-body">
-              <div class="kpi-number" id="kpiTotalProposals">1</div>
+              <div class="kpi-number" id="kpiTotalProposals">0</div>
               <div class="kpi-status-sub">
-                <span class="status-pill status-pending">Under BDC Review</span>
               </div>
             </div>
             <div class="kpi-card-footer">
@@ -380,9 +375,9 @@
             <div class="kpi-card-body">
               <div class="kpi-status-main">
                 <span class="verified-dot"></span>
-                <span>Active &amp; Verified</span>
+                <span>—</span>
               </div>
-              <p class="kpi-detail-text">Level 2 Resident • Philippine National ID Verified</p>
+              <p class="kpi-detail-text">—</p>
             </div>
             <div class="kpi-card-footer">
               <span>View residency credentials &rarr;</span>
@@ -466,12 +461,6 @@
                   <p class="desk-info-text">BPSO Hotline: <strong>(043) 723-1568</strong> / <strong>0917-888-BRGY</strong><br>CDRMO Disaster Rescue: <strong>(043) 702-3900</strong></p>
                 </div>
               </div>
-            </div>
-
-            <!-- Preemptive Advisory Card -->
-            <div class="desk-advisory-callout">
-              <span class="advisory-badge">Advisory</span>
-              <p>Typhoon Alert Level 1 remains in effect. Emergency assistance units are on standby 24/7. Stay safe and report hazards promptly.</p>
             </div>
           </div>
         </div>
@@ -729,7 +718,7 @@
                     <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                       <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
                     </svg>
-                    <span>Tier 2: Fully Verified Resident</span>
+                    <span>—</span>
                   </div>
                 </div>
               </div>
@@ -780,45 +769,6 @@
                     <span class="id-doc-date">Verified on file by Barangay Secretary</span>
                   </div>
                 </div>
-
-                <div class="id-upload-prompt">
-                  <h5 class="upload-prompt-title">Need to renew or upload additional ID?</h5>
-                  <p class="upload-prompt-desc">You may upload your updated Cedula (Community Tax Certificate) or Barangay ID to renew certification eligibility.</p>
-                  
-                  <form id="idUploadForm" class="id-upload-form">
-                    <div class="form-row">
-                      <label for="newIdType" class="form-label">ID Type</label>
-                      <select id="newIdType" class="form-select">
-                        <option value="Cedula">Cedula / Community Tax Certificate</option>
-                        <option value="Barangay ID">Barangay Pallocan West ID</option>
-                        <option value="Driver's License">Driver's License</option>
-                        <option value="UMID">UMID / SSS ID</option>
-                        <option value="Voter's ID">COMELEC Voter's ID / Certification</option>
-                      </select>
-                    </div>
-
-                    <div class="form-row">
-                      <label for="newIdFile" class="form-label">Upload Document Photo</label>
-                      <div class="custom-file-upload">
-                        <input type="file" id="newIdFile" accept="image/*,.pdf" class="file-input-hidden">
-                        <label for="newIdFile" class="file-upload-dropzone">
-                          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                            <polyline points="17 8 12 3 7 8"></polyline>
-                            <line x1="12" y1="3" x2="12" y2="15"></line>
-                          </svg>
-                          <span id="newIdFileName">Click to select photo or scan (PNG, JPG, PDF)</span>
-                        </label>
-                      </div>
-                    </div>
-
-                    <div class="form-row id-submit-row">
-                      <button type="submit" class="btn-dash-primary full-width" id="btnSubmitId">
-                        <span>Submit ID for Re-Verification</span>
-                      </button>
-                    </div>
-                  </form>
-                </div>
               </div>
             </div>
           </div>
@@ -843,7 +793,7 @@
                       id="profileMobile"
                       class="form-input"
                       value=""
-                      placeholder="0917 123 4567"
+                      placeholder="09XX XXX XXXX"
                       inputmode="tel"
                       maxlength="13"
                       required
@@ -852,7 +802,7 @@
                   </div>
                   <div class="form-group">
                     <label for="profileEmail" class="form-label">Email Address <span class="text-danger">*</span></label>
-                    <input type="email" id="profileEmail" class="form-input" value="" placeholder="you@example.com" required>
+                    <input type="email" id="profileEmail" class="form-input" value="" placeholder="Email address" required>
                     <span class="field-error-msg" id="profileEmailError" style="display: none;"></span>
                   </div>
                   <div class="form-group">

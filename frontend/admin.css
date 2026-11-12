@@ -3597,11 +3597,11 @@ body.print-modal-open {
   stroke-width: 2.5;
 }
 
-/* Metric Summary Cards */
+/* Metric Summary Cards (Straight 4 Cards in One Line on Desktop) */
 .proposal-metrics-bar {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
   width: 100%;
   margin: 0 auto 22px;
 }
@@ -3611,13 +3611,13 @@ body.print-modal-open {
   min-width: 0;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1200px) {
   .proposal-metrics-bar {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 640px) {
   .proposal-metrics-bar {
     grid-template-columns: 1fr;
   }
@@ -6608,8 +6608,10 @@ body.print-modal-open {
   flex-shrink: 0;
 }
 
-/* Maximize space inside Budget Summary & 8 Sector Cards; pin FY/status pill & Edit button to the very right side */
-#viewBudget #budgetMetricsBar {
+/* Maximize space inside Budget, Proposal & Project Summary Cards (straight 4 cards in one line) */
+#viewBudget #budgetMetricsBar,
+#viewProposals #proposalMetricsBar,
+#viewProjects #projectMetricsBar {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 14px;
@@ -6617,14 +6619,18 @@ body.print-modal-open {
   margin-bottom: 20px;
 }
 
-#viewBudget #budgetMetricsBar .proposal-metric-card {
+#viewBudget #budgetMetricsBar .proposal-metric-card,
+#viewProposals #proposalMetricsBar .proposal-metric-card,
+#viewProjects #projectMetricsBar .proposal-metric-card {
   width: 100%;
   box-sizing: border-box;
   padding: 16px 16px;
   min-height: 116px;
 }
 
-#viewBudget #budgetMetricsBar .metric-card-top {
+#viewBudget #budgetMetricsBar .metric-card-top,
+#viewProposals #proposalMetricsBar .metric-card-top,
+#viewProjects #projectMetricsBar .metric-card-top {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -6633,14 +6639,23 @@ body.print-modal-open {
   margin-bottom: 8px;
 }
 
-#viewBudget #budgetMetricsBar .metric-card-label {
+#viewBudget #budgetMetricsBar .metric-card-label,
+#viewProposals #proposalMetricsBar .metric-card-label,
+#viewProjects #projectMetricsBar .metric-card-label {
   flex: 1 1 auto;
   min-width: 0;
   padding-top: 2px;
   line-height: 1.35;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  text-transform: uppercase;
 }
 
-#viewBudget #budgetMetricsBar .metric-card-actions-group {
+#viewBudget #budgetMetricsBar .metric-card-actions-group,
+#viewProposals #proposalMetricsBar .metric-card-actions-group,
+#viewProjects #projectMetricsBar .metric-card-actions-group {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -6650,8 +6665,27 @@ body.print-modal-open {
   flex-shrink: 0;
 }
 
-#viewBudget #budgetMetricsBar .metric-card-body {
+#viewBudget #budgetMetricsBar .metric-card-body,
+#viewProposals #proposalMetricsBar .metric-card-body,
+#viewProjects #projectMetricsBar .metric-card-body {
   width: 100%;
+}
+
+#viewProposals #proposalMetricsBar .metric-card-count,
+#viewProjects #projectMetricsBar .metric-card-count {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  margin-top: 6px;
+  color: #0f172a;
+}
+
+#viewProposals #proposalMetricsBar .metric-card-sub,
+#viewProjects #projectMetricsBar .metric-card-sub {
+  font-size: 11.5px;
+  color: #64748b;
+  margin-top: 5px;
 }
 
 #viewBudget #budgetSectorsGrid {
@@ -6696,15 +6730,90 @@ body.print-modal-open {
 
 @media (max-width: 1200px) {
   #viewBudget #budgetMetricsBar,
-  #viewBudget #budgetSectorsGrid {
+  #viewBudget #budgetSectorsGrid,
+  #viewProposals #proposalMetricsBar,
+  #viewProjects #projectMetricsBar {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 640px) {
   #viewBudget #budgetMetricsBar,
-  #viewBudget #budgetSectorsGrid {
+  #viewBudget #budgetSectorsGrid,
+  #viewProposals #proposalMetricsBar,
+  #viewProjects #projectMetricsBar {
     grid-template-columns: 1fr;
+  }
+}
+
+/* Maximize space for Announcements Section: Straight 3 cards in one line */
+#viewAnnouncements #announcementMetricsBar,
+#announcementMetricsBar {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 14px;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+#announcementMetricsBar .proposal-metric-card {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 16px 16px;
+  min-height: 116px;
+}
+
+#announcementMetricsBar .metric-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+#announcementMetricsBar .metric-card-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding-top: 2px;
+  line-height: 1.35;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+#announcementMetricsBar .metric-card-body {
+  width: 100%;
+}
+
+#announcementMetricsBar .metric-card-count {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  margin-top: 6px;
+  color: #0f172a;
+}
+
+#announcementMetricsBar .metric-card-sub {
+  font-size: 11.5px;
+  color: #64748b;
+  margin-top: 5px;
+}
+
+@media (max-width: 900px) {
+  #viewAnnouncements #announcementMetricsBar,
+  #announcementMetricsBar {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 640px) {
+  #viewAnnouncements #announcementMetricsBar,
+  #announcementMetricsBar {
+    grid-template-columns: 1fr !important;
   }
 }
 

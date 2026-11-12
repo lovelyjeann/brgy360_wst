@@ -250,63 +250,9 @@ function normalizeConcernRecord(raw) {
     };
 }
 
-  function isDefaultJuanAccount(user) {
-    if (!user) return false;
-    const uEmail = String(user.email || '').trim().toLowerCase();
-    const uId = String(user.residentId || '').trim();
-    return uEmail === 'juan@gmail.com' || uEmail === 'juan.delacruz@example.com' || uId === 'PW-2026-08492';
-  }
-
-  const JUAN_SEED_REQUEST_IDS = new Set([
-    'REQ-2026-08492',
-    'BRGY-84291',
-    'BRGY-81409',
-    'BRGY-79104'
-  ]);
-
-  const ADMIN_OTHER_SEED_REQUEST_OWNERS = {
-    'REQ-2026-08491': 'Maria Santos Alcantara',
-    'REQ-2026-08490': 'Rogelio B. Mendoza',
-    'REQ-2026-08489': 'Carmela D. Hernandez',
-    'REQ-2026-08488': 'Jayson Mark Reyes',
-    'REQ-2026-08487': 'Lourdes P. Castillo',
-    'REQ-2026-08486': 'Arnel G. Dimaculangan',
-    'REQ-2026-08485': 'Bernadette V. Gomez',
-    'REQ-2026-08484': 'Danilo E. Perez',
-    'REQ-2026-08483': 'Corazon T. Marasigan',
-    'REQ-2026-08482': 'Kevin Paul Ramos',
-    'REQ-2026-08481': 'Elena S. Villanueva',
-    'REQ-2026-08480': 'Nestor C. Macalalad',
-    'REQ-2026-08479': 'Rosario M. Javier',
-    'REQ-2026-08478': 'Gilbert R. Tolentino',
-    'REQ-2026-08477': 'Patricia A. Dimaano',
-    'REQ-2026-08476': 'Eduardo F. Cueto',
-    'REQ-2026-08475': 'Kristine Joy Montalbo'
-  };
-
-  const JUAN_SEED_CONCERN_IDS = new Set(['TCK-4021', 'TCK-3890', 'TCK-3412']);
-  const OTHER_SEED_CONCERN_IDS = new Set(['TCK-4018', 'TCK-4015', 'TCK-4009', 'TCK-3994']);
-
-  const JUAN_SEED_PROPOSAL_IDS = new Set(['PROP-8421', 'PROP-2026-001']);
-  const OTHER_SEED_PROPOSAL_OWNERS = {
-    'PROP-2026-002': 'Maria Santos · Women’s Club',
-    'PROP-2026-003': 'Senior Citizens Association',
-    'PROP-2026-004': 'PTA Pres. Ricardo Ramos',
-    'PROP-2026-005': 'Ibaba Homeowners Civic Action',
-    'PROP-2026-006': 'SK Council Pallocan West',
-    'PROP-2026-007': 'Engr. Marco Villanueva',
-    'PROP-2026-008': 'BPSO Tanod Executive Committee',
-    'PROP-2026-009': 'Pallocan Merchants Guild',
-    'PROP-2026-010': 'BDRRMC Volunteer Corps',
-    'PROP-2026-011': 'Dr. Angela Perez & BHWs',
-    'PROP-2026-012': 'PrimeAds Media Group'
-  };
-
   function isConcernOwnedByUser(concern, user) {
     if (!concern || !user) return false;
     const ref = String(concern.ref || concern.id || '').trim();
-    if (OTHER_SEED_CONCERN_IDS.has(ref)) return false;
-    if (JUAN_SEED_CONCERN_IDS.has(ref)) return isDefaultJuanAccount(user);
 
     const uId = String(user.residentId || '').trim().toLowerCase();
     const cId = String(concern.residentId || '').trim().toLowerCase();
@@ -438,26 +384,11 @@ async function loadResidentProfile() {
     if (!r) return null;
     const id = r.id || r.ref || ('REQ-2026-' + Math.floor(10000 + Math.random() * 90000));
     const ref = r.ref || r.id || id;
-    const isJuanSeed = JUAN_SEED_REQUEST_IDS.has(id) || JUAN_SEED_REQUEST_IDS.has(ref);
-    const otherSeedOwner = ADMIN_OTHER_SEED_REQUEST_OWNERS[id] || ADMIN_OTHER_SEED_REQUEST_OWNERS[ref] || null;
 
     let fullName = r.fullName || r.resident || 'Verified Resident';
     let resident = r.resident || fullName;
     let userEmail = r.userEmail || r.email || '';
     let residentId = r.residentId || '';
-
-    // Restore canonical ownership on seeded records so they never attach to newly created accounts
-    if (isJuanSeed) {
-      fullName = 'Juan Dela Cruz';
-      resident = 'Juan Dela Cruz';
-      userEmail = 'juan@gmail.com';
-      residentId = 'PW-2026-08492';
-    } else if (otherSeedOwner) {
-      fullName = otherSeedOwner;
-      resident = otherSeedOwner;
-      userEmail = '';
-      residentId = 'PW-SEED-' + String(id).slice(-5);
-    }
 
     const docType = r.docType || r.documentType || 'Barangay Clearance';
     const documentType = r.documentType || docType;
@@ -468,10 +399,10 @@ async function loadResidentProfile() {
     const dateFiled = r.dateFiled || (r.date ? r.date : new Date().toISOString().slice(0, 10));
     const date = r.date || dateFiled;
     const status = r.status || 'In Review';
-    const age = r.age || '34';
-    const contact = r.contact || r.mobile || r.phone || '0917 123 4567';
-    const idOnRecord = r.idOnRecord || (r.attachmentName ? `Attached: ${r.attachmentName}` : 'PhilID ****-****-8492');
-    const residencySince = r.residencySince || 'March 2012';
+    const age = r.age || '';
+    const contact = r.contact || r.mobile || r.phone || '';
+    const idOnRecord = r.idOnRecord || (r.attachmentName ? `Attached: ${r.attachmentName}` : '');
+    const residencySince = r.residencySince || '';
     const claimMethod = r.claimMethod || 'Physical Pickup at Barangay Hall';
     const claimTarget = r.claimTarget || 'Estimated within 1–2 business days';
     const notes = r.notes || (status === 'Ready for Pickup' ? 'Cleared by Lupong Tagapamayapa. Document printed and sealed. Ready for collection.' : 'Application received online. Document being prepared for validation by Barangay Secretary.');
@@ -507,13 +438,6 @@ async function loadResidentProfile() {
     if (!req || !user) return false;
     const id = String(req.id || '').trim();
     const ref = String(req.ref || '').trim();
-
-    if (ADMIN_OTHER_SEED_REQUEST_OWNERS[id] || ADMIN_OTHER_SEED_REQUEST_OWNERS[ref]) {
-      return false;
-    }
-    if (JUAN_SEED_REQUEST_IDS.has(id) || JUAN_SEED_REQUEST_IDS.has(ref)) {
-      return isDefaultJuanAccount(user);
-    }
 
     const uId = String(user.residentId || '').trim().toLowerCase();
     const rId = String(req.residentId || '').trim().toLowerCase();
@@ -646,27 +570,6 @@ return Array.isArray(result.concerns)
     if (!Array.isArray(rawList)) rawList = [...DEFAULT_CONCERNS];
     let normalized = rawList.map(normalizeConcernRecord);
 
-    // Seed shared multi-resident concerns once if upgrading from legacy store
-    if (!localStorage.getItem('brgy360_concerns_connected_v3')) {
-      const existingRefs = new Set(normalized.map(c => c.ref));
-      DEFAULT_CONCERNS.forEach(seed => {
-        if (!existingRefs.has(seed.ref)) {
-          normalized.push(normalizeConcernRecord(seed));
-        } else {
-          // Enrich legacy seeded record with title & reporter metadata while keeping status/notes
-          const idx = normalized.findIndex(c => c.ref === seed.ref);
-          if (idx !== -1) {
-            if (!rawList[idx].title) normalized[idx].title = seed.title;
-            if (!rawList[idx].reporter) normalized[idx].reporter = seed.reporter;
-            if (!rawList[idx].userEmail) normalized[idx].userEmail = seed.userEmail;
-            if (!rawList[idx].userMobile) normalized[idx].userMobile = seed.userMobile;
-            if (!rawList[idx].residentId) normalized[idx].residentId = seed.residentId;
-          }
-        }
-      });
-      localStorage.setItem('brgy360_concerns_connected_v3', 'true');
-    }
-
     saveData('brgy360_concerns', normalized);
     return normalized;
   }
@@ -705,13 +608,6 @@ console.log(
     const id = String(p.id || '').trim();
     const ref = String(p.ref || '').trim();
 
-    if (OTHER_SEED_PROPOSAL_OWNERS[id] || OTHER_SEED_PROPOSAL_OWNERS[ref]) {
-      return false;
-    }
-    if (JUAN_SEED_PROPOSAL_IDS.has(id) || JUAN_SEED_PROPOSAL_IDS.has(ref)) {
-      return isDefaultJuanAccount(user);
-    }
-
     const uId = String(user.residentId || '').trim().toLowerCase();
     const pId = String(p.residentId || '').trim().toLowerCase();
     if (uId && pId && uId === pId) return true;
@@ -733,8 +629,6 @@ console.log(
     if (!p) return null;
     const id = p.id || p.ref || ('PROP-' + Math.floor(1000 + Math.random() * 9000));
     const ref = p.ref || p.id || id;
-    const isJuanSeed = JUAN_SEED_PROPOSAL_IDS.has(id) || JUAN_SEED_PROPOSAL_IDS.has(ref);
-    const otherSeedProponent = OTHER_SEED_PROPOSAL_OWNERS[id] || OTHER_SEED_PROPOSAL_OWNERS[ref] || null;
 
     const title = p.title || 'Community Project Proposal';
     const category = p.category || 'Infrastructure';
@@ -744,16 +638,6 @@ console.log(
     let proponent = p.resident_full_name || p.full_legal_name || p.guest_full_name || p.proponent || currentUser?.full_legal_name || currentUser?.name || 'Community Resident';
     let email = p.email || p.userEmail || '';
     let residentId = p.residentId || '';
-
-    if (isJuanSeed) {
-      proponent = 'Juan Dela Cruz';
-      email = 'juan@gmail.com';
-      residentId = 'PW-2026-08492';
-    } else if (otherSeedProponent) {
-      proponent = otherSeedProponent;
-      email = '';
-      residentId = 'PW-PROP-SEED-' + String(id).slice(-3);
-    }
 
     const dateFiled = p.dateFiled || (p.date ? p.date : new Date().toISOString().split('T')[0]);
     const date = p.date || dateFiled;
@@ -825,28 +709,7 @@ console.log(
   function loadAndSyncAllProposals() {
     let all = loadData('brgy360_proposals', null);
     if (!Array.isArray(all) || all.length === 0) {
-      const defaultJuan = {
-        id: 'PROP-8421',
-        ref: 'PROP-8421',
-        title: 'Installation of Solar LED Streetlights along Sitio Ibaba Riverbank Walkway',
-        category: 'Infrastructure',
-        location: 'Sitio Ibaba',
-        sitio: 'Sitio Ibaba',
-        budget: 150000,
-        timeline: 'Q1 2027 (3 months implementation)',
-        dateFiled: '2026-09-28',
-        date: 'Sep 28, 2026',
-        year: '2026',
-        status: 'Under Review',
-        proponent: 'Juan Dela Cruz',
-        email: 'juan@gmail.com',
-        residentId: 'PW-2026-08492',
-        rationale: 'The riverbank pathway is heavily traversed by over 300 residents daily but lacks grid electricity. Standalone solar lights provide clean, zero-grid-cost illumination to prevent accidents and deter nighttime criminality.',
-        description: 'The riverbank pathway is heavily traversed by over 300 residents daily but lacks grid electricity. Standalone solar lights provide clean, zero-grid-cost illumination to prevent accidents and deter nighttime criminality.',
-        councilNote: 'Endorsed for technical site survey by the Committee on Infrastructure. Calendar for prioritization during the Barangay Assembly Deliberation.',
-        councilNotes: 'Endorsed for technical site survey by the Committee on Infrastructure. Calendar for prioritization during the Barangay Assembly Deliberation.'
-      };
-      all = [defaultJuan].map(normalizeUserProposalRecord);
+      all = [];
       saveData('brgy360_proposals', all);
       return all;
     }
@@ -942,9 +805,6 @@ console.log(
   }
 
   function getNotifsStorageKey() {
-    if (isDefaultJuanAccount(currentUser)) {
-      return 'brgy360_notifs';
-    }
     const cleanEmail = String(currentUser?.email || '').trim().toLowerCase();
     if (cleanEmail) {
       return 'brgy360_notifs_' + cleanEmail;
@@ -955,7 +815,7 @@ console.log(
 
   function loadUserNotifications() {
     const key = getNotifsStorageKey();
-    const fallback = isDefaultJuanAccount(currentUser) ? DEFAULT_NOTIFS : [];
+    const fallback = DEFAULT_NOTIFS;
     const loaded = loadData(key, fallback);
     return Array.isArray(loaded) ? loaded : fallback;
   }
@@ -1570,7 +1430,7 @@ setInterval(loadResidentNotifications, 30000);
           ? regDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
           : 'October 2026';
       } else {
-        accountMemberSince.textContent = isDefaultJuanAccount(currentUser) ? 'March 2024' : 'October 2026';
+        accountMemberSince.textContent = 'October 2026';
       }
     }
     if (accountIdDocTitle) {
@@ -2670,17 +2530,17 @@ setInterval(loadResidentNotifications, 30000);
       const todayFormatted = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 
       // Gather applicant resident information from form / current user
-      const applicantName = (document.getElementById('modalDocFullName')?.value || currentUser?.name || currentUser?.fullName || 'Juan M. Dela Cruz').trim();
-      const applicantContact = (document.getElementById('modalDocMobile')?.value || currentUser?.phone || currentUser?.mobile || '0917 123 4567').trim();
+      const applicantName = (document.getElementById('modalDocFullName')?.value || currentUser?.name || currentUser?.fullName || '').trim();
+      const applicantContact = (document.getElementById('modalDocMobile')?.value || currentUser?.phone || currentUser?.mobile || '').trim();
       const applicantSitio = (document.getElementById('modalDocSitio')?.value || currentUser?.sitio || 'Sitio Ibaba').trim();
       const applicantAddress = (document.getElementById('modalDocAddress')?.value || currentUser?.address || (applicantSitio + ', Barangay Pallocan West')).trim();
-      const applicantEmail = currentUser?.email || 'juan.delacruz@example.com';
-      const applicantResidentId = currentUser?.residentId || 'PW-2026-08492';
-      const applicantAge = currentUser?.age || '34';
+      const applicantEmail = currentUser?.email || '';
+      const applicantResidentId = currentUser?.residentId || '';
+      const applicantAge = currentUser?.age || '';
 
       const attachEl = document.getElementById('modalDocAttachment');
       const attachName = attachEl && attachEl.files && attachEl.files[0] ? attachEl.files[0].name : '';
-      const applicantIdOnRecord = attachName ? `Attached: ${attachName}` : (currentUser?.idOnRecord || 'PhilID ****-****-8492');
+      const applicantIdOnRecord = attachName ? `Attached: ${attachName}` : (currentUser?.idOnRecord || '');
 
       const newRequest = normalizeUserRequestRecord({
         id: refCode,
@@ -3957,8 +3817,7 @@ setInterval(loadResidentNotifications, 30000);
         }
       } catch (e) {}
 
-      // 5. Default preconfigured password fallback
-      return DEFAULT_USER.password || 'UserPassword360!';
+      return DEFAULT_USER.password || '';
     }
 
     function setFieldError(inputEl, errorEl, message) {

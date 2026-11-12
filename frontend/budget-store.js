@@ -158,12 +158,7 @@ export function normalizeBudgetRecord(raw, index = 0) {
   const rawActual = Number(obj.actual);
   const actual = Number.isFinite(rawActual) && rawActual >= 0 ? Math.round(rawActual * 100) / 100 : 0;
 
-  const description = String(obj.description || `${quarter} ${category} Budget Allocation`)
-    .trim()
-    .replace(/Purok\s*1-3/gi, 'Sitio Ibaba')
-    .replace(/Purok\s*2/gi, 'Tierra Verde')
-    .replace(/Purok\s*4/gi, 'Sitio Gitna')
-    .replace(/Sitio\s+Riverside/gi, 'Sitio Santolan');
+  const description = String(obj.description || `${quarter} ${category} Budget Allocation`).trim();
 
   const remarks = typeof obj.remarks === 'string' ? obj.remarks.trim() : '';
   const status = normalizeStatus(obj.status, actual);

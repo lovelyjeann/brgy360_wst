@@ -699,9 +699,9 @@
       <div class="table-toolbar">
         <!-- Filter Status Pills -->
         <div class="filter-pills" id="statusFilterGroup">
-          <button type="button" class="filter-pill active" data-filter="all">All (<span id="countAll">5</span>)</button>
-          <button type="button" class="filter-pill" data-filter="Ready for Pickup">Ready for Pickup (<span id="countReady">2</span>)</button>
-          <button type="button" class="filter-pill" data-filter="In Review">In Review (<span id="countReview">3</span>)</button>
+          <button type="button" class="filter-pill active" data-filter="all">All (<span id="countAll">0</span>)</button>
+          <button type="button" class="filter-pill" data-filter="Ready for Pickup">Ready for Pickup (<span id="countReady">0</span>)</button>
+          <button type="button" class="filter-pill" data-filter="In Review">In Review (<span id="countReview">0</span>)</button>
         </div>
 
         <!-- Search Input -->
@@ -734,7 +734,7 @@
       </div>
 
       <div class="table-footer">
-        <span id="paginationLabel">Showing 5 active requests</span>
+        <span id="paginationLabel">Showing 0 active requests</span>
         <a href="admin.html" style="color: var(--accent-blue); text-decoration: none; font-weight: 600;">&larr; Return to Admin Executive Dashboard</a>
       </div>
     </main>
@@ -813,94 +813,8 @@
     (function () {
       'use strict';
 
-      // 1. Initial Service Requests Dataset (Representative of all 5 document types)
-      const serviceRequestsData = [
-        {
-          id: 'REQ-2026-08492',
-          fullName: 'Juan M. Dela Cruz',
-          age: '34',
-          address: '042 Sitio Ibaba Main Road',
-          purokSitio: 'Sitio Ibaba',
-          documentType: 'Barangay Clearance',
-          purpose: 'Local Employment Application with Pilipinas Shell Batangas',
-          date: 'October 11, 2026',
-          status: 'Ready for Pickup',
-          residencySince: 'March 2012',
-          businessName: 'Dela Cruz Enterprises',
-          businessAddress: '042 Sitio Ibaba Main Road, Barangay Pallocan Kanluran',
-          natureOfBusiness: 'Retail of Consumer Goods',
-          businessType: 'Sole Proprietorship',
-          numberOfEmployees: '2'
-        },
-        {
-          id: 'REQ-2026-08490',
-          fullName: 'Rogelio B. Mendoza',
-          age: '45',
-          address: '088 Crossing Ilaya',
-          purokSitio: 'Sitio Ilaya',
-          documentType: 'Certificate of Residency',
-          purpose: 'Pag-IBIG Housing Loan Prerequisite & Title Verification',
-          date: 'October 11, 2026',
-          status: 'In Review',
-          residencySince: 'June 2008',
-          businessName: 'Mendoza Vulcanizing Services',
-          businessAddress: '088 Crossing Ilaya, Barangay Pallocan Kanluran',
-          natureOfBusiness: 'Automotive Tire Care',
-          businessType: 'Sole Proprietorship',
-          numberOfEmployees: '3'
-        },
-        {
-          id: 'REQ-2026-08491',
-          fullName: 'Maria Santos Alcantara',
-          age: '28',
-          address: 'Block 3 Lot 8, Villa Celina',
-          purokSitio: 'Sitio Santolan',
-          documentType: 'Certificate of Indigency',
-          purpose: 'CHED Tertiary Education Subsidy & Tuition Waiver',
-          date: 'October 11, 2026',
-          status: 'In Review',
-          residencySince: 'August 2015',
-          businessName: 'Alcantara Handicrafts',
-          businessAddress: 'Block 3 Lot 8, Sitio Santolan, Barangay Pallocan Kanluran',
-          natureOfBusiness: 'Home Crafts & Sewing',
-          businessType: 'Sole Proprietorship',
-          numberOfEmployees: '1'
-        },
-        {
-          id: 'REQ-2026-08488',
-          fullName: 'Jayson Mark Reyes',
-          age: '21',
-          address: '023 Alley 4, Sitio Gitna',
-          purokSitio: 'Sitio Gitna',
-          documentType: 'Certification for First-Time Job Seeker',
-          purpose: 'BPO Customer Support Trainee (RA 11261 Assistance Act)',
-          date: 'October 10, 2026',
-          status: 'In Review',
-          residencySince: 'May 2005',
-          businessName: 'N/A',
-          businessAddress: '023 Alley 4, Sitio Gitna, Barangay Pallocan Kanluran',
-          natureOfBusiness: 'N/A',
-          businessType: 'N/A',
-          numberOfEmployees: '0'
-        },
-        {
-          id: 'REQ-2026-08489',
-          fullName: 'Carmela D. Hernandez',
-          age: '41',
-          address: '15 Riverside Drive',
-          purokSitio: 'Tierra Verde',
-          documentType: 'Barangay Business Clearance',
-          purpose: 'Barangay Business Clearance Renewal for 2026',
-          date: 'October 10, 2026',
-          status: 'Ready for Pickup',
-          residencySince: 'January 2010',
-          businessName: 'Hernandez Sari-Sari Store & Carinderia',
-          businessAddress: '15 Riverside Drive, Tierra Verde, Barangay Pallocan Kanluran',
-          natureOfBusiness: 'Retail Food Commodities & Eatery',
-          businessType: 'Sole Proprietorship',
-          numberOfEmployees: '3'
-        }
-      ];
+      // 1. Service Requests Dataset
+      const serviceRequestsData = [];
 
       // 2. Dynamic Document Templates Definitions (5 Exact Templates)
       const DOCUMENT_TEMPLATES = {

@@ -15,6 +15,7 @@ const projectRoutes = require("./routes/projectRoutes");
 const proposalRoutes = require("./routes/proposalRoutes");
 const budgetRoutes = require("./routes/budgetRoutes");
 const announcementRoutes = require("./routes/announcementRoutes");
+const officialsRoutes = require("./routes/officialsRoutes");
 
 const app = express();
 
@@ -69,6 +70,8 @@ app.use("/api/budget", budgetRoutes);
 // Announcement routes
 app.use("/api/announcements", announcementRoutes);
 
+// Officials routes
+app.use("/api/officials", officialsRoutes);
 
 // Admin routes
 app.use("/api/admin", adminRoutes);
