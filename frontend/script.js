@@ -42,6 +42,18 @@ document.addEventListener('DOMContentLoaded', function () {
   const loginForm = document.getElementById('loginForm');
   const registerForm = document.getElementById('registerForm');
 
+  // ==========================================
+  // FORGOT PASSWORD ELEMENTS
+  // ==========================================
+  const linkForgotPassword = document.getElementById('linkForgotPassword');
+  const forgotPasswordView = document.getElementById('forgot-password-view');
+  const forgotPasswordForm = document.getElementById('forgotPasswordForm');
+  const forgotPasswordEmail = document.getElementById('forgotPasswordEmail');
+  const forgotPasswordFeedback = document.getElementById('forgotPasswordFeedback');
+  const forgotPasswordEmailError = document.getElementById('forgotPasswordEmailError');
+  const btnForgotPasswordSubmit = document.getElementById('btnForgotPasswordSubmit');
+  const backToLoginFromForgot = document.getElementById('backToLoginFromForgot');
+
   // Interactive Forms
   const docServiceForm = document.getElementById('docServiceForm');
   const complaintReportForm = document.getElementById('complaintReportForm');
@@ -171,6 +183,61 @@ document.addEventListener('DOMContentLoaded', function () {
     resetPasswordVisibility(authModal);
   }
 
+  // ==========================================
+  // FORGOT PASSWORD VIEW
+  // ==========================================
+
+  function showForgotPasswordView() {
+      const loginView = document.getElementById('login-view');
+      const registerView = document.getElementById('register-view');
+
+      if (loginView) loginView.style.display = 'none';
+      if (registerView) registerView.style.display = 'none';
+      if (forgotPasswordView) forgotPasswordView.style.display = 'block';
+
+      if (forgotPasswordFeedback) {
+          forgotPasswordFeedback.style.display = 'none';
+          forgotPasswordFeedback.textContent = '';
+      }
+
+      if (forgotPasswordEmailError) {
+          forgotPasswordEmailError.textContent = '';
+      }
+  }
+
+  function showLoginFromForgotPassword() {
+      const loginView = document.getElementById('login-view');
+
+      if (forgotPasswordView) {
+          forgotPasswordView.style.display = 'none';
+      }
+
+      if (loginView) {
+          loginView.style.display = 'block';
+      }
+
+      if (forgotPasswordFeedback) {
+          forgotPasswordFeedback.style.display = 'none';
+          forgotPasswordFeedback.textContent = '';
+      }
+  }
+
+  if (linkForgotPassword && forgotPasswordView) {
+      linkForgotPassword.addEventListener('click', function (e) {
+          e.preventDefault();
+
+          document.getElementById('login-view').style.display = 'none';
+          document.getElementById('register-view').style.display = 'none';
+          forgotPasswordView.style.display = 'block';
+      });
+  }
+
+  if (backToLoginFromForgot) {
+      backToLoginFromForgot.addEventListener('click', function () {
+          showLoginFromForgotPassword();
+      });
+  }
+
   function getActiveSessionInfo() {
     const rawSession = localStorage.getItem('brgy360_session');
     const currentRole = localStorage.getItem('currentUserRole');
@@ -187,34 +254,45 @@ document.addEventListener('DOMContentLoaded', function () {
     return { active: false, role: null };
   }
 
-  function openAuthModal(view, forceOpen = false) {
-    const sessionInfo = getActiveSessionInfo();
-    if (!forceOpen && sessionInfo.active) {
-      window.location.href = sessionInfo.role === 'admin' ? 'admin.html' : 'user.html';
-      return;
-    }
-    if (!authModal) return;
+  function openAuthModal(view = 'login') {
     authModal.classList.add('active');
     document.body.classList.add('auth-modal-open');
     authModal.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
-    if (view === 'register') {
-      showRegisterView();
-    } else {
-      showLoginView();
+
+    // Always hide Forgot Password when reopening the modal
+    if (forgotPasswordView) {
+        forgotPasswordView.style.display = 'none';
     }
-  }
+
+    if (view === 'register') {
+        showRegisterView();
+    } else {
+        showLoginView();
+    }
+}
 
   function closeAuthModal() {
     if (!authModal) return;
+
     authModal.classList.remove('active');
     document.body.classList.remove('auth-modal-open');
+
+    if (authModal.contains(document.activeElement)) {
+        document.activeElement.blur();
+    }
+    
     authModal.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
     document.documentElement.style.overflow = 'auto';
+
+    if (forgotPasswordView) {
+        forgotPasswordView.style.display = 'none';
+    }
+
     clearAuthFeedback();
     resetPasswordVisibility(authModal);
-  }
+}
 
   // ==========================================================
   // LOGGED-IN SESSION STATE SYNCHRONIZATION ON PUBLIC VIEW
@@ -388,6 +466,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // 3. Client-Side Validation: Login Form
   const loginEmail = document.getElementById('loginEmail');
   const loginPassword = document.getElementById('loginPassword');
+  const loginRememberMe = document.getElementById('loginRememberMe');
   const loginEmailError = document.getElementById('loginEmailError');
   const loginPasswordError = document.getElementById('loginPasswordError');
   const loginFeedback = document.getElementById('loginFeedback');
@@ -469,7 +548,10 @@ document.addEventListener('DOMContentLoaded', function () {
           method: 'POST',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: emailLower, password: passVal })
+          body: JSON.stringify({
+    email: emailLower,
+    password: passVal,
+    rememberMe: document.getElementById('loginRememberMe')?.checked === true})
         });
 
         const adminData = await adminResp.json().catch(() => ({}));
@@ -505,12 +587,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
       // Resident Authentication
       try {
-        const response = await fetch('http://localhost:5000/api/auth/login', {
-          method: 'POST',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: emailLower, password: passVal })
-        });
+          const response = await fetch('http://localhost:5000/api/auth/login', {
+              method: 'POST',
+              credentials: 'include',
+              headers: {
+                  'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                  email: emailLower,
+                  password: passVal,
+                  rememberMe: document.getElementById('loginRememberMe')?.checked === true
+              })
+          });
 
         const result = await response.json().catch(() => ({}));
 
@@ -563,6 +651,77 @@ document.addEventListener('DOMContentLoaded', function () {
         }
       }
     });
+  }
+
+  // ==========================================
+  // FORGOT PASSWORD SUBMISSION
+  // ==========================================
+
+  if (forgotPasswordForm) {
+      forgotPasswordForm.addEventListener('submit', async function (event) {
+          event.preventDefault();
+
+          const email = forgotPasswordEmail.value.trim().toLowerCase();
+
+          if (forgotPasswordEmailError) {
+              forgotPasswordEmailError.textContent = '';
+          }
+
+          if (forgotPasswordFeedback) {
+              forgotPasswordFeedback.style.display = 'none';
+              forgotPasswordFeedback.textContent = '';
+          }
+
+          if (!email) {
+              if (forgotPasswordEmailError) {
+                  forgotPasswordEmailError.textContent = 'Please enter your registered email address.';
+              }
+              return;
+          }
+
+          const originalButtonText = btnForgotPasswordSubmit.textContent;
+
+          btnForgotPasswordSubmit.disabled = true;
+          btnForgotPasswordSubmit.textContent = 'Sending...';
+
+          try {
+              const response = await fetch('http://localhost:5000/api/auth/forgot-password', {
+                  method: 'POST',
+                  headers: {
+                      'Content-Type': 'application/json'
+                  },
+                  credentials: 'include',
+                  body: JSON.stringify({ email })
+              });
+
+              const data = await response.json();
+
+              if (!response.ok) {
+                  throw new Error(data.message || 'Unable to process your request.');
+              }
+
+              forgotPasswordFeedback.textContent =
+                  data.message || 'If your account exists, a password reset link will be sent to your email.';
+
+              forgotPasswordFeedback.style.display = 'block';
+              forgotPasswordFeedback.classList.remove('error');
+              forgotPasswordFeedback.classList.add('success');
+
+          } catch (error) {
+              console.error('Forgot password error:', error);
+
+              forgotPasswordFeedback.textContent =
+                  error.message || 'Something went wrong. Please try again.';
+
+              forgotPasswordFeedback.style.display = 'block';
+              forgotPasswordFeedback.classList.remove('success');
+              forgotPasswordFeedback.classList.add('error');
+
+          } finally {
+              btnForgotPasswordSubmit.disabled = false;
+              btnForgotPasswordSubmit.textContent = originalButtonText;
+          }
+      });
   }
 
   // 4. Client-Side Validation & File Management: Registration Form
@@ -1244,36 +1403,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  // 7. Citizen Project Proposal Form Handler
-  if (projectProposalForm) {
-    projectProposalForm.addEventListener('submit', function (e) {
-      e.preventDefault();
-      const title = (document.getElementById('proposalTitle')?.value || '').trim() || 'Citizen Community Proposal';
-      const proposalCode = 'PROP-' + new Date().getFullYear() + '-' + Math.floor(100 + Math.random() * 900);
-
-      try {
-        const stored = JSON.parse(localStorage.getItem('brgy360_proposals') || '[]');
-        stored.unshift({
-          id: proposalCode,
-          ref: proposalCode,
-          title: title,
-          category: 'Citizen Initiative',
-          dateFiled: new Date().toISOString().split('T')[0],
-          date: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
-          status: 'Pending'
-        });
-        localStorage.setItem('brgy360_proposals', JSON.stringify(stored));
-        window.dispatchEvent(new Event('storage'));
-      } catch (err) {}
-
-      showPublicToast(
-        'Project Proposal Received',
-        'Thank you! Your project proposal for "' + title + '" has been received.\nTracking ID: ' + proposalCode + '\nIt will be reviewed during the Barangay Development Council planning session.',
-        'success'
-      );
-      projectProposalForm.reset();
-    });
-  }
+  // Citizen proposals are submitted through the database-backed modal form below.
 
   // 8. Hero Background Slideshow
   const heroSlides = document.querySelectorAll('.hero-slide');
@@ -1692,34 +1822,9 @@ document.addEventListener('DOMContentLoaded', function () {
           successTrackingId.textContent = result.trackingCode;
         }
 
-        try {
-          const raw = localStorage.getItem('brgy360_proposals');
-          const list = raw ? JSON.parse(raw) : [];
-          const newProp = {
-            id: result.trackingCode || `PROP-${Date.now()}`,
-            ref: result.trackingCode || `PROP-${Date.now()}`,
-            proposalId: result.proposalId,
-            title: document.getElementById('modalProjectTitle')?.value.trim() || 'Community Proposal',
-            category: document.getElementById('modalProjectCategory')?.value || 'Infrastructure',
-            location: document.getElementById('modalProjectSitio')?.value || 'Sitio Ibaba',
-            sitio: document.getElementById('modalProjectSitio')?.value || 'Sitio Ibaba',
-            budget: parseFloat(document.getElementById('modalProjectBudget')?.value) || 0,
-            timeline: document.getElementById('modalProjectTimeline')?.value.trim() || 'Q1 2027',
-            rationale: document.getElementById('modalProjectRationale')?.value.trim() || '',
-            description: document.getElementById('modalProjectRationale')?.value.trim() || '',
-            proponent: document.getElementById('modalProponentName')?.value.trim() || 'Resident',
-            email: document.getElementById('modalProponentEmail')?.value.trim() || '',
-            status: 'Pending',
-            dateFiled: new Date().toISOString().split('T')[0],
-            date: new Date().toLocaleDateString('en-PH', { year: 'numeric', month: 'short', day: 'numeric' })
-          };
-          list.unshift(newProp);
-          localStorage.setItem('brgy360_proposals', JSON.stringify(list));
-          window.dispatchEvent(new Event('storage'));
-          window.dispatchEvent(new CustomEvent('brgy360_proposals_changed', { detail: list }));
-        } catch (storageErr) {
-          console.warn('Storage sync warning:', storageErr);
-        }
+        // PostgreSQL is the source of truth. Do not write a duplicate proposal
+        // into localStorage after the API confirms the submission.
+
 
         modalProposeForm.style.display = 'none';
         if (modalSuccessState) modalSuccessState.style.display = 'block';
@@ -2488,9 +2593,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
       return `
         <article class="announcement-card ${item.isEmergency ? 'emergency-card' : 'standard-card'}" data-id="${safeId}">
+          ${item.isEmergency ? `
+          <div class="emergency-top-banner">
+            <div class="emergency-banner-left">
+              <span class="emergency-pulse-dot"></span>
+              <span class="emergency-banner-text">Critical Advisory</span>
+            </div>
+            <span class="emergency-banner-tag">Action Required</span>
+          </div>` : ''}
           <div class="announcement-card-inner">
             <div class="announcement-meta-row">
-              <span class="meta-category-pill">${safeCategory}</span>
+              <span class="meta-category-pill ${item.isEmergency ? 'pill-emergency' : ''}">${safeCategory}</span>
               <span class="meta-date-item">${safeDate}</span>
             </div>
             <h3 class="announcement-card-title">${safeTitle}</h3>
@@ -2512,10 +2625,14 @@ document.addEventListener('DOMContentLoaded', function () {
     const item = announcements.find(function (a) { return String(a.id) === String(id); });
     if (!item || !announcementDetailModal || !announcementModalContent) return;
 
+    const modalCard = announcementDetailModal.querySelector('.announcement-modal-card');
+    if (modalCard) modalCard.classList.toggle('is-critical', !!item.isEmergency);
+
     announcementModalContent.innerHTML = `
+      ${item.isEmergency ? '<div class="announcement-modal-header-banner"><span>🚨</span><span>Critical Advisory</span></div>' : ''}
       <div class="announcement-modal-scrollable">
         <div class="modal-meta-bar">
-          <span class="meta-category-pill">${escapeAnnouncementHtml(item.category)}</span>
+          <span class="meta-category-pill ${item.isEmergency ? 'pill-emergency' : ''}">${escapeAnnouncementHtml(item.category)}</span>
           <span>Published: ${escapeAnnouncementHtml(item.date)}</span>
         </div>
         <h2 class="modal-announcement-title">${escapeAnnouncementHtml(item.title)}</h2>

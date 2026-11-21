@@ -7,7 +7,7 @@
   <meta name="description" content="Brgy360 civic governance platform with full-spectrum descriptive, predictive, and prescriptive analytics console for Barangay Pallocan West.">
   <meta property="og:title" content="Brgy360 - Barangay Services Platform">
   <meta property="og:description" content="Brgy360 civic governance platform with full-spectrum descriptive, predictive, and prescriptive analytics console for Barangay Pallocan West.">
-  <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+  <link rel="icon" type="image/svg+xml" href="assets/logo1.png">
 
   <!-- Google Font: Poppins (Complete weights for consistent typography) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,6 +22,48 @@
   <link rel="stylesheet" href="announcements.css">
   <link rel="stylesheet" href="reports.css">
   <link rel="stylesheet" href="auth.css">
+  <!-- Leaflet (OpenStreetMap map library) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+  <style>
+    /* OpenStreetMap modal */
+    .map-modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,.65); backdrop-filter: blur(6px); z-index: 1100; display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity .25s ease; }
+    .map-modal-overlay.active { opacity: 1; pointer-events: auto; }
+    .map-modal-box { background: #fff; width: 100%; max-width: 860px; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,.25); transform: translateY(20px); transition: transform .25s ease; }
+    .map-modal-overlay.active .map-modal-box { transform: translateY(0); }
+    .map-modal-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 22px; border-bottom: 1px solid #e2e8f0; }
+    .map-modal-title { font-size: 17px; font-weight: 700; color: #0f172a; }
+    .map-modal-sub { font-size: 12.5px; color: #64748b; }
+    .map-modal-close { background: none; border: none; font-size: 26px; line-height: 1; color: #94a3b8; cursor: pointer; }
+    .map-modal-close:hover { color: #0f172a; }
+    .map-directions-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 22px; border-top: 1px solid #e2e8f0; background: #f8fafc; }
+    .map-directions-info { font-size: 13px; color: #475569; line-height: 1.5; flex: 1 1 260px; min-width: 0; }
+    .map-directions-info strong { color: #0f172a; }
+    .map-directions-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .map-mode-select { padding: 9px 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; background: #fff; color: #0f172a; }
+    .map-directions-btn { background: #0d47a1; color: #fff; border: none; border-radius: 50px; padding: 10px 18px; font-size: 13.5px; font-weight: 600; cursor: pointer; transition: background .2s ease; }
+    .map-secondary-btn { background: #fff; color: #0d47a1; border: 1px solid #0d47a1; border-radius: 50px; padding: 9px 16px; font-size: 13px; font-weight: 600; cursor: pointer; }
+    .map-secondary-btn:hover { background: #eff6ff; }
+    .map-directions-btn { text-decoration: none; display: inline-block; }
+    .map-directions-btn:hover { background: #1565c0; }
+    .map-directions-note { width: 100%; font-size: 12px; color: #64748b; display: none; }
+    #brgyMap { width: 100%; height: min(70vh, 520px); }
+    /* Google Maps nav button (sits beside Login / Register) */
+    .nav-btn-map { display: inline-flex; align-items: center; gap: 6px; }
+    #navMapSlot { margin-right: 8px; }
+    /* Fix: peso sign overlapping the budget amount in the "Propose a Project" modal */
+    .budget-input-wrapper { position: relative; }
+    .budget-input-wrapper .currency-prefix {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      z-index: 1;
+      line-height: 1;
+    }
+    .budget-input-wrapper .modal-input.budget-input { padding-left: 36px; }
+  </style>
   <!-- Universal Authentication & Route Guard -->
   <script type="module" src="./auth.js"></script>
   <!-- Chart.js CDN for trend chart -->
@@ -34,7 +76,7 @@
     <div class="nav-container">
       <!-- Left side: Logo & Title -->
       <a href="#home" class="logo-group">
-        <img src="assets/logo.svg" alt="Brgy360 Logo" class="nav-logo">
+        <img src="assets/logo1.png" alt="Brgy360 Logo" class="nav-logo">
         <span class="nav-title">Brgy360</span>
       </a>
 
@@ -54,6 +96,9 @@
         <li><a href="#budget">Budget</a></li>
         <li><a href="#reports">Report</a></li>
         <li><a href="#announcements">Announcement</a></li>
+        <li id="navMapSlot"><a href="https://www.openstreetmap.org/?mlat=13.7544&mlon=121.0650#map=17/13.7544/121.0650" target="_blank" rel="noopener noreferrer" class="nav-btn-auth nav-btn-map" id="openMapBtn" title="View Barangay Pallocan West on the map" aria-label="View Barangay Pallocan West on the map">
+          <span>Map</span>
+        </a></li>
         <li id="navAuthSlot"><a href="#login" class="nav-btn-auth" id="openLoginBtn">Login / Register</a></li>
       </ul>
     </div>
@@ -64,17 +109,17 @@
 
     <!-- Background photo slideshow -->
   <div class="hero-slides">
-        <div class="hero-slide active" style="background-image: url('assets/brgy.jpg');"></div>
-        <div class="hero-slide" style="background-image: url('assets/brgy1.jpg');"></div>
-        <div class="hero-slide" style="background-image: url('assets/brgy2.jpg');"></div>
-        <div class="hero-slide" style="background-image: url('assets/brgy3.jpg');"></div>
-        <div class="hero-slide" style="background-image: url('assets/brgy4.jpg');"></div>
-        <div class="hero-slide" style="background-image: url('assets/brgy5.jpg');"></div>
+        <div class="hero-slide active" style="background-image: url('assets/brgy.jpeg');"></div>
+        <div class="hero-slide" style="background-image: url('assets/brgy1.jpeg');"></div>
+        <div class="hero-slide" style="background-image: url('assets/brgy2.jpeg');"></div>
+        <div class="hero-slide" style="background-image: url('assets/brgy3.jpeg');"></div>
+        <div class="hero-slide" style="background-image: url('assets/brgy4.jpeg');"></div>
+        <div class="hero-slide" style="background-image: url('assets/brgy5.jpeg');"></div>
     </div>
 
     <div class="hero-content">
       <!-- Large centered logo (approx 140px) -->
-      <img src="assets/logo.svg" alt="Brgy360 Emblem" class="hero-logo">
+      <img src="assets/logo1.png" alt="Brgy360 Emblem" class="hero-logo">
 
       <!-- Small uppercase tagline -->
       <p class="tagline">Your Barangay, All in One.</p>
@@ -1427,7 +1472,7 @@
 
         <!-- Dynamic Result Count Display -->
         <div class="announcements-feed-count" id="announcementsFeedCount">
-          <span>6 Announcements</span>
+          <span>Announcements</span>
         </div>
       </div>
 
@@ -1487,7 +1532,7 @@
           <div class="auth-field-group">
             <div class="auth-label-row">
               <label for="loginPassword" class="auth-label">Password</label>
-              <a href="#forgot" class="auth-link-sm" id="linkForgotPassword">Forgot password?</a>
+              <a href="#" class="auth-link-sm" id="linkForgotPassword">Forgot password?</a>
             </div>
             <div class="auth-input-wrapper">
               <svg class="auth-field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -1526,6 +1571,82 @@
           <span>Don't have an account?</span>
           <button type="button" class="auth-switch-link" id="switchToRegisterBtn">Create an Account</button>
         </div>
+      </div>
+
+
+      <!-- VIEW 2: FORGOT PASSWORD FORM -->
+      <div id="forgot-password-view" class="auth-view" style="display: none;">
+
+        <div class="auth-header">
+          <div class="auth-icon-badge" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="22" height="22"
+              fill="none" stroke="currentColor" stroke-width="2.2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+              <polyline points="3,7 12,13 21,7"></polyline>
+            </svg>
+          </div>
+
+          <h2 class="auth-heading">Forgot Your Password?</h2>
+          <p class="auth-subtitle">
+            Enter the email address associated with your account.
+            We'll send you a link to reset your password.
+          </p>
+        </div>
+
+        <form id="forgotPasswordForm" novalidate>
+
+          <div class="auth-feedback-banner"
+            id="forgotPasswordFeedback"
+            style="display: none;"
+            role="alert">
+          </div>
+
+          <div class="auth-field-group">
+            <label for="forgotPasswordEmail" class="auth-label">
+              Registered Email
+            </label>
+
+            <div class="auth-input-wrapper">
+              <svg class="auth-field-icon" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round"
+                aria-hidden="true">
+                <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                <polyline points="22,6 12,13 2,6"></polyline>
+              </svg>
+
+              <input
+                type="email"
+                id="forgotPasswordEmail"
+                class="auth-input"
+                placeholder="you@example.com"
+                required
+                autocomplete="email">
+            </div>
+
+            <span class="auth-error-text"
+              id="forgotPasswordEmailError"></span>
+          </div>
+
+          <button
+            type="submit"
+            class="auth-btn-primary"
+            id="btnForgotPasswordSubmit">
+            Send Reset Link
+          </button>
+
+        </form>
+
+        <div class="auth-bottom-switch">
+          <button
+            type="button"
+            class="auth-switch-link"
+            id="backToLoginFromForgot">
+            &larr; Back to Login
+          </button>
+        </div>
+
       </div>
 
       <!-- VIEW 2: REGISTRATION FORM (#register-view - initially hidden) -->
@@ -1929,19 +2050,152 @@
     <div class="container">
       <p>© 2026 Brgy360. Your Barangay, All in One.</p>
       <p style="color: #64748b; font-size: 13px; margin-top: 4px;">Bridging Technology and Governance.</p>
-      <div style="margin-top: 10px; display: inline-flex; align-items: center; gap: 8px;">
-        <a href="admin.html" id="footerAdminLink" style="display: inline-flex; align-items: center; gap: 6px; color: #0d47a1; font-weight: 600; font-size: 12.5px; text-decoration: none; padding: 4px 10px; background: rgba(13, 71, 161, 0.08); border-radius: 6px; border: 1px solid rgba(13, 71, 161, 0.15);">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="3" width="7" height="9" rx="1"></rect>
-            <rect x="14" y="3" width="7" height="5" rx="1"></rect>
-            <rect x="14" y="12" width="7" height="9" rx="1"></rect>
-            <rect x="3" y="16" width="7" height="5" rx="1"></rect>
-          </svg>
-          <span>Admin Analytics &amp; Governance Console &rarr;</span>
-        </a>
-      </div>
     </div>
   </footer>
+
+  <!-- OPENSTREETMAP MODAL -->
+  <div class="map-modal-overlay" id="mapModal" role="dialog" aria-modal="true" aria-labelledby="mapModalTitle" aria-hidden="true">
+    <div class="map-modal-box">
+      <div class="map-modal-header">
+        <div>
+          <div class="map-modal-title" id="mapModalTitle">Barangay Pallocan West</div>
+          <div class="map-modal-sub">Batangas City &middot; Map data &copy; OpenStreetMap contributors</div>
+        </div>
+        <button type="button" class="map-modal-close" id="closeMapBtn" aria-label="Close map">&times;</button>
+      </div>
+      <div id="brgyMap"></div>
+      <div class="map-directions-bar">
+        <div class="map-directions-info" id="mapDirectionsInfo">
+          <strong>Barangay Hall</strong> &middot; Barangay Pallocan West, Batangas City
+        </div>
+        <div class="map-directions-actions">
+          <select class="map-mode-select" id="mapTravelMode" aria-label="Travel mode">
+            <option value="fossgis_osrm_car">By car / tricycle</option>
+            <option value="fossgis_osrm_bike">By bike</option>
+            <option value="fossgis_osrm_foot">On foot</option>
+          </select>
+          <button type="button" class="map-secondary-btn" id="btnUseMyLocation">Use my location</button>
+          <a class="map-directions-btn" id="btnGetDirections" href="#" target="_blank" rel="noopener noreferrer">Get Directions</a>
+        </div>
+        <div class="map-directions-note" id="mapDirectionsNote"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    (function () {
+      // Fallback used only if the backend API is unreachable.
+      var FALLBACK = { name: 'Barangay Pallocan West', city: 'Batangas City', lat: 13.7544, lng: 121.0650, zoom: 16 };
+      var MAP_API_URL = 'http://localhost:5000/api/map/location';
+      var map = null;
+      var currentLoc = FALLBACK;
+      var modal = document.getElementById('mapModal');
+      var openBtn = document.getElementById('openMapBtn');
+      var closeBtn = document.getElementById('closeMapBtn');
+      if (!modal || !openBtn || typeof L === 'undefined') return; // link fallback opens openstreetmap.org
+
+      function loadLocation() {
+        return fetch(MAP_API_URL)
+          .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+          .then(function (json) { return (json && json.data) ? json.data : FALLBACK; })
+          .catch(function () { return FALLBACK; });
+      }
+
+      function buildMap(loc) {
+        currentLoc = loc;
+        renderInfo(loc);
+        updateDirectionsLink();
+        var coords = [loc.lat, loc.lng];
+        map = L.map('brgyMap').setView(coords, loc.zoom || 16);
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19,
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+        var popup = document.createElement('div');
+        var strong = document.createElement('strong');
+        strong.textContent = loc.name;
+        popup.appendChild(strong);
+        popup.appendChild(document.createElement('br'));
+        popup.appendChild(document.createTextNode(loc.city));
+        L.marker(coords).addTo(map).bindPopup(popup).openPopup();
+        setTimeout(function () { map.invalidateSize(); }, 260);
+      }
+
+      function renderInfo(loc) {
+        var info = document.getElementById('mapDirectionsInfo');
+        if (!info) return;
+        info.textContent = '';
+        var t = document.createElement('strong');
+        t.textContent = 'Barangay Hall';
+        info.appendChild(t);
+        info.appendChild(document.createTextNode(' \u00b7 ' + loc.name + ', ' + loc.city));
+        if (loc.address) { info.appendChild(document.createElement('br')); info.appendChild(document.createTextNode(loc.address)); }
+        if (loc.landmark) { info.appendChild(document.createElement('br')); info.appendChild(document.createTextNode('Landmark: ' + loc.landmark)); }
+      }
+
+      function directionsUrl(mode, from) {
+        var to = currentLoc.lat + ',' + currentLoc.lng;
+        return 'https://www.openstreetmap.org/directions?engine=' + encodeURIComponent(mode) +
+               '&route=' + (from ? from + ';' : ';') + to;
+      }
+
+      var userFrom = '';   // "lat,lng" once the resident shares their location
+
+      function updateDirectionsLink() {
+        var link = document.getElementById('btnGetDirections');
+        var mode = document.getElementById('mapTravelMode').value;
+        if (link) link.href = directionsUrl(mode, userFrom);
+      }
+
+      function useMyLocation() {
+        var note = document.getElementById('mapDirectionsNote');
+        var btn = document.getElementById('btnUseMyLocation');
+        note.style.display = 'block';
+        if (!navigator.geolocation) {
+          note.textContent = 'Your browser does not support location. Get Directions will open without a starting point.';
+          return;
+        }
+        note.textContent = 'Getting your location... please allow location access if your browser asks.';
+        btn.disabled = true;
+        navigator.geolocation.getCurrentPosition(
+          function (pos) {
+            userFrom = pos.coords.latitude.toFixed(6) + ',' + pos.coords.longitude.toFixed(6);
+            updateDirectionsLink();
+            note.textContent = 'Location found. Press Get Directions to see the route from where you are.';
+            btn.disabled = false;
+          },
+          function () {
+            note.textContent = 'Location access was not allowed. Get Directions will open without a starting point, so enter your starting address on the next page.';
+            btn.disabled = false;
+          },
+          { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+        );
+      }
+
+      function openMap(e) {
+        e.preventDefault();
+        modal.classList.add('active');
+        modal.setAttribute('aria-hidden', 'false');
+        updateDirectionsLink();
+        if (!map) {
+          loadLocation().then(buildMap);
+        } else {
+          setTimeout(function () { map.invalidateSize(); }, 260);
+        }
+      }
+      function closeMap() {
+        modal.classList.remove('active');
+        modal.setAttribute('aria-hidden', 'true');
+      }
+      openBtn.addEventListener('click', openMap);
+      document.getElementById('btnUseMyLocation').addEventListener('click', useMyLocation);
+      document.getElementById('mapTravelMode').addEventListener('change', updateDirectionsLink);
+      closeBtn.addEventListener('click', closeMap);
+      modal.addEventListener('click', function (e) { if (e.target === modal) closeMap(); });
+      document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeMap(); });
+    })();
+  </script>
 
   <script type="module" src="./script.js"></script>
 </body>

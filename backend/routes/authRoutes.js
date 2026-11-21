@@ -1,4 +1,3 @@
-
 const express = require("express");
 const router = express.Router();
 
@@ -8,7 +7,10 @@ const {
     getCurrentUser,
     loginAdmin,
     setupResidentPassword,
-    checkResidentEmail
+    checkResidentEmail,
+    requestPasswordReset,
+    verifyPasswordResetToken,
+    resetPassword
 } = require("../controllers/authController");
 
 const upload = require("../middleware/uploadMiddleware");
@@ -31,6 +33,19 @@ router.post("/login", loginResident);
 
 // Resident password setup using email token
 router.post("/setup-password", setupResidentPassword);
+
+// ==========================================
+// FORGOT PASSWORD ROUTES
+// ==========================================
+
+// Request password reset email
+router.post("/forgot-password", requestPasswordReset);
+
+// Verify password reset token
+router.get("/verify-reset-token/:token", verifyPasswordResetToken);
+
+// Save new password
+router.post("/reset-password", resetPassword);
 
 // Admin login
 router.post("/admin/login", loginAdmin);

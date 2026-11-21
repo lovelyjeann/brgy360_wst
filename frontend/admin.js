@@ -126,7 +126,14 @@ function normalizeServiceRequest(r) {
     const docType = r.document_type || r.docType || r.documentType || '';
     const documentType = r.document_type || r.documentType || docType;
 
-    const sitio = r.sitio || r.purokSitio || '';
+    const sitio =
+        r.sitio ||
+        r.sitio_purok ||
+        r.purok_sitio ||
+        r.purokSitio ||
+        r.purok ||
+        r.location_sitio ||
+        '';
     const purokSitio = r.purokSitio || sitio;
     const address = r.address || '';
 
@@ -437,7 +444,7 @@ function normalizeServiceRequest(r) {
 
     // Support both database records and older frontend/seed records.
     const id = p.id || p.ref || p.tracking_code ||
-        ('PROP-2026-' + Math.floor(100 + Math.random() * 900));
+        (p.proposal_id ? `PROP-${p.fiscal_year || new Date().getFullYear()}-${String(p.proposal_id).padStart(4, '0')}` : '');
 
     const ref = p.ref || p.tracking_code || p.id || id;
 
@@ -622,130 +629,82 @@ function normalizeServiceRequest(r) {
 }
 
   
-function loadCitizenProposals() {
-    try {
-        const raw = localStorage.getItem('brgy360_proposals');
-        if (raw) {
-            const parsed = JSON.parse(raw);
-            if (Array.isArray(parsed) && parsed.length > 0) {
-                return parsed.map(normalizeProposalRecord);
-            }
-        }
-    } catch (e) {
-        console.warn('Error reading proposals from localStorage:', e);
-    }
-    return [];
-}
-
-function saveCitizenProposals() {
-    try {
-        localStorage.setItem('brgy360_proposals', JSON.stringify(citizenProposals));
-        window.dispatchEvent(new Event('storage'));
-        window.dispatchEvent(new CustomEvent('brgy360_proposals_changed', { detail: citizenProposals }));
-    } catch (e) {
-        console.warn('Error saving citizenProposals to localStorage:', e);
-    }
-}
-
-  let citizenProposals = loadCitizenProposals();
+  let citizenProposals = [];
 
   async function loadCitizenProposalsFromDatabase() {
     try {
-        // Try admin route first; if 404 or fails, fall back to /api/proposals
-        let response = await fetch('http://localhost:5000/api/proposals/admin/all', {
-            method: 'GET',
-            credentials: 'include'
-        });
+      const response = await fetch('http://localhost:5000/api/proposals/admin/all', {
+        method: 'GET',
+        credentials: 'include'
+      });
 
-        if (response.status === 404) {
-            response = await fetch('http://localhost:5000/api/proposals', {
-                method: 'GET',
-                credentials: 'include'
-            });
-        }
+      if (!response.ok) {
+        throw new Error(`Server returned HTTP ${response.status}`);
+      }
 
-        if (!response.ok) {
-            throw new Error(`Server returned HTTP ${response.status}`);
-        }
+      const data = await response.json();
+      if (data?.success === false) {
+        throw new Error(data.message || 'Failed to load proposals from the database.');
+      }
 
-        const data = await response.json();
+      const rawList = Array.isArray(data)
+        ? data
+        : (Array.isArray(data?.proposals) ? data.proposals : null);
 
-        // Extract raw proposal records from flexible backend JSON shapes
-        let rawList = [];
-        if (Array.isArray(data)) {
-            rawList = data;
-        } else if (Array.isArray(data.proposals)) {
-            rawList = data.proposals;
-        } else if (Array.isArray(data.data)) {
-            rawList = data.data;
-        } else if (data.success === false) {
-            throw new Error(data.message || 'Failed to load proposals.');
-        }
+      if (!rawList) {
+        throw new Error('The proposals API returned an unexpected response.');
+      }
 
-        if (rawList.length > 0) {
-            citizenProposals = rawList.map(p => normalizeProposalRecord({
-                ...p,
+      citizenProposals = rawList
+        .map(p => normalizeProposalRecord({
+          ...p,
+          id: p.tracking_code || p.trackingCode || p.ref || p.id ||
+            (p.proposal_id ? `PROP-${p.fiscal_year || new Date().getFullYear()}-${String(p.proposal_id).padStart(4, '0')}` : ''),
+          ref: p.tracking_code || p.trackingCode || p.ref || p.id ||
+            (p.proposal_id ? `PROP-${p.fiscal_year || new Date().getFullYear()}-${String(p.proposal_id).padStart(4, '0')}` : ''),
+          proposalId: p.proposal_id || p.proposalId,
+          title: p.project_title || p.projectTitle || p.title,
+          category: p.sector_category || p.sectorCategory || p.category,
+          year: String(p.fiscal_year || p.fiscalYear || p.year || new Date().getFullYear()),
+          location: p.location_sitio || p.locationSitio || p.sitio || p.location,
+          sitio: p.location_sitio || p.locationSitio || p.sitio || p.location,
+          proponent: p.proponent || p.guest_full_name || p.resident_full_name || p.fullName || p.resident,
+          email: p.email || p.guest_email || p.resident_email || p.userEmail,
+          dateFiled: p.submitted_at || p.submittedAt || p.created_at || p.dateFiled || p.date,
+          date: (p.submitted_at || p.submittedAt || p.created_at)
+            ? new Date(p.submitted_at || p.submittedAt || p.created_at).toLocaleDateString('en-PH', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+              })
+            : (p.date || ''),
+          budget: p.estimated_budget ?? p.estimatedBudget ?? p.budget ?? 0,
+          timeline: p.proposed_target_timeline || p.proposedTimeline || p.timeline || '',
+          status: p.proposal_status || p.proposalStatus || p.status || 'Pending',
+          description: p.rationale_community_impact || p.rationale || p.description || '',
+          rationale: p.rationale_community_impact || p.rationale || p.description || '',
+          councilNotes: p.council_review_notes || p.councilReviewNotes || p.councilNotes || p.councilNote || '',
+          councilNote: p.council_review_notes || p.councilReviewNotes || p.councilNote || p.councilNotes || '',
+          supportingDocument: p.supporting_documents_path || p.supportingDocumentsPath || p.supportingDocument || ''
+        }))
+        .filter(Boolean);
 
-                // Map database fields (supporting both snake_case and camelCase schemas)
-                id: p.tracking_code || p.trackingCode || p.ref || p.id || (p.proposal_id ? `PR-${p.proposal_id}` : ''),
-                ref: p.tracking_code || p.trackingCode || p.ref || p.id || (p.proposal_id ? `PR-${p.proposal_id}` : ''),
-                proposalId: p.proposal_id || p.proposalId || p.id,
-                title: p.project_title || p.projectTitle || p.title,
-                category: p.sector_category || p.sectorCategory || p.category,
-                year: String(p.fiscal_year || p.fiscalYear || p.year || new Date().getFullYear()),
-                location: p.location_sitio || p.locationSitio || p.sitio || p.location,
-                sitio: p.location_sitio || p.locationSitio || p.sitio || p.location,
-                proponent: p.proponent || p.proponent_name || p.proponentName || p.fullName || p.resident,
-                email: p.email || p.userEmail,
-                dateFiled: p.submitted_at || p.submittedAt || p.created_at || p.dateFiled || p.date,
-                date: (p.submitted_at || p.submittedAt || p.created_at)
-                    ? new Date(p.submitted_at || p.submittedAt || p.created_at).toLocaleDateString('en-PH', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric'
-                    })
-                    : (p.date || ''),
-                budget: p.estimated_budget ?? p.estimatedBudget ?? p.budget ?? 0,
-                timeline: p.proposed_target_timeline || p.proposedTimeline || p.timeline || '',
-                status: p.proposal_status || p.proposalStatus || p.status || 'Pending',
-                description: p.rationale_community_impact || p.rationale || p.description || '',
-                rationale: p.rationale_community_impact || p.rationale || p.description || '',
-                councilNotes: p.council_review_notes || p.councilReviewNotes || p.councilNotes || p.councilNote || '',
-                councilNote: p.council_review_notes || p.councilReviewNotes || p.councilNote || p.councilNotes || '',
-                supportingDocument: p.supporting_documents_path || p.supportingDocumentsPath || p.supportingDocument || ''
-            }));
-
-            // Sync successfully retrieved proposals to localStorage for instant hydration
-            try {
-                localStorage.setItem('brgy360_proposals', JSON.stringify(citizenProposals));
-            } catch (e) {}
-
-            renderProposalsGrid();
-            console.log('Admin proposals loaded from database:', citizenProposals);
-        } else {
-            // Backend returned empty list; fallback to local storage if present
-            const local = loadCitizenProposals();
-            if (local.length > 0 && citizenProposals.length === 0) {
-                citizenProposals = local;
-                renderProposalsGrid();
-            }
-        }
-
+      // An empty database result is an empty admin list. Never restore local/demo records.
+      renderProposalsGrid();
+      console.log('Admin proposals loaded from database:', citizenProposals);
+      return citizenProposals;
     } catch (error) {
-        console.error('Error loading Admin proposals:', error);
-        // Fallback to localStorage proposals so proposals submitted locally are not lost
-        const local = loadCitizenProposals();
-        if (local.length > 0) {
-            citizenProposals = local;
-            renderProposalsGrid();
-        } else {
-            showAdminToast(
-                'Unable to load proposals from the database.',
-                'error'
-            );
-        }
+      console.error('Error loading Admin proposals:', error);
+      citizenProposals = [];
+      renderProposalsGrid();
+      showAdminToast(
+        'Unable to load proposals',
+        error.message || 'Proposals could not be retrieved from the database.',
+        'error'
+      );
+      return [];
     }
-}
+  }
 
   function clampProjectProgress(value) {
     const num = Number(value);
@@ -1023,26 +982,41 @@ async function loadAdminBudgetRecordsFromDatabase() {
     }
   }
   
-  function getResidentDocumentUrl(filePath) {
-  if (!filePath) return '';
+  
+function getResidentDocumentUrl(filePath) {
+    if (!filePath) return '';
 
-  // If the backend already returned a full URL, use it.
-  if (/^https?:\/\//i.test(filePath)) {
-    return filePath;
-  }
+    // If the backend already returned a full URL, use it.
+    if (/^https?:\/\//i.test(filePath)) {
+        return filePath;
+    }
 
-  // Normalize the saved path and remove any leading slash.
-  const normalizedPath = String(filePath)
-    .replace(/\\/g, '/')
-    .replace(/^\/+/, '');
+    // Normalize slashes (handles Windows paths).
+    let normalizedPath = String(filePath)
+        .trim()
+        .replace(/\\/g, '/')
+        .replace(/^\/+/, '');
 
-  // The backend serves files from its /uploads route.
-  const fileName = normalizedPath.startsWith('uploads/')
-    ? normalizedPath.slice('uploads/'.length)
-    : normalizedPath;
+    // Keep only the path after the last uploads/ folder.
+    const uploadsIdx = normalizedPath.toLowerCase().lastIndexOf('uploads/');
 
-  return `${ADMIN_API_BASE.replace(/\/api\/?$/, '')}/uploads/${encodeURIComponent(fileName)}`;
+    if (uploadsIdx !== -1) {
+        normalizedPath = normalizedPath.slice(uploadsIdx + 'uploads/'.length);
+    }
+
+    // Encode each folder/file name separately.
+    const encodedPath = normalizedPath
+        .split('/')
+        .filter(Boolean)
+        .map(encodeURIComponent)
+        .join('/');
+
+    return `${ADMIN_API_BASE.replace(/\/api\/?$/, '')}/uploads/${encodedPath}`;
 }
+
+  function isResidentPdf(filePath) {
+      return /\.pdf(?:[?#]|$)/i.test(String(filePath || '').trim());
+  }
 
   async function loadGeographicBreakdownFromAPI() {
     const tableBody = document.getElementById('geographicBreakdownTableBody');
@@ -1183,7 +1157,7 @@ async function loadAdminBudgetRecordsFromDatabase() {
       const yr = document.getElementById('dashboardFiscalYearSelect')?.value || '2026';
       initOrUpdateReportsCharts(yr);
     }
-    if (viewId === 'proposals') renderProposalsTable();
+    if (viewId === 'proposals') loadCitizenProposalsFromDatabase();
     if (viewId === 'projects') renderProjectsTable();
     if (viewId === 'announcements') loadAnnouncementsFromBackend();
     if (viewId === 'budget') renderAdminBudgetTable();
@@ -1432,7 +1406,17 @@ async function loadAdminBudgetRecordsFromDatabase() {
                 throw new Error(data.message || 'Unable to load notifications.');
             }
 
+            const previousNotifIds = new Set((adminNotifications || []).map(n => String(n.notification_id || n.id)));
             adminNotifications = data.notifications || [];
+
+            // If a new "Project Proposal" notification arrived, refresh the proposals list.
+            const hasNewProposalNotif = adminNotifications.some(n =>
+                !previousNotifIds.has(String(n.notification_id || n.id)) &&
+                String(n.title || '').toLowerCase().includes('project proposal')
+            );
+            if (hasNewProposalNotif && typeof loadCitizenProposalsFromDatabase === 'function') {
+                loadCitizenProposalsFromDatabase();
+            }
 
             updateAdminNotificationBadge(data.unreadCount);
             renderAdminNotifications();
@@ -1524,8 +1508,14 @@ async function loadAdminBudgetRecordsFromDatabase() {
     // Initial notification load
     loadAdminNotifications();
 
+    // Initial proposals load (previously never fetched on page load)
+    loadCitizenProposalsFromDatabase();
+
     // Refresh notifications every 30 seconds
     setInterval(loadAdminNotifications, 30000);
+
+    // Refresh proposals every 30 seconds so new submissions appear automatically
+    setInterval(loadCitizenProposalsFromDatabase, 30000);
 
   // Quick Action menu triggers
   const qaLogIncident = document.getElementById('qaLogIncident');
@@ -2103,36 +2093,35 @@ async function loadAdminBudgetRecordsFromDatabase() {
         : [];
       const projStats = getDynamicProjectStatusAnalytics(yearStr);
 
-      setVal('cardValResidents', '4,650');
-      setSub('cardSubResidents', '4,020 verified (86.4%)');
+      // Resident records carry no registration year, so other fiscal years show no resident data.
+      setVal('cardValResidents', '0');
+      setSub('cardSubResidents', '0 verified (0.0%)');
 
-      setVal('cardValPendingVerif', '630');
+      setVal('cardValPendingVerif', '0');
       setSub('cardSubPendingVerif', 'Awaiting citizen validation');
 
       setVal('cardValTotalBudget', formatCurrencyPHP(budgetMetrics.totalBudget));
       setSub('cardSubTotalBudget', `${formatCurrencyPHP(budgetMetrics.totalSpending)} spent · ${budgetMetrics.utilizationText} utilized`);
 
-      const totalReqHist = yearReqs.length > 0 ? yearReqs.length : 15;
-      const completedReqHist = yearReqs.length > 0
-        ? yearReqs.filter((r) => r.status === 'Ready for Pickup' || r.status === 'Completed' || r.status === 'Approved').length
-        : 15;
-      const pendingReqHist = yearReqs.length > 0
-        ? yearReqs.filter((r) => r.status === 'In Review' || r.status === 'Pending').length
-        : 0;
+      const totalReqHist = yearReqs.length;
+      const completedReqHist = yearReqs.filter(
+        (r) => r.status === 'Ready for Pickup' || r.status === 'Completed' || r.status === 'Approved'
+      ).length;
+      const pendingReqHist = yearReqs.filter(
+        (r) => r.status === 'In Review' || r.status === 'Pending'
+      ).length;
 
       setVal('cardValTotalRequests', totalReqHist.toString());
-      setSub('cardSubTotalRequests', 'All document filings');
+      setSub('cardSubTotalRequests', totalReqHist === 0 ? 'No filings for this FY' : 'All document filings');
 
       setVal('cardValCompletedRequests', completedReqHist.toString());
-      setSub('cardSubCompletedRequests', pendingReqHist === 0 ? '100% completed' : 'Ready for pickup / released');
+      setSub('cardSubCompletedRequests', totalReqHist > 0 && pendingReqHist === 0 ? '100% completed' : 'Ready for pickup / released');
 
       setVal('cardValPendingRequests', pendingReqHist.toString());
       setSub('cardSubPendingRequests', pendingReqHist === 0 ? 'All processed' : 'In review &amp; verification');
 
-      const totalIncHist = yearConcerns.length > 0 ? yearConcerns.length : 11;
-      const openIncHist = yearConcerns.length > 0
-        ? yearConcerns.filter((i) => normalizeConcernStatus(i.status) !== 'Resolved').length
-        : 0;
+      const totalIncHist = yearConcerns.length;
+      const openIncHist = yearConcerns.filter((i) => normalizeConcernStatus(i.status) !== 'Resolved').length;
 
       setVal('cardValReportedConcerns', totalIncHist.toString());
       setSub(
@@ -4445,32 +4434,21 @@ function syncAllStoresFromStorage(changedKey) {
     else if (item.status === 'Rejected') statusPillClass = 'badge-status red';
 
     const currentDocTypeVal = item.docType || item.documentType || 'Barangay Clearance';
-    const docTypeOptions = [
-      'Barangay Clearance',
-      'Certificate of Indigency',
-      'Certificate of Residency',
-      'Barangay Business Clearance',
-      'Certification for First-Time Job Seeker',
-      'Katarungang Pambarangay Mediation'
-    ];
-    if (!docTypeOptions.includes(currentDocTypeVal)) {
-      docTypeOptions.push(currentDocTypeVal);
-    }
 
     if (modalReqBody) {
       modalReqBody.innerHTML = `
         <div style="display:flex; flex-direction:column; gap:14px;">
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px;">
             <div><span style="font-size:11px; color:#64748b;">Resident Applicant:</span><br><strong>${escapeHtml(item.resident || item.fullName)}</strong></div>
-            <div><span style="font-size:11px; color:#64748b;">Sitio / Purok:</span><br><strong>${escapeHtml(item.sitio || item.purokSitio)}</strong></div>
+            <div><span style="font-size:11px; color:#64748b;">Sitio / Purok:</span><br><strong>${escapeHtml(item.sitio || item.purokSitio || getResidentSitioForRequest(item))}</strong></div>
             <div><span style="font-size:11px; color:#64748b;">Contact Mobile:</span><br><strong>${escapeHtml(item.contact || 'N/A')}</strong></div>
             <div><span style="font-size:11px; color:#64748b;">ID on Record:</span><br><strong>${escapeHtml(item.idOnRecord || 'PhilID on file')}</strong></div>
           </div>
           <div>
-            <label for="modalReqDocTypeSelect" style="font-size:11px; color:#64748b; display:block; margin-bottom:4px;">Certificate / Service Type:</label>
-            <select id="modalReqDocTypeSelect" class="form-select">
-              ${docTypeOptions.map(opt => `<option value="${escapeHtml(opt)}" ${opt === currentDocTypeVal ? 'selected' : ''}>${escapeHtml(opt)}</option>`).join('')}
-            </select>
+            <span style="font-size:11px; color:#64748b;">Certificate / Service Type:</span>
+            <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:6px; padding:10px; margin-top:4px; font-weight:500;">
+              ${escapeHtml(currentDocTypeVal)}
+            </div>
           </div>
           <div>
             <span style="font-size:11px; color:#64748b;">Declared Purpose:</span>
@@ -4490,20 +4468,6 @@ function syncAllStoresFromStorage(changedKey) {
           </div>
         </div>
       `;
-      const docTypeSel = document.getElementById('modalReqDocTypeSelect');
-      if (docTypeSel) {
-        docTypeSel.addEventListener('change', function () {
-          const updatedType = this.value;
-          item.docType = updatedType;
-          item.documentType = updatedType;
-          if (modalReqDocType) modalReqDocType.textContent = updatedType;
-          persistServiceRequests();
-          renderRequestsTable();
-          renderOverviewQueue();
-          refreshAdminDashboard();
-          showAdminToast('Service Request Updated', `Certificate type for ${item.id} updated to ${updatedType}.`, 'info');
-        });
-      }
     }
 
     const modalFooter = document.getElementById('modalReqFooter');
@@ -4554,6 +4518,20 @@ function syncAllStoresFromStorage(changedKey) {
     }
 
     requestDetailModal.classList.add('active');
+  }
+
+  // Reads the sitio from the resident's registered record when the request row has none.
+  function getResidentSitioForRequest(item) {
+    try {
+      const name = String(item.fullName || item.resident || '').trim().toLowerCase();
+      const match = (typeof residentApplications !== 'undefined' ? residentApplications : []).find(r =>
+        (item.user_id && String(r.userId) === String(item.user_id)) ||
+        (name && String(r.fullName || '').trim().toLowerCase() === name)
+      );
+      return match ? (match.sitio || '') : '';
+    } catch (e) {
+      return '';
+    }
   }
 
   function closeRequestDetailModal() {
@@ -5322,29 +5300,23 @@ function syncAllStoresFromStorage(changedKey) {
           let footerActions = '';
           if (p.status === 'Pending') {
             footerActions = `
-              <button type="button" class="btn-prop-action btn-prop-approve" data-id="${p.id || p.ref}" title="Approve proposal">Approve</button>
               <button type="button" class="btn-prop-action btn-prop-under-review" data-id="${p.id || p.ref}" title="Mark Under Review">Under Review</button>
-              <button type="button" class="btn-prop-action btn-prop-reject" data-id="${p.id || p.ref}" title="Reject proposal">Reject</button>
               <button type="button" class="btn-prop-action btn-prop-review" data-id="${p.id || p.ref}">Review Details</button>
             `;
           } else if (p.status === 'Under Review') {
             footerActions = `
-              <button type="button" class="btn-prop-action btn-prop-approve" data-id="${p.id || p.ref}" title="Approve proposal">Approve</button>
-              <button type="button" class="btn-prop-action btn-prop-reject" data-id="${p.id || p.ref}" title="Reject proposal">Reject</button>
               <button type="button" class="btn-prop-action btn-prop-review" data-id="${p.id || p.ref}">Review Details</button>
             `;
           } else if (p.status === 'Approved') {
             footerActions = `
               <span style="font-size: 11.5px; font-weight: 600; color: #16a34a; margin-right: 4px;">✓ Approved</span>
               <button type="button" class="btn-prop-action btn-prop-under-review" data-id="${p.id || p.ref}" title="Mark Under Review">Under Review</button>
-              <button type="button" class="btn-prop-action btn-prop-reject" data-id="${p.id || p.ref}" title="Reject proposal">Reject</button>
               <button type="button" class="btn-prop-action btn-prop-review" data-id="${p.id || p.ref}">Review Details</button>
             `;
           } else {
             // Rejected
             footerActions = `
               <span style="font-size: 11.5px; font-weight: 600; color: #e11d48; margin-right: 4px;">✕ Rejected</span>
-              <button type="button" class="btn-prop-action btn-prop-approve" data-id="${p.id || p.ref}" title="Reconsider and approve">Approve</button>
               <button type="button" class="btn-prop-action btn-prop-under-review" data-id="${p.id || p.ref}" title="Mark Under Review">Under Review</button>
               <button type="button" class="btn-prop-action btn-prop-review" data-id="${p.id || p.ref}">Review Details</button>
             `;
@@ -5694,11 +5666,9 @@ function syncAllStoresFromStorage(changedKey) {
     });
   }
 
-  // Cross-page storage synchronization for proposals & capital projects
+  // Proposal events may trigger a refresh, but records always come from the database.
   window.addEventListener('storage', function(e) {
     if (e.key === 'brgy360_proposals' || !e.key) {
-      citizenProposals = loadCitizenProposals();
-      renderProposalsGrid();
       loadCitizenProposalsFromDatabase();
     }
     if (e.key === 'brgy360_capital_projects') {
@@ -5707,8 +5677,6 @@ function syncAllStoresFromStorage(changedKey) {
   });
 
   window.addEventListener('brgy360_proposals_changed', function() {
-    citizenProposals = loadCitizenProposals();
-    renderProposalsGrid();
     loadCitizenProposalsFromDatabase();
   });
 
@@ -5781,106 +5749,11 @@ function syncAllStoresFromStorage(changedKey) {
 
   if (btnSaveSubmitProp) {
     btnSaveSubmitProp.addEventListener('click', () => {
-      const titleEl = document.getElementById('newPropTitle');
-      const propEl = document.getElementById('newPropProponent');
-      const budgetEl = document.getElementById('newPropBudget');
-      const descEl = document.getElementById('newPropDescription');
-      const locEl = document.getElementById('newPropLocation');
-
-      const title = (titleEl?.value || '').trim();
-      const category = document.getElementById('newPropCategory')?.value || 'Infrastructure';
-      const year = document.getElementById('newPropYear')?.value.trim() || '2026';
-      const location = (locEl?.value || '').trim();
-      const proponent = (propEl?.value || '').trim();
-      const budget = (budgetEl?.value || '').trim();
-      const status = document.getElementById('newPropStatus')?.value || 'Pending';
-      const description = (descEl?.value || '').trim();
-
-      // Reset prior errors
-      const titleErr = document.getElementById('newPropTitleError');
-      const propErr = document.getElementById('newPropProponentError');
-      const budgetErr = document.getElementById('newPropBudgetError');
-      const descErr = document.getElementById('newPropDescriptionError');
-
-      [titleErr, propErr, budgetErr, descErr].forEach(e => { if (e) e.textContent = ''; });
-      [titleEl, propEl, budgetEl, descEl].forEach(e => { if (e) e.classList.remove('is-invalid', 'input-error'); });
-
-      let isValid = true;
-      let firstInvalid = null;
-
-      if (!title || title.length < 3) {
-        if (titleErr) titleErr.textContent = 'Proposal title must be at least 3 characters.';
-        if (titleEl) titleEl.classList.add('is-invalid');
-        isValid = false;
-        if (!firstInvalid) firstInvalid = titleEl;
-      }
-
-      const nameRegex = /^[a-zA-Z\s]+$/;
-      if (!proponent) {
-        if (propErr) propErr.textContent = 'Proponent / resident name is required.';
-        if (propEl) propEl.classList.add('is-invalid');
-        isValid = false;
-        if (!firstInvalid) firstInvalid = propEl;
-      } else if (!nameRegex.test(proponent)) {
-        if (propErr) propErr.textContent = 'Proponent name must contain letters and spaces only. No numbers or special characters.';
-        if (propEl) propEl.classList.add('is-invalid');
-        isValid = false;
-        if (!firstInvalid) firstInvalid = propEl;
-      }
-
-      const budgetNum = parseFloat(budget.replace(/[^\d.]/g, ''));
-      if (!budget || isNaN(budgetNum) || budgetNum <= 0) {
-        if (budgetErr) budgetErr.textContent = 'Estimated budget must be a positive numeric amount greater than 0.';
-        if (budgetEl) budgetEl.classList.add('is-invalid');
-        isValid = false;
-        if (!firstInvalid) firstInvalid = budgetEl;
-      }
-
-      if (!description || description.length < 10) {
-        if (descErr) descErr.textContent = 'Please provide a descriptive scope (at least 10 characters).';
-        if (descEl) descEl.classList.add('is-invalid');
-        isValid = false;
-        if (!firstInvalid) firstInvalid = descEl;
-      }
-
-      if (!isValid) {
-        if (firstInvalid) firstInvalid.focus();
-        showAdminToast('Validation Error', 'Please correct the highlighted proposal fields.', 'danger');
-        return;
-      }
-
-      const formattedBudget = `₱${budgetNum.toLocaleString()}`;
-      const nextNum = citizenProposals.length + 1;
-      const newId = `PROP-2026-${String(nextNum).padStart(3, '0')}`;
-
-      const newProposal = normalizeProposalRecord({
-        id: newId,
-        ref: newId,
-        title: title,
-        category: category,
-        year: year,
-        location: location,
-        sitio: location,
-        proponent: proponent,
-        date: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
-        dateFiled: new Date().toISOString().split('T')[0],
-        budget: formattedBudget,
-        rawBudget: budgetNum,
-        status: status,
-        description: description,
-        rationale: description
-      });
-
-      citizenProposals.unshift(newProposal);
-      saveCitizenProposals();
-      renderProposalsGrid();
-
-      if (modalSubmitProp) {
-        modalSubmitProp.classList.remove('active');
-        document.getElementById('submitProposalForm')?.reset();
-      }
-
-      showAdminToast('Proposal Submitted', `"${title}" successfully recorded as ${newId}.`, 'success');
+      showAdminToast(
+        'Database submission required',
+        'Admin-created local proposal records are disabled. Submit a proposal through the public or resident proposal form so it is saved in the database.',
+        'info'
+      );
     });
   }
 
@@ -6437,37 +6310,39 @@ function normalizeAnnouncementFromDatabase(row) {
     if (!ann) return;
 
     const nextCritical = !ann.isCritical;
-    ann.isCritical = nextCritical;
-    ann.isEmergency = nextCritical;
-    ann.urgency = nextCritical ? 'Critical' : 'Standard';
 
     try {
-      saveAnnouncements(announcementsList);
-    } catch (e) {
-      console.warn('LocalStorage announcement sync error:', e);
-    }
-
-    renderAnnouncementsTable();
-
-    try {
-      await fetch(`${ADMIN_API_BASE}/announcements/${encodeURIComponent(id)}/priority`, {
+      // Save to the database so the Public Home Page picks it up
+      const response = await fetch(`${ADMIN_API_BASE}/announcements/${encodeURIComponent(id)}/status`, {
         method: 'PATCH',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          is_critical: nextCritical,
           urgency: nextCritical ? 'Critical' : 'Standard'
         })
       });
-    } catch (error) {
-      console.warn('Backend announcement priority update optional sync:', error);
-    }
 
-    showAdminToast(
-      nextCritical ? '🚨 Marked as Critical Priority' : 'Standard Priority Restored',
-      `"${ann.title}" is now ${nextCritical ? 'flagged with Critical Advisory badge and prioritized.' : 'marked as standard priority.'}`,
-      nextCritical ? 'warning' : 'info'
-    );
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || 'Unable to update announcement priority.');
+      }
+
+      await loadAnnouncementsFromBackend();
+
+      showAdminToast(
+        nextCritical ? '🚨 Marked as Critical Priority' : 'Standard Priority Restored',
+        `"${ann.title}" is now ${nextCritical ? 'flagged as a Critical Advisory on the Public Home Page.' : 'marked as standard priority.'}`,
+        nextCritical ? 'warning' : 'info'
+      );
+    } catch (error) {
+      console.error('Update announcement priority error:', error);
+      showAdminToast(
+        'Priority Update Failed',
+        error.message || 'Could not update announcement priority.',
+        'danger'
+      );
+    }
   };
 
   // Event Listeners for Proposals Filters
@@ -6793,37 +6668,56 @@ function normalizeAnnouncementFromDatabase(row) {
             finalSummary = deriveSummaryFromText(rawContent);
           }
 
-          announcementsList[existingIdx] = normalizeAnnouncement({
-            ...prev,
-            title,
-            category: cat,
-            audience: aud,
-            department,
-            date: datePublished,
-            status,
-            isCritical,
-            isEmergency: isCritical,
-            summary: finalSummary,
-            content: finalHtmlContent,
-            plainContent: rawContent,
-            publishedAt: prev.publishedAt || Date.now(),
-            updatedAt: Date.now()
-          }, existingIdx);
+          try {
+            btnSubmitNewAnn.disabled = true;
+            btnSubmitNewAnn.textContent = 'Saving...';
 
-          persistAnnouncementsState();
-          renderAnnouncementsTable();
-          modalNewAnn?.classList.remove('active');
-          document.getElementById('newAnnouncementForm')?.reset();
-          if (annEditIdInput) annEditIdInput.value = '';
-          setModalPriorityState(false, false);
+            const response = await fetch(`${ADMIN_API_BASE}/announcements/${encodeURIComponent(editingId)}`, {
+              method: 'PUT',
+              credentials: 'include',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                headline: title,
+                category: cat,
+                target_audience: aud,
+                urgency: isCritical ? 'Critical' : 'Standard',
+                feed_summary: finalSummary,
+                announcement_content: finalHtmlContent,
+                publication_status: status === 'Active' ? 'Published' : 'Unpublished'
+              })
+            });
 
-          showAdminToast(
-            'Announcement Updated',
-            status === 'Active'
-              ? `"${title}" updated and synchronized with the Public Home Page.`
-              : `"${title}" saved with status: ${status} (hidden from Public Home Page).`,
-            'success'
-          );
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+              throw new Error(data.message || 'Unable to update announcement.');
+            }
+
+            await loadAnnouncementsFromBackend();
+
+            modalNewAnn?.classList.remove('active');
+            document.getElementById('newAnnouncementForm')?.reset();
+            if (annEditIdInput) annEditIdInput.value = '';
+            setModalPriorityState(false, false);
+
+            showAdminToast(
+              'Announcement Updated',
+              status === 'Active'
+                ? `"${title}" updated and synchronized with the Public Home Page.`
+                : `"${title}" saved with status: ${status} (hidden from Public Home Page).`,
+              'success'
+            );
+          } catch (error) {
+            console.error('Update announcement error:', error);
+            showAdminToast(
+              'Announcement Error',
+              error.message || 'Unable to update announcement.',
+              'danger'
+            );
+          } finally {
+            btnSubmitNewAnn.disabled = false;
+            btnSubmitNewAnn.textContent = 'Broadcast Announcement';
+          }
           return;
         }
       }
@@ -9166,91 +9060,124 @@ if (projBeneficiariesInput) {
     const nameInfo = parseNameWithSuffix(app.fullName);
     const idPreviewBox = document.getElementById('resReviewIdPreviewBox');
 
-if (idPreviewBox) {
-  const idDocumentUrl = getResidentDocumentUrl(app.idFilePath);
+    if (idPreviewBox) {
+        const idDocumentUrl = getResidentDocumentUrl(app.idFilePath);
+        const isPdf = isResidentPdf(app.idFilePath);
 
-  if (idDocumentUrl) {
-    idPreviewBox.innerHTML = `
-      <div style="display:flex; flex-direction:column; align-items:center; padding:12px; background:#ffffff; border-radius:8px; width:100%;">
-        <img
-          src="${escapeHtml(idDocumentUrl)}"
-          alt="Submitted Government ID"
-          style="max-height:190px; max-width:100%; object-fit:contain; border-radius:6px;"
-          onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
-        >
-        <div style="display:none; color:#fca5a5; padding:12px; text-align:center;">
-          Unable to load the submitted ID file.
-        </div>
-        <div style="margin-top:10px; font-size:12px; color:#0f172a; width:100%;">
-          📎 ${escapeHtml(app.idType || 'Government ID')}
-        </div>
-        <a
-          href="${escapeHtml(idDocumentUrl)}"
-          target="_blank"
-          rel="noopener noreferrer"
-          style="margin-top:8px; color:#0369a1; font-size:12px;"
-        >
-          Open Original Document
-        </a>
-      </div>
-    `;
-  } else {
-    idPreviewBox.innerHTML = `
-      <div style="padding:20px; text-align:center; background:#f8fafc; border:1px dashed #cbd5e1; border-radius:8px;">
-        <div style="font-weight:600; color:#334155;">No Government ID File Found</div>
-        <div style="font-size:12px; color:#64748b; margin-top:4px;">
-          No ID attachment path was returned for this resident.
-        </div>
-      </div>
-    `;
-  }
-}
+        if (idDocumentUrl) {
+            idPreviewBox.innerHTML = `
+                <div style="display:flex; flex-direction:column; align-items:center; padding:12px; background:#ffffff; border-radius:8px; width:100%;">
+
+                    ${
+                        isPdf
+                        ? `
+                            <iframe
+                                src="${escapeHtml(idDocumentUrl)}#toolbar=0&navpanes=0&scrollbar=1"
+                                title="Submitted Government ID PDF"
+                                style="width:100%; height:500px; border:none; border-radius:6px; background:#f8fafc;"
+                            ></iframe>
+                        `
+                        : `
+                            <img
+                                src="${escapeHtml(idDocumentUrl)}"
+                                alt="Submitted Government ID"
+                                style="max-height:190px; max-width:100%; object-fit:contain; border-radius:6px;"
+                                onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
+                            >
+                            <div style="display:none; color:#fca5a5; padding:12px; text-align:center;">
+                                Unable to load the submitted ID file.
+                            </div>
+                        `
+                    }
+
+                    <div style="margin-top:10px; font-size:12px; color:#0f172a; width:100%;">
+                        📎 ${escapeHtml(app.idType || 'Government ID')}
+                        ${isPdf ? ' (PDF)' : ''}
+                    </div>
+
+                    <a
+                        href="${escapeHtml(idDocumentUrl)}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style="margin-top:8px; color:#0369a1; font-size:12px;"
+                    >
+                        Open Original Document
+                    </a>
+                </div>
+            `;
+        } else {
+            idPreviewBox.innerHTML = `
+                <div style="padding:20px; text-align:center; background:#f8fafc; border:1px dashed #cbd5e1; border-radius:8px;">
+                    <div style="font-weight:600; color:#334155;">No Government ID File Found</div>
+                    <div style="font-size:12px; color:#64748b; margin-top:4px;">
+                        No ID attachment path was returned for this resident.
+                    </div>
+                </div>
+            `;
+        }
+    }
 
 // Populate Proof of Residency with the original uploaded document
 const proofPreviewBox = document.getElementById('resReviewProofPreviewBox');
 
 if (proofPreviewBox) {
-  const proofDocumentUrl = getResidentDocumentUrl(app.residencyProofPath);
+    const proofDocumentUrl = getResidentDocumentUrl(app.residencyProofPath);
+    const isPdf = isResidentPdf(app.residencyProofPath);
 
-  if (proofDocumentUrl) {
-    proofPreviewBox.innerHTML = `
-      <div style="display:flex; flex-direction:column; align-items:center; padding:12px; background:#ffffff; border:1px solid #cbd5e1; border-radius:8px; width:100%;">
-        <img
-          src="${escapeHtml(proofDocumentUrl)}"
-          alt="Submitted Proof of Residency"
-          style="max-height:190px; max-width:100%; object-fit:contain; border-radius:6px;"
-          onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
-        >
-        <div style="display:none; color:#b91c1c; padding:12px; text-align:center;">
-          Unable to load the submitted proof document.
-        </div>
-        <div style="margin-top:10px; font-size:12px; color:#0f172a; width:100%;">
-          📎 ${escapeHtml(app.proofType || 'Proof of Residency')}
-        </div>
-        <a
-          href="${escapeHtml(proofDocumentUrl)}"
-          target="_blank"
-          rel="noopener noreferrer"
-          style="margin-top:8px; color:#0369a1; font-size:12px;"
-        >
-          Open Original Document
-        </a>
-      </div>
-    `;
-  } else {
-    proofPreviewBox.innerHTML = `
-      <div style="padding:24px 18px; text-align:center; background:#f8fafc; border:1px dashed #cbd5e1; border-radius:8px;">
-        <div style="font-weight:600; color:#334155; font-size:13px;">
-          No Proof of Residency
-        </div>
-        <div style="font-size:12px; color:#64748b; margin-top:4px;">
-          The applicant did not attach an optional proof-of-residency document.
-        </div>
-      </div>
-    `;
-  }
+    if (proofDocumentUrl) {
+        proofPreviewBox.innerHTML = `
+            <div style="display:flex; flex-direction:column; align-items:center; padding:12px; background:#ffffff; border:1px solid #cbd5e1; border-radius:8px; width:100%;">
+
+                ${
+                    isPdf
+                    ? `
+                        <iframe
+                            src="${escapeHtml(proofDocumentUrl)}#toolbar=0&navpanes=0&scrollbar=1"
+                            title="Submitted Proof of Residency PDF"
+                            style="width:100%; height:500px; border:none; border-radius:6px; background:#f8fafc;"
+                        ></iframe>
+                    `
+                    : `
+                        <img
+                            src="${escapeHtml(proofDocumentUrl)}"
+                            alt="Submitted Proof of Residency"
+                            style="max-height:190px; max-width:100%; object-fit:contain; border-radius:6px;"
+                            onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
+                        >
+                        <div style="display:none; color:#b91c1c; padding:12px; text-align:center;">
+                            Unable to load the submitted proof document.
+                        </div>
+                    `
+                }
+
+                <div style="margin-top:10px; font-size:12px; color:#0f172a; width:100%;">
+                    📎 ${escapeHtml(app.proofType || 'Proof of Residency')}
+                    ${isPdf ? ' (PDF)' : ''}
+                </div>
+
+                <a
+                    href="${escapeHtml(proofDocumentUrl)}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style="margin-top:8px; color:#0369a1; font-size:12px;"
+                >
+                    Open Original Document
+                </a>
+            </div>
+        `;
+    } else {
+        proofPreviewBox.innerHTML = `
+            <div style="padding:24px 18px; text-align:center; background:#f8fafc; border:1px dashed #cbd5e1; border-radius:8px;">
+                <div style="font-weight:600; color:#334155; font-size:13px;">
+                    No Proof of Residency
+                </div>
+                <div style="font-size:12px; color:#64748b; margin-top:4px;">
+                    The applicant did not attach a proof-of-residency document.
+                </div>
+            </div>
+        `;
+    }
 }
-
     // Workflow Action Controls Configuration
     const auditStatus = document.getElementById('resReviewAuditStatus');
     const auditDot = document.querySelector('#resReviewModal .res-modal-audit-note .status-pill-dot');
@@ -9489,36 +9416,56 @@ async function approveResidentAccount(appId) {
     viewport.innerHTML = '';
     currentLightboxZoom = 1;
     currentLightboxRotation = 0;
-    applyLightboxTransform();
 
     if (type === 'id') {
-      if (titleEl) titleEl.textContent = 'Government Identification Preview & Inspection';
-      const uploadedImg = document.querySelector('#resReviewIdPreviewBox img');
-      if (uploadedImg) {
-        const cloned = uploadedImg.cloneNode(true);
-        cloned.style.maxHeight = '70vh';
-        cloned.style.maxWidth = '90vw';
-        viewport.appendChild(cloned);
-      } else {
-        const source = document.querySelector('#resReviewIdPreviewBox .res-id-graphic');
-        if (source) viewport.appendChild(source.cloneNode(true));
-      }
+        if (titleEl) {
+            titleEl.textContent = 'Government Identification Preview & Inspection';
+        }
+
+        const previewBox = document.getElementById('resReviewIdPreviewBox');
+        const source = previewBox?.querySelector('iframe, img');
+
+        if (source) {
+            const cloned = source.cloneNode(true);
+
+            if (cloned.tagName === 'IFRAME') {
+                cloned.style.width = '90vw';
+                cloned.style.height = '75vh';
+                cloned.style.border = 'none';
+            } else {
+                cloned.style.maxHeight = '70vh';
+                cloned.style.maxWidth = '90vw';
+            }
+
+            viewport.appendChild(cloned);
+        }
     } else {
-      if (titleEl) titleEl.textContent = 'Proof of Residency Document Inspection';
-      const uploadedImg = document.querySelector('#resReviewProofPreviewBox img');
-      if (uploadedImg) {
-        const cloned = uploadedImg.cloneNode(true);
-        cloned.style.maxHeight = '70vh';
-        cloned.style.maxWidth = '90vw';
-        viewport.appendChild(cloned);
-      } else {
-        const source = document.querySelector('#resReviewProofPreviewBox .res-proof-graphic') || document.querySelector('#resReviewProofPreviewBox > div');
-        if (source) viewport.appendChild(source.cloneNode(true));
-      }
+        if (titleEl) {
+            titleEl.textContent = 'Proof of Residency Document Inspection';
+        }
+
+        const previewBox = document.getElementById('resReviewProofPreviewBox');
+        const source = previewBox?.querySelector('iframe, img');
+
+        if (source) {
+            const cloned = source.cloneNode(true);
+
+            if (cloned.tagName === 'IFRAME') {
+                cloned.style.width = '90vw';
+                cloned.style.height = '75vh';
+                cloned.style.border = 'none';
+            } else {
+                cloned.style.maxHeight = '70vh';
+                cloned.style.maxWidth = '90vw';
+            }
+
+            viewport.appendChild(cloned);
+        }
     }
 
+    applyLightboxTransform();
     lightbox.classList.add('active');
-  }
+}
 
   // Export Registry CSV
   function exportResidentRegistryCsv() {

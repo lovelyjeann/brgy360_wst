@@ -16,6 +16,7 @@ const proposalRoutes = require("./routes/proposalRoutes");
 const budgetRoutes = require("./routes/budgetRoutes");
 const announcementRoutes = require("./routes/announcementRoutes");
 const officialsRoutes = require("./routes/officialsRoutes");
+const mapRoutes = require("./routes/mapRoutes");
 
 const app = express();
 
